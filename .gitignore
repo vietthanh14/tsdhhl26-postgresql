@@ -1,0 +1,16 @@
+# Môi trường
+.env
+.DS_Store
+Thumbs.db
+
+# Dependencies
+vendor/
+node_modules/
+
+# Files cấu hình nhạy cảm (Cần tạo file config/supabase.example.php để push lên thay thế)
+config/supabase.php
+
+# Các thư mục log hoặc upload tạm thời (nếu có)
+logs/
+uploads/
+*.log

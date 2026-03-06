@@ -1,0 +1,150 @@
+<?php
+// index.php (Trang chủ kiêm Trang Đăng nhập)
+session_start();
+require_once __DIR__ . '/lib/SupabaseClient.php';
+
+// Nếu đã đăng nhập, đẩy thẳng vào Dashboard thí sinh
+if (isset($_SESSION['user_id'])) {
+    header('Location: /tsdhhl26/candidate/index.php');
+    exit;
+}
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = strtolower(trim($_POST['username'] ?? ''));
+    $password = $_POST['password'] ?? '';
+
+    if ($username && $password) {
+        try {
+            // Nối Username với đuôi email ảo để login qua Supabase Auth
+            $fake_email = $username . '@halou.system';
+            
+            $supabase = new SupabaseClient('anon');
+            $response = $supabase->signIn($fake_email, $password);
+
+            if ($response['code'] == 200 && isset($response['data']['access_token'])) {
+                // Đăng nhập thành công, lưu Token và ID vào session
+                $_SESSION['access_token'] = $response['data']['access_token'];
+                $_SESSION['user_id'] = $response['data']['user']['id'];
+                $_SESSION['email'] = $response['data']['user']['email'] ?? '';
+                
+                header('Location: /tsdhhl26/candidate/index.php');
+                exit;
+            } else {
+                $error = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
+            }
+        } catch (Exception $e) {
+            $error = "Lỗi hệ thống: " . $e->getMessage();
+        }
+    } else {
+        $error = 'Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu.';
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Tuyển sinh Đại học Hạ Long</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --brand-color: #1A3A6E;
+            --brand-hover: #12284c;
+            --bg-color: #f7f9fc;
+            --text-color: #333333;
+            --border-radius: 4px; /* Flat design typically uses smaller border radius */
+        }
+        body { 
+            background-color: var(--bg-color); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+        }
+        .auth-card { 
+            width: 100%; 
+            max-width: 420px; 
+            padding: 40px; 
+            border-radius: var(--border-radius); 
+            background: white; 
+            border: 1px solid #e2e8f0;
+            /* Phẳng hơn, bỏ đi các vùng đổ bóng loang lổ (shadow lớn) */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .btn-brand {
+            background-color: var(--brand-color);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .btn-brand:hover, .btn-brand:focus {
+            background-color: var(--brand-hover);
+            color: #ffffff;
+        }
+        .form-control {
+            border-radius: var(--border-radius);
+            border: 1px solid #cbd5e1;
+            padding: 0.6rem 0.75rem;
+        }
+        .form-control:focus {
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15);
+        }
+        .form-label {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 0.3rem;
+        }
+        .auth-title {
+            color: var(--brand-color);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .text-brand { color: var(--brand-color) !important; }
+    </style>
+</head>
+<body>
+
+<div class="auth-card">
+    <div class="text-center mb-4">
+        <h3 class="auth-title fw-bold">ĐĂNG NHẬP</h3>
+        <p class="text-muted small">Cổng thông tin tuyển sinh Đại học Hạ Long</p>
+    </div>
+
+    <?php if($error): ?>
+        <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?></div>
+    <?php endif; ?>
+
+    <form method="POST" action="">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Tên đăng nhập</label>
+            <input type="text" name="username" class="form-control" required placeholder="Nhập tên đăng nhập">
+        </div>
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Mật khẩu</label>
+            <input type="password" name="password" class="form-control" required placeholder="••••••••">
+        </div>
+        
+        <div class="d-flex justify-content-end mb-3">
+            <a href="/tsdhhl26/auth/forgot_password.php" class="text-decoration-none small text-brand fw-medium">Quên mật khẩu?</a>
+        </div>
+        
+        <button type="submit" class="btn btn-brand w-100 py-2">ĐĂNG NHẬP</button>
+    </form>
+    
+    <div class="text-center mt-4 pt-3 border-top pb-1">
+        <span class="small text-muted">Chưa có tài khoản?</span> 
+        <a href="/tsdhhl26/auth/register.php" class="text-decoration-none fw-semibold text-brand small">Đăng ký mới</a>
+    </div>
+</div>
+
+</body>
+</html>
