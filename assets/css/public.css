@@ -1,0 +1,84 @@
+/* assets/css/public.css — Stylesheet dùng chung cho các trang public */
+
+/* ── Biến màu ───────────────────────────────────────────── */
+:root {
+    --brand: #1A3A6E;
+    --brand-dark: #0f2444;
+    --brand-hover: #12284c;
+    --bg: #f7f9fc;
+}
+
+/* ── Reset / Base ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: #333;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.page-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.site-header {
+    background-color: var(--brand);
+    border-bottom: 3px solid #e6b800;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.header-brand { transition: opacity .2s; }
+.header-brand:hover { opacity: .85; }
+
+/* ── Auth Card ──────────────────────────────────────────── */
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 40px;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0,0,0,.07);
+}
+.auth-title { color: var(--brand); letter-spacing: -.5px; }
+.btn-brand  { background-color: var(--brand); color: #fff; border: none; border-radius: 4px; font-weight: 500; transition: background .2s; }
+.btn-brand:hover, .btn-brand:focus { background-color: var(--brand-hover); color: #fff; }
+.form-control { border-radius: 4px; border: 1px solid #cbd5e1; padding: .6rem .75rem; }
+.form-control:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(26,58,110,.15); }
+.form-label { font-size: .9rem; color: #475569; margin-bottom: .3rem; }
+.text-brand { color: var(--brand) !important; }
+
+/* ── Footer ─────────────────────────────────────────────── */
+.site-footer {
+    background-color: var(--brand-dark);
+    border-top: 3px solid #e6b800;
+}
+.footer-heading {
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    padding-bottom: 8px;
+}
+.footer-social {
+    color: rgba(255,255,255,.5);
+    font-size: 1.15rem;
+    text-decoration: none;
+    transition: color .2s;
+}
+.footer-social:hover { color: #e6b800; }
+.footer-bottom {
+    background-color: rgba(0,0,0,.2);
+    padding: 12px 0;
+}

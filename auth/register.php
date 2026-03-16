@@ -73,71 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Đăng ký Tài khoản - Tuyển sinh Đại học Hạ Long</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
-        :root {
-            --brand-color: #1A3A6E;
-            --brand-hover: #12284c;
-            --bg-color: #f7f9fc;
-            --text-color: #333333;
-            --border-radius: 4px;
-        }
-        body { 
-            background-color: var(--bg-color); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            padding: 40px 0; 
-            font-family: 'Inter', sans-serif;
-            color: var(--text-color);
-        }
-        .auth-card { 
-            width: 100%; 
-            max-width: 480px; 
-            padding: 40px; 
-            border-radius: var(--border-radius); 
-            background: white; 
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        .btn-brand {
-            background-color: var(--brand-color);
-            color: #ffffff;
-            border: none;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .btn-brand:hover, .btn-brand:focus {
-            background-color: var(--brand-hover);
-            color: #ffffff;
-        }
-        .form-control {
-            border-radius: var(--border-radius);
-            border: 1px solid #cbd5e1;
-            padding: 0.6rem 0.75rem;
-        }
-        .form-control:focus {
-            border-color: var(--brand-color);
-            box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15);
-        }
-        .form-label {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 0.3rem;
-        }
+        h6 { color: var(--brand); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-text { font-size: 0.8rem; color: #94a3b8; }
-        .auth-title {
-            color: var(--brand-color);
-            letter-spacing: -0.5px;
-            margin-bottom: 0.5rem;
-        }
-        h6 { color: var(--brand-color); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .text-brand { color: var(--brand-color) !important; }
     </style>
 </head>
 <body>
 
+<?php include __DIR__ . '/../includes/header.php'; ?>
+
+<div class="page-wrapper">
 <div class="auth-card">
     <div class="text-center mb-4 pb-2 border-bottom">
         <h3 class="auth-title fw-bold">MỞ HỒ SƠ</h3>
@@ -184,6 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <?php endif; ?>
 </div>
+</div>
 
+<?php include __DIR__ . '/../includes/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
