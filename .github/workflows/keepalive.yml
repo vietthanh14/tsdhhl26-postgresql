@@ -1,0 +1,24 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Chạy vào lúc 00:00 mỗi 3 ngày (tránh bị Supabase dừng do 7 ngày không hoạt động)
+    - cron: '0 0 */3 * *'
+  # Cho phép chạy thủ công từ tab Actions
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase to keep it awake..."
+          curl -sS -X GET "${SUPABASE_URL}/rest/v1/majors?select=id&limit=1" \
+          -H "apikey: ${SUPABASE_ANON_KEY}" \
+          -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+          -H "Content-Type: application/json"
+          echo -e "\n\n✔️ Ping thành công!"
