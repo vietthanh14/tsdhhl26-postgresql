@@ -104,12 +104,16 @@ unset($app);
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
     <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
+        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
         body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
         .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
         .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .main-content { margin-left: 16.666667%; padding: 30px; }
+        .main-content { margin-left: 16.666667%; padding: 30px; transition: margin-left 0.3s; }
+        @media (max-width: 767.98px) {
+            .main-content { margin-left: 0 !important; padding: 15px !important; }
+            .bulk-actions button { width: 100%; margin-bottom: 8px; margin-right: 0 !important; }
+        }
         .badge-status { font-size: 0.8rem; padding: 0.4em 0.6em; }
         table.dataTable td { vertical-align: middle; }
         .bulk-actions { background: rgba(26, 58, 110, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #1A3A6E; display: none; }
@@ -144,7 +148,7 @@ unset($app);
             <div class="bulk-actions" id="bulkActionsPanel">
                 <span class="fw-bold text-brand me-3">Đã chọn <span id="selectedCount">0</span> hồ sơ:</span>
                 <button type="button" class="btn btn-success btn-sm me-2" onclick="submitBulk('mark_paid')"><i class="bi bi-cash-coin"></i> Đánh dấu Đã Nộp Lệ Phí (PAID)</button>
-                <button type="button" class="btn btn-primary btn-sm me-2" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt Hợp lệ (APPROVED)</button>
+                <button type="button" class="btn btn-brand btn-sm me-2" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt Hợp lệ (APPROVED)</button>
                 <button type="button" class="btn btn-danger btn-sm" onclick="submitBulk('mark_rejected')"><i class="bi bi-x-circle"></i> Từ chối (REJECTED)</button>
             </div>
 
@@ -199,7 +203,7 @@ unset($app);
                                     </td>
                                     <td>
                                         <?php if (!empty($app['receipt_url'])): ?>
-                                            <a href="<?php echo htmlspecialchars($app['receipt_url']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="<?php echo htmlspecialchars($app['receipt_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand">
                                                 <i class="bi bi-image"></i> Xem BL
                                             </a>
                                             <div class="small text-muted mt-1"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>

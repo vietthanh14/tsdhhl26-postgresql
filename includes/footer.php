@@ -3,13 +3,13 @@
 ?>
 <footer class="site-footer">
     <div class="container-fluid px-4 py-5">
-        <div class="row g-4 align-items-start">
+        <div class="row g-4 justify-content-center text-center">
             <!-- Logo + Mạng xã hội -->
-            <div class="col-md-3 text-center text-md-start">
-                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" height="80" class="mb-3"
+            <div class="col-md-4">
+                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" height="80" class="mb-3 mx-auto d-block"
                      onerror="this.style.display='none'">
                 <div class="fw-bold text-white mb-1" style="font-size:.85rem;letter-spacing:.5px;">ĐẠI HỌC HẠ LONG</div>
-                <div class="d-flex gap-3 justify-content-center justify-content-md-start mt-3">
+                <div class="d-flex gap-3 justify-content-center mt-3">
                     <a href="https://www.facebook.com/dhhl.edu.vn" target="_blank" class="footer-social" title="Facebook"><i class="bi bi-facebook"></i></a>
                     <a href="#" class="footer-social" title="YouTube"><i class="bi bi-youtube"></i></a>
                     <a href="#" class="footer-social" title="Instagram"><i class="bi bi-instagram"></i></a>
@@ -18,8 +18,8 @@
             </div>
 
             <!-- Thông tin liên hệ -->
-            <div class="col-md-5">
-                <h6 class="footer-heading"><i class="bi bi-building me-2"></i>THÔNG TIN LIÊN HỆ</h6>
+            <div class="col-md-4">
+                <h6 class="footer-heading justify-content-center d-flex align-items-center"><i class="bi bi-building me-2"></i>THÔNG TIN LIÊN HỆ</h6>
                 <ul class="list-unstyled text-white-50 small mt-3 d-flex flex-column gap-2">
                     <li><i class="bi bi-geo-alt-fill me-2 text-white-50"></i>Cơ sở 1: Số 258 Bạch Đằng, phường Vàng Danh, tỉnh Quảng Ninh</li>
                     <li><i class="bi bi-geo-alt-fill me-2 text-white-50"></i>Cơ sở 2: Số 58 Nguyễn Văn Cừ, phường Hạ Long, tỉnh Quảng Ninh</li>
@@ -29,8 +29,8 @@
             </div>
 
             <!-- QR Zalo -->
-            <div class="col-md-4 text-center">
-                <h6 class="footer-heading"><i class="bi bi-people-fill me-2"></i>NHÓM ZALO HỖ TRỢ</h6>
+            <div class="col-md-4">
+                <h6 class="footer-heading justify-content-center d-flex align-items-center"><i class="bi bi-people-fill me-2"></i>NHÓM ZALO HỖ TRỢ</h6>
                 <div class="mt-3 d-inline-block position-relative">
                     <img src="/tsdhhl26/assets/zalo_qr.png" alt="QR Zalo" width="130" class="rounded border border-white border-opacity-25"
                          onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://zalo.me/g/halouniversity'">

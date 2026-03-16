@@ -52,12 +52,15 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
     <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
+        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
         body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
         .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
         .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .main-content { margin-left: 16.666667%; padding: 30px; }
+        .main-content { margin-left: 16.666667%; padding: 30px; transition: margin-left 0.3s; }
+        @media (max-width: 767.98px) {
+            .main-content { margin-left: 0 !important; padding: 15px !important; }
+        }
         table.dataTable td { vertical-align: middle; }
     </style>
 </head>

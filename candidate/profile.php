@@ -88,7 +88,7 @@ $profile = $profileResponse['data'][0];
         :root {
             --brand-color: #1A3A6E;
             --brand-hover: #12284c;
-            --sidebar-bg: #0f2444; 
+            --sidebar-bg: #1A3A6E; 
             --bg-color: #f7f9fc;
             --border-radius: 4px;
         }
@@ -97,15 +97,17 @@ $profile = $profileResponse['data'][0];
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; transition: all 0.2s; }
         .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
         .content-area { padding: 40px; }
-        .card { border: 1px solid #e2e8f0; border-radius: var(--border-radius); box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 24px; }
-        .card-header { border-bottom: 1px solid #e2e8f0; background: white; }
-        .btn-brand { background-color: var(--brand-color); color: white; border: none; border-radius: var(--border-radius); }
+        .card { border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card-header { border-bottom: 1px solid #e2e8f0; background: white; border-top-left-radius: 8px; border-top-right-radius: 8px;}
+        .btn-brand { background-color: var(--brand-color); color: white; border: none; border-radius: 6px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-weight: 500;}
         .btn-brand:hover { background-color: var(--brand-hover); color: white; }
         .text-brand { color: var(--brand-color) !important; }
-        .form-control { border-radius: var(--border-radius); border: 1px solid #cbd5e1; }
-        .form-control:focus { border-color: var(--brand-color); box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15); }
-        .form-label { font-size: 0.85rem; color: #64748b; margin-bottom: 0.3rem; }
+        .form-control, .form-select { border-radius: 6px; border: 1px solid #cbd5e1; min-height: 44px; }
+        .form-control:focus, .form-select:focus { border-color: var(--brand-color); box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15); }
+        .form-label { font-size: 0.85rem; color: #64748b; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px;}
         .bg-brand { background-color: var(--brand-color) !important; }
+        .content-area { padding: 40px; transition: padding 0.3s; }
+        @media (max-width: 767.98px) { .content-area { padding: 20px; } }
     </style>
 </head>
 <body>
@@ -118,7 +120,7 @@ $profile = $profileResponse['data'][0];
 
         <!-- Main Content -->
         <div class="col-md-10 content-area">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-2">
                 <h3 class="fw-bold mb-0 text-dark">Thông tin cá nhân</h3>
             </div>
 
@@ -229,7 +231,7 @@ $profile = $profileResponse['data'][0];
                                     <div class='list-group-item d-flex justify-content-between align-items-center py-3'>
                                         <div>
                                             <div class='fw-bold small'>{$typeName}</div>
-                                            <a href='{$doc['drive_file_url']}' target='_blank' class='text-primary small text-decoration-none'>Xem file</a>
+                                            <a href='{$doc['drive_file_url']}' target='_blank' class='text-brand small text-decoration-none'>Xem file</a>
                                         </div>
                                         <div>
                                             <button class='btn btn-sm btn-outline-danger' onclick='deleteDocument(\"{$doc['id']}\")'>Xóa</button>
@@ -266,7 +268,7 @@ document.getElementById('uploadBtn').addEventListener('click', async function() 
     const file = fileInput.files[0];
     const reader = new FileReader();
     
-    statusDiv.className = 'small mt-2 text-center text-primary';
+    statusDiv.className = 'small mt-2 text-center text-brand';
     statusDiv.innerText = 'Đang mã hóa file...';
     progress.classList.remove('d-none');
     this.disabled = true;

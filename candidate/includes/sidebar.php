@@ -7,8 +7,17 @@ $currentLevelId = $_GET['level_id'] ?? null;
 $levelsResSidebar = $supabase->select('education_levels', 'order=id.asc');
 $educationLevelsSidebar = ($levelsResSidebar['code'] == 200) ? $levelsResSidebar['data'] : [];
 ?>
-<div class="col-md-2 sidebar d-none d-md-block">
-    <h5 class="text-white text-center mb-4">HALOU PORTAL</h5>
+<!-- Mobile Overlay -->
+<div class="sidebar-mobile-overlay" id="sidebarOverlay"></div>
+
+<div class="col-md-2 sidebar sidebar-offcanvas d-none d-md-block" id="mainSidebar">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+        <h5 class="text-white mb-0 text-center w-100">HALOU PORTAL</h5>
+        <button class="btn btn-sm text-white d-md-none p-0" id="closeSidebarBtn">
+            <i class="bi bi-x-lg fs-4"></i>
+        </button>
+    </div>
+
     <a href="/tsdhhl26/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
     
     <div class="text-secondary small fw-bold px-4 mt-3 mb-1 text-uppercase" style="letter-spacing: 0.5px; opacity: 0.7;">Đăng Ký Xét Tuyển</div>
@@ -32,9 +41,27 @@ $educationLevelsSidebar = ($levelsResSidebar['code'] == 200) ? $levelsResSidebar
         </a>
     <?php endforeach; ?>
     
-    <div class="text-secondary small fw-bold px-4 mt-4 mb-1 text-uppercase" style="letter-spacing: 0.5px; opacity: 0.7;">Tài Khoản</div>
-    <a href="/tsdhhl26/candidate/documents.php" class="<?php echo ($currentPage == 'documents.php') ? 'active' : ''; ?>">Tài liệu của tôi</a>
-    <a href="/tsdhhl26/candidate/profile.php" class="<?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">Thông tin cá nhân</a>
-    <hr class="text-secondary">
-    <a href="/tsdhhl26/auth/logout.php" class="text-danger">Đăng xuất</a>
+    <div class="mb-4"></div>
 </div>
+
+<script>
+    // Off-canvas sidebar logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        const sidebar = document.getElementById('mainSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if(toggleBtn && sidebar && overlay) {
+            const toggleMenu = () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+            };
+
+            toggleBtn.addEventListener('click', toggleMenu);
+            if(closeBtn) closeBtn.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+        }
+    });
+</script>

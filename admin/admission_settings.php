@@ -187,7 +187,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
+        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
         body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; }
         .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; }
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
@@ -214,8 +214,10 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
         </div>
 
         <!-- Main Content -->
-        <div class="col-md-10 p-5">
-            <h3 class="fw-bold mb-4">Cấu Hình Thông Số Tuyển Sinh</h3>
+        <div class="col-md-10 content-area" style="padding: 30px;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+                <h3 class="fw-bold mb-0">Cấu Hình Thông Số Tuyển Sinh</h3>
+            </div>
             
             <?php if($message): ?><div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
             <?php if($error): ?><div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
@@ -270,7 +272,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
                                     <form method="POST" class="d-inline">
                                         <input type="hidden" name="action" value="toggle_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>">
                                         <input type="hidden" name="is_active" value="<?php echo $p['is_active'] ? 'false' : 'true'; ?>">
-                                        <button class="btn btn-sm btn-outline-primary"><?php echo $p['is_active'] ? 'Đóng' : 'Mở'; ?></button>
+                                        <button class="btn btn-sm btn-outline-brand"><?php echo $p['is_active'] ? 'Đóng' : 'Mở'; ?></button>
                                     </form>
                                     <form method="POST" class="d-inline border-0 p-0" onsubmit="event.preventDefault(); confirmDelete(this, 'Chắc chắn xóa đợt tuyển sinh này?');">
                                         <input type="hidden" name="action" value="delete_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>">

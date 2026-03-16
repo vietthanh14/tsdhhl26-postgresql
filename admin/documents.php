@@ -50,7 +50,7 @@ unset($doc);
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
     <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
+        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
         body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
         .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
@@ -119,7 +119,7 @@ unset($doc);
                                 </td>
                                 <td>
                                     <?php if (!empty($doc['drive_file_url'])): ?>
-                                        <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand">
                                             <i class="bi bi-box-arrow-up-right"></i> Xem Tài liệu
                                         </a>
                                     <?php else: ?>

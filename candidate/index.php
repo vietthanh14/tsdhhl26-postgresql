@@ -50,7 +50,7 @@ if ($appsResponse['code'] == 200) {
         :root {
             --brand-color: #1A3A6E;
             --brand-hover: #12284c;
-            --sidebar-bg: #0f2444; /* Darker version for sidebar */
+            --sidebar-bg: #1A3A6E; /* Darker version for sidebar */
             --bg-color: #f7f9fc;
             --border-radius: 4px;
         }
@@ -79,9 +79,8 @@ if ($appsResponse['code'] == 200) {
 
         <!-- Main Content -->
         <div class="col-md-10 content-area">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-2">
                 <h3 class="fw-bold mb-0 text-dark">Bảng điều khiển</h3>
-                <span class="text-muted small">Xin chào, <span class="fw-semibold text-brand"><?php echo htmlspecialchars($profile['full_name'] ?? 'Thí sinh'); ?></span></span>
             </div>
 
             <div class="row">
@@ -100,7 +99,6 @@ if ($appsResponse['code'] == 200) {
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center py-3">
                             <h6 class="mb-0 fw-bold">Hồ sơ xét tuyển của bạn</h6>
-                            <a href="/tsdhhl26/candidate/apply.php" class="btn btn-brand btn-sm px-3">+ Nộp hồ sơ mới</a>
                         </div>
                         <div class="card-body p-0">
                             <?php if (empty($applications)): ?>
@@ -118,8 +116,6 @@ if ($appsResponse['code'] == 200) {
                                                 <th>Ngày nộp</th>
                                                 <th>Lệ phí</th>
                                                 <th>Trạng thái hồ sơ</th>
-                                                <th>Thanh toán</th>
-                                                <th>Hành động</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -135,7 +131,7 @@ if ($appsResponse['code'] == 200) {
                                                                 data-app-id="<?php echo $app['id']; ?>"><i class="bi bi-check-lg"></i></button>
                                                     </div>
                                                 </td>
-                                                <td class="fw-bold text-primary"><?php echo htmlspecialchars($app['majors']['major_name'] ?? 'N/A'); ?></td>
+                                                <td class="fw-bold text-brand"><?php echo htmlspecialchars($app['majors']['major_name'] ?? 'N/A'); ?></td>
                                                 <td><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></td>
                                                 <td><?php echo date('d/m/Y', strtotime($app['submitted_at'])); ?></td>
                                                 <td><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</td>
@@ -148,19 +144,6 @@ if ($appsResponse['code'] == 200) {
                                                         elseif($app['status'] == 'REJECTED') { $statusClass = 'bg-danger'; $statusText = '❌ Từ chối'; }
                                                     ?>
                                                     <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                                </td>
-                                                <td>
-                                                    <?php if($app['payment_status'] == 'UNPAID'): ?>
-                                                        <span class="badge bg-danger rounded-pill">Chưa thanh toán</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-success rounded-pill">Đã thanh toán</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <a href="#" class="btn btn-sm btn-outline-secondary">Xem chi tiết</a>
-                                                    <?php if($app['payment_status'] == 'UNPAID'): ?>
-                                                        <a href="#" class="btn btn-sm btn-success">Thanh toán ngay</a>
-                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>
