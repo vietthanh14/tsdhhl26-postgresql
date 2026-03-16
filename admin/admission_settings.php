@@ -131,7 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'major_code' => $_POST['major_code'],
             'major_name' => $_POST['major_name'],
             'education_level_id' => $_POST['education_level_id'],
-            'application_fee' => $_POST['application_fee']
+            'application_fee' => $_POST['application_fee'],
+            'zalo_link' => trim($_POST['zalo_link'] ?? '')
         ];
         $res = $supabaseAdmin->insert('majors', $data);
         if (in_array($res['code'], [201, 200, 204])) $_SESSION['msg'] = "Thêm Ngành học thành công!";
@@ -143,7 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'major_code' => $_POST['major_code'],
             'major_name' => $_POST['major_name'],
             'education_level_id' => $_POST['education_level_id'],
-            'application_fee' => $_POST['application_fee']
+            'application_fee' => $_POST['application_fee'],
+            'zalo_link' => trim($_POST['zalo_link'] ?? '')
         ];
         $res = $supabaseAdmin->update('majors', 'id', $_POST['id'], $data);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Cập nhật Ngành học thành công!";
@@ -186,50 +188,43 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
     <title>Cấu Hình Tuyển Sinh - Admin HALOU</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
-        body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; }
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; }
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .nav-tabs .nav-link { color: #64748b; font-weight: 600; }
-        .nav-tabs .nav-link.active { color: var(--brand-color); border-bottom: 3px solid var(--brand-color); }
-        .btn-brand { background-color: var(--brand-color); color: white; }
-        .major-checkboxes { max-height: 150px; overflow-y: auto; background: #f8fafc; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; }
+        .major-checkboxes { max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; }
+        .nav-tabs .nav-link.active { color: var(--brand) !important; border-bottom: 3px solid var(--brand) !important; }
+        .btn-brand { background-color: var(--brand, #1A3A6E); color: white; }
     </style>
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
-    <!-- Sidebar -->
-        <div class="col-md-2 sidebar d-none d-md-block px-0 shadow">
-            <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
-            <a href="/tsdhhl26/admin/index.php">Bảng điều khiển</a>
-            <a href="/tsdhhl26/admin/admission_settings.php" class="active">Cấu hình Đợt/Ngành</a>
-            <a href="/tsdhhl26/admin/applications.php">Quản lý Hồ sơ</a>
-            <a href="/tsdhhl26/admin/documents.php">Tài liệu tải lên</a>
-            <a href="/tsdhhl26/admin/users.php">Quản lý Thí sinh</a>
-            <hr class="text-secondary mx-3">
-            <a href="/tsdhhl26/admin/logout.php" class="text-danger">Đăng xuất</a>
-        </div>
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <!-- Sidebar -->
+        <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="col-md-10 content-area" style="padding: 30px;">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
-                <h3 class="fw-bold mb-0">Cấu Hình Thông Số Tuyển Sinh</h3>
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0 text-brand">Cấu Hình Thông Số Tuyển Sinh</h3>
             </div>
             
-            <?php if($message): ?><div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-            <?php if($error): ?><div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+            <?php if($message): ?><div class="alert alert-success border-0 shadow-sm"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+            <?php if($error): ?><div class="alert alert-danger border-0 shadow-sm"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
 
-            <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#periods">Đợt Tuyển Sinh</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#levels">Hệ Đào Tạo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#majors">Ngành Học & Lệ Phí</button></li>
+            <ul class="nav nav-tabs mb-4 border-0 border-bottom" id="settingsTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active px-4 py-3 border-0 bg-transparent text-muted fw-bold" data-bs-toggle="tab" data-bs-target="#periods">Đợt Tuyển Sinh</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link px-4 py-3 border-0 bg-transparent text-muted fw-bold" data-bs-toggle="tab" data-bs-target="#levels">Hệ Đào Tạo</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link px-4 py-3 border-0 bg-transparent text-muted fw-bold" data-bs-toggle="tab" data-bs-target="#majors">Ngành Học & Lệ Phí</button>
+                </li>
             </ul>
 
-            <div class="tab-content bg-white p-4 rounded shadow-sm border">
-                
+            <div class="tab-content bg-white p-4 rounded-3 shadow-sm border-0 mb-5">
                 <!-- TAB ĐỢT TUYỂN SINH -->
                 <div class="tab-pane fade show active" id="periods">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -319,7 +314,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
                         <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#addMajorModal">+ Thêm Ngành</button>
                     </div>
                     <table class="table table-hover align-middle">
-                        <thead class="table-light"><tr><th>Mã Ngành</th><th>Tên Ngành</th><th>Hệ Đào Tạo</th><th>Lệ phí nộp (VND)</th><th>Hành động</th></tr></thead>
+                        <thead class="table-light"><tr><th>Mã Ngành</th><th>Tên Ngành</th><th>Hệ Đào Tạo</th><th>Lệ phí nộp (VND)</th><th>Nhóm Zalo</th><th>Hành động</th></tr></thead>
                         <tbody>
                             <?php foreach($majors as $m): ?>
                             <tr>
@@ -328,7 +323,16 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
                                 <td><span class="badge bg-info text-white"><?php echo htmlspecialchars($m['education_levels']['name'] ?? 'N/A'); ?></span></td>
                                 <td class="text-danger fw-semibold"><?php echo number_format($m['application_fee'], 0, ',', '.'); ?> đ</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-warning" onclick="openEditMajorModal('<?php echo $m['id']; ?>', '<?php echo htmlspecialchars($m['major_code'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($m['major_name'], ENT_QUOTES); ?>', '<?php echo $m['education_level_id']; ?>', '<?php echo $m['application_fee']; ?>')">Sửa</button>
+                                    <?php if (!empty($m['zalo_link'])): ?>
+                                        <a href="<?php echo htmlspecialchars($m['zalo_link']); ?>" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                            <i class="bi bi-chat-dots-fill"></i> Tham gia
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted small">Chưa có</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="openEditMajorModal('<?php echo $m['id']; ?>', '<?php echo htmlspecialchars($m['major_code'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($m['major_name'], ENT_QUOTES); ?>', '<?php echo $m['education_level_id']; ?>', '<?php echo $m['application_fee']; ?>', '<?php echo htmlspecialchars($m['zalo_link'] ?? '', ENT_QUOTES); ?>')">Sửa</button>
                                     <form method="POST" class="d-inline border-0 p-0" onsubmit="event.preventDefault(); confirmDelete(this, 'Bạn có chắc chắn muốn xóa ngành học này?');">
                                         <input type="hidden" name="action" value="delete_major"><input type="hidden" name="id" value="<?php echo $m['id']; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
@@ -431,6 +435,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
                     </select>
                 </div>
                 <div class="mb-3"><label class="form-label">Lệ phí nộp hồ sơ (VNĐ)</label><input type="number" name="application_fee" class="form-control" required value="300000" min="0"></div>
+                <div class="mb-3"><label class="form-label"><i class="bi bi-chat-dots-fill text-success me-1"></i>Link nhóm Zalo (không bắt buộc)</label><input type="url" name="zalo_link" class="form-control" placeholder="https://zalo.me/g/..."></div>
             </div>
             <div class="modal-footer"><button type="submit" class="btn btn-brand w-100">Lưu ngành học</button></div>
         </form>
@@ -526,6 +531,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
                     </select>
                 </div>
                 <div class="mb-3"><label class="form-label">Lệ phí nộp hồ sơ (VNĐ)</label><input type="number" name="application_fee" id="edit_major_fee" class="form-control" required min="0"></div>
+                <div class="mb-3"><label class="form-label"><i class="bi bi-chat-dots-fill text-success me-1"></i>Link nhóm Zalo (không bắt buộc)</label><input type="url" name="zalo_link" id="edit_major_zalo" class="form-control" placeholder="https://zalo.me/g/..."></div>
             </div>
             <div class="modal-footer"><button type="submit" class="btn btn-warning w-100">Cập nhật ngành học</button></div>
         </form>
@@ -584,12 +590,13 @@ function openEditLevelModal(id, name, description) {
     new bootstrap.Modal(document.getElementById('editLevelModal')).show();
 }
 
-function openEditMajorModal(id, code, name, levelId, fee) {
+function openEditMajorModal(id, code, name, levelId, fee, zalo) {
     document.getElementById('edit_major_id').value = id;
     document.getElementById('edit_major_code').value = code;
     document.getElementById('edit_major_name').value = name;
     document.getElementById('edit_major_level_id').value = levelId;
     document.getElementById('edit_major_fee').value = fee;
+    document.getElementById('edit_major_zalo').value = zalo || '';
     new bootstrap.Modal(document.getElementById('editMajorModal')).show();
 }
 const allPeriodMajorMethods = <?php echo json_encode($periodMajorMethods); ?>;
@@ -678,5 +685,6 @@ function filterMajorsForPeriod() {
     }
 }
 </script>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

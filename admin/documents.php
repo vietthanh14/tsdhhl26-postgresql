@@ -49,87 +49,71 @@ unset($doc);
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
-    <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
-        body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .main-content { margin-left: 16.666667%; padding: 30px; }
-        table.dataTable td { vertical-align: middle; }
-    </style>
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
-    <!-- Sidebar -->
-    <div class="col-md-2 sidebar d-none d-md-block px-0">
-        <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
-        <a href="/tsdhhl26/admin/index.php">Bảng điều khiển</a>
-        <a href="/tsdhhl26/admin/admission_settings.php">Cấu hình Đợt/Ngành</a>
-        <a href="/tsdhhl26/admin/applications.php">Quản lý Hồ sơ</a>
-        <a href="/tsdhhl26/admin/documents.php" class="active">Tài liệu tải lên</a>
-        <a href="/tsdhhl26/admin/users.php">Quản lý Thí sinh</a>
-        <hr class="text-secondary mx-3">
-        <a href="/tsdhhl26/admin/logout.php" class="text-danger">Đăng xuất</a>
-    </div>
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <!-- Sidebar -->
+        <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
-    <!-- Main Content -->
-    <div class="col-md-10 main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0 text-brand">Quản lý Tài liệu Ứng viên</h3>
-        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0 text-brand">Quản lý Tài liệu Ứng viên</h3>
+            </div>
 
-        <?php if($message): ?><div class="alert alert-success alert-dismissible fade show"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-        <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
 
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle w-100" id="docsTable">
-                        <thead class="table-light text-muted">
-                            <tr>
-                                <th>Thí sinh</th>
-                                <th>Thông tin liên hệ</th>
-                                <th>Loại tài liệu</th>
-                                <th>Ngày tải lên</th>
-                                <th>File đính kèm</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($documents as $doc): 
-                                $user = $doc['user_profiles'] ?? [];
-                                $doctype = $doc['document_types'] ?? [];
-                            ?>
-                            <tr>
-                                <td>
-                                    <strong class="d-block text-brand"><?php echo htmlspecialchars($user['full_name'] ?? 'Không rõ'); ?></strong>
-                                    <span class="text-muted small">CMND: <?php echo htmlspecialchars($user['identity_card'] ?? 'N/A'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="d-block small"><i class="bi bi-telephone text-muted"></i> <?php echo htmlspecialchars($user['phone_number'] ?? 'N/A'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info text-dark border mt-1">
-                                        <?php echo htmlspecialchars($doctype['type_name'] ?? 'Không rõ'); ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="d-block small mt-1 text-muted"><?php echo date('d/m/Y H:i', strtotime($doc['uploaded_at'])); ?></span>
-                                </td>
-                                <td>
-                                    <?php if (!empty($doc['drive_file_url'])): ?>
-                                        <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand">
-                                            <i class="bi bi-box-arrow-up-right"></i> Xem Tài liệu
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="text-muted small">Chưa có file</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle w-100" id="docsTable">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th>Thí sinh</th>
+                                    <th>Thông tin liên hệ</th>
+                                    <th>Loại tài liệu</th>
+                                    <th>Ngày tải lên</th>
+                                    <th class="text-end">File đính kèm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($documents as $doc): 
+                                    $user = $doc['user_profiles'] ?? [];
+                                    $doctype = $doc['document_types'] ?? [];
+                                ?>
+                                <tr>
+                                    <td>
+                                        <strong class="d-block text-brand"><?php echo htmlspecialchars($user['full_name'] ?? 'Không rõ'); ?></strong>
+                                        <span class="text-muted small">CMND: <?php echo htmlspecialchars($user['identity_card'] ?? 'N/A'); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block small"><i class="bi bi-telephone text-muted"></i> <?php echo htmlspecialchars($user['phone_number'] ?? 'N/A'); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border shadow-xs mt-1 px-2 py-1">
+                                            <?php echo htmlspecialchars($doctype['type_name'] ?? 'Không rõ'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block small mt-1 text-muted"><?php echo date('d/m/Y H:i', strtotime($doc['uploaded_at'])); ?></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <?php if (!empty($doc['drive_file_url'])): ?>
+                                            <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand rounded-pill px-3">
+                                                <i class="bi bi-box-arrow-up-right"></i> Xem
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted small italic">Chưa có file</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -146,12 +130,14 @@ unset($doc);
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
             },
-            "order": [[3, "desc"]], // Sắp xếp theo ngày tải lên hiển thị mới nhất
-            "pageLength": 50
+            "order": [[3, "desc"]], 
+            "pageLength": 25,
+            "drawCallback": function() {
+                $('.dataTables_paginate > .pagination').addClass('pagination-sm mt-3');
+            }
         });
     });
 </script>
-</div>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

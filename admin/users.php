@@ -51,94 +51,75 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
-    <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
-        body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .main-content { margin-left: 16.666667%; padding: 30px; transition: margin-left 0.3s; }
-        @media (max-width: 767.98px) {
-            .main-content { margin-left: 0 !important; padding: 15px !important; }
-        }
-        table.dataTable td { vertical-align: middle; }
-    </style>
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
-    <!-- Sidebar -->
-    <div class="col-md-2 sidebar d-none d-md-block px-0">
-        <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
-        <a href="/tsdhhl26/admin/index.php">Bảng điều khiển</a>
-        <a href="/tsdhhl26/admin/admission_settings.php">Cấu hình Đợt/Ngành</a>
-        <a href="/tsdhhl26/admin/applications.php">Quản lý Hồ sơ</a>
-        <a href="/tsdhhl26/admin/documents.php">Tài liệu tải lên</a>
-        <a href="/tsdhhl26/admin/users.php" class="active">Quản lý Thí sinh</a>
-        <hr class="text-secondary mx-3">
-        <a href="/tsdhhl26/admin/logout.php" class="text-danger">Đăng xuất</a>
-    </div>
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <!-- Sidebar -->
+        <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
-    <!-- Main Content -->
-    <div class="col-md-10 main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0 text-brand">Quản lý Thông tin Thí sinh</h3>
-        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0 text-brand">Quản lý Thông tin Thí sinh</h3>
+            </div>
 
-        <?php if($message): ?><div class="alert alert-success alert-dismissible fade show"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-        <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
 
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle w-100" id="usersTable">
-                        <thead class="table-light text-muted">
-                            <tr>
-                                <th>Họ và Tên</th>
-                                <th>Thông tin liên hệ</th>
-                                <th>CMND / CCCD</th>
-                                <th>Ngày sinh</th>
-                                <th>Địa chỉ</th>
-                                <th>Ngày đăng ký</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($users as $u): ?>
-                            <tr>
-                                <td>
-                                    <strong class="d-block text-brand"><?php echo htmlspecialchars($u['full_name'] ?? 'Không rõ'); ?></strong>
-                                    <span class="text-muted small">ID: <?php echo htmlspecialchars(substr($u['id'], 0, 8) . '...'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="d-block small"><i class="bi bi-envelope text-muted"></i> <?php echo htmlspecialchars($u['contact_email'] ?? 'N/A'); ?></span>
-                                    <span class="d-block small mt-1"><i class="bi bi-telephone text-muted"></i> <?php echo htmlspecialchars($u['phone_number'] ?? 'N/A'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="d-block fw-semibold text-dark"><?php echo htmlspecialchars($u['identity_card'] ?? 'N/A'); ?></span>
-                                </td>
-                                <td>
-                                    <?php if(!empty($u['date_of_birth'])): ?>
-                                        <span><?php echo date('d/m/Y', strtotime($u['date_of_birth'])); ?></span>
-                                    <?php else: ?>
-                                        <span class="text-muted small">N/A</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="small text-muted" style="max-width: 200px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?php echo htmlspecialchars($u['address'] ?? ''); ?>">
-                                        <?php echo htmlspecialchars($u['address'] ?? 'N/A'); ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="d-block small text-muted"><?php echo date('d/m/Y H:i', strtotime($u['created_at'])); ?></span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-warning" onclick="editUser('<?php echo $u['id']; ?>', '<?php echo htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['identity_card'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['contact_email'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['phone_number'] ?? '', ENT_QUOTES); ?>', '<?php echo $u['date_of_birth'] ?? ''; ?>', '<?php echo htmlspecialchars($u['address'] ?? '', ENT_QUOTES); ?>')"><i class="bi bi-pencil-square"></i></button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle w-100" id="usersTable">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th>Họ và Tên</th>
+                                    <th>Thông tin liên hệ</th>
+                                    <th>CMND / CCCD</th>
+                                    <th>Ngày sinh</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Ngày đăng ký</th>
+                                    <th class="text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($users as $u): ?>
+                                <tr>
+                                    <td>
+                                        <strong class="d-block text-brand"><?php echo htmlspecialchars($u['full_name'] ?? 'Không rõ'); ?></strong>
+                                        <span class="text-muted small">ID: <?php echo htmlspecialchars(substr($u['id'], 0, 8) . '...'); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block small"><i class="bi bi-envelope text-muted"></i> <?php echo htmlspecialchars($u['contact_email'] ?? 'N/A'); ?></span>
+                                        <span class="d-block small mt-1"><i class="bi bi-telephone text-muted"></i> <?php echo htmlspecialchars($u['phone_number'] ?? 'N/A'); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block fw-semibold text-dark"><?php echo htmlspecialchars($u['identity_card'] ?? 'N/A'); ?></span>
+                                    </td>
+                                    <td>
+                                        <?php if(!empty($u['date_of_birth'])): ?>
+                                            <span><?php echo date('d/m/Y', strtotime($u['date_of_birth'])); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted small">N/A</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted" style="max-width: 200px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?php echo htmlspecialchars($u['address'] ?? ''); ?>">
+                                            <?php echo htmlspecialchars($u['address'] ?? 'N/A'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block small text-muted"><?php echo date('d/m/Y H:i', strtotime($u['created_at'])); ?></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-brand rounded-circle" onclick="editUser('<?php echo $u['id']; ?>', '<?php echo htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['identity_card'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['contact_email'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['phone_number'] ?? '', ENT_QUOTES); ?>', '<?php echo $u['date_of_birth'] ?? ''; ?>', '<?php echo htmlspecialchars($u['address'] ?? '', ENT_QUOTES); ?>')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,45 +129,45 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
 <!-- Modal Edit User -->
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form method="POST" class="modal-content">
-            <div class="modal-header">
+        <form method="POST" class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-brand text-white border-0">
                 <h5 class="modal-title fw-bold">Chỉnh sửa Thông tin Thí sinh</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <input type="hidden" name="action" value="update_user">
                 <input type="hidden" name="user_id" id="edit_user_id">
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Họ và Tên</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Họ và Tên</label>
                         <input type="text" name="full_name" id="edit_full_name" class="form-control" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">CMND/CCCD</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">CMND/CCCD</label>
                         <input type="text" name="identity_card" id="edit_identity_card" class="form-control">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Email liên hệ</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Email liên hệ</label>
                         <input type="email" name="contact_email" id="edit_contact_email" class="form-control">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Số điện thoại</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Số điện thoại</label>
                         <input type="text" name="phone_number" id="edit_phone_number" class="form-control">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Ngày sinh</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Ngày sinh</label>
                         <input type="date" name="date_of_birth" id="edit_date_of_birth" class="form-control">
                     </div>
                     <div class="col-md-12 mb-3">
-                        <label class="form-label">Địa chỉ</label>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Địa chỉ</label>
                         <textarea name="address" id="edit_address" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-brand px-4">Lưu thay đổi</button>
             </div>
         </form>
     </div>
@@ -214,12 +195,14 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
             },
-            "order": [[5, "desc"]], // Sắp xếp theo ngày đăng ký
-            "pageLength": 50
+            "order": [[5, "desc"]], 
+            "pageLength": 25,
+            "drawCallback": function() {
+                $('.dataTables_paginate > .pagination').addClass('pagination-sm mt-3');
+            }
         });
     });
 </script>
-</div>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

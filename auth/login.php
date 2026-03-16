@@ -21,6 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = $supabase->signIn($fake_email, $password);
 
             if ($response['code'] == 200 && isset($response['data']['access_token'])) {
+                // Xóa session admin nếu có (tránh lẫn lộn vai trò)
+                unset($_SESSION['admin_logged_in']);
                 // Đăng nhập thành công, lưu Token và ID vào session
                 $_SESSION['access_token'] = $response['data']['access_token'];
                 $_SESSION['user_id'] = $response['data']['user']['id'];

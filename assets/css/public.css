@@ -106,39 +106,48 @@ select.form-select { cursor: pointer; }
     }
 }
 
-/* ── Mobile Off-Canvas Sidebar ──────────────────────────── */
+/* ── Centralized Sidebar & Layout (Admin & Candidate) ── */
+.sidebar { 
+    background-color: var(--sidebar-bg, #1A3A6E); 
+    height: calc(100vh - 71px); /* Header is typically ~70px */
+    position: sticky; 
+    top: 71px; /* Below the header */
+    left: 0; 
+    width: 16.666667%; /* col-md-2 equivalent */
+    z-index: 900; /* Less than header, more than content */
+    overflow-y: auto;
+}
+.sidebar-menu a { 
+    color: #cbd5e1; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    display: block; 
+    font-weight: 500; 
+    transition: all 0.2s ease;
+}
+.sidebar-menu a:hover, .sidebar-menu a.active { 
+    background-color: rgba(255,255,255,0.1); 
+    color: #fff; 
+}
+
+.main-content { 
+    margin-left: 0; 
+    padding: 30px; 
+    width: 83.333333%; /* col-md-10 */
+    min-height: calc(100vh - 71px); /* Adjust based on header/footer */
+}
+
+/* Mobile Off-Canvas Sidebar Styling */
 @media (max-width: 767.98px) {
-    .sidebar-mobile-overlay {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 1040;
-        display: none;
-        backdrop-filter: blur(2px);
-    }
-    .sidebar-mobile-overlay.show { display: block; }
+    .sidebar { display: none !important; }
+    .main-content { margin-left: 0; width: 100%; padding: 15px; }
     
-    .sidebar-offcanvas {
-        position: fixed;
-        top: 0;
-        left: -280px; /* Hide by default */
-        width: 280px;
-        height: 100vh;
-        z-index: 1050;
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-        display: block !important; /* Override d-none */
-        padding-top: 20px !important;
-    }
-    .sidebar-offcanvas.open {
-        transform: translateX(280px); /* Slide in */
-    }
-    .content-area, .p-5 {
-        padding: 20px !important; /* Smaller padding on mobile */
+    .sidebar-mobile {
+        background-color: var(--sidebar-bg, #1A3A6E);
+        width: 280px !important;
     }
     
-    /* Table scroll optimization */
+    /* Optimize data tables on mobile */
     .table-responsive {
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);

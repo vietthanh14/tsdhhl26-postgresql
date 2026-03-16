@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $app_id = $_POST['app_id'];
         $data = [
             'status' => $_POST['status'],
-            'payment_status' => $_POST['payment_status'],
             'updated_at' => date('Y-m-d H:i:sP')
         ];
         $res = $supabaseAdmin->update('applications', 'id', $app_id, $data);
@@ -33,30 +32,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: applications.php"); exit;
     }
     
-    // Cập nhật hàng loạt (Bulk Update)
+    // Cập nhật hàng loạt (Bulk Update) — 1 API call duy nhất thay vì N calls
     if ($action === 'bulk_update') {
-        $app_ids = $_POST['app_ids'] ?? [];
+        $app_ids  = array_filter($_POST['app_ids'] ?? []);
         $bulk_type = $_POST['bulk_type'] ?? '';
-        
+
         if (empty($app_ids)) {
             $_SESSION['err'] = "Bạn chưa chọn hồ sơ nào.";
         } else {
-            $successCount = 0;
             $data = ['updated_at' => date('Y-m-d H:i:sP')];
-            
-            if ($bulk_type === 'mark_paid') {
-                $data['payment_status'] = 'PAID';
-            } elseif ($bulk_type === 'mark_approved') {
-                $data['status'] = 'APPROVED';
-            } elseif ($bulk_type === 'mark_rejected') {
-                $data['status'] = 'REJECTED';
+
+            if ($bulk_type === 'mark_pending')    $data['status'] = 'PENDING';
+            elseif ($bulk_type === 'mark_approved') $data['status'] = 'APPROVED';
+            elseif ($bulk_type === 'mark_rejected') $data['status'] = 'REJECTED';
+
+            // Gọi 1 lần duy nhất: PATCH /applications?id=in.(id1,id2,...)
+            $res = $supabaseAdmin->updateBulk('applications', 'id', array_values($app_ids), $data);
+
+            if (in_array($res['code'], [200, 204])) {
+                $count = count($app_ids);
+                $_SESSION['msg'] = "Đã cập nhật hàng loạt thành công {$count} hồ sơ!";
+            } else {
+                $_SESSION['err'] = "Lỗi cập nhật hàng loạt: " . json_encode($res['data'] ?? []);
             }
-            
-            foreach ($app_ids as $id) {
-                $res = $supabaseAdmin->update('applications', 'id', $id, $data);
-                if (in_array($res['code'], [200, 204])) $successCount++;
-            }
-            $_SESSION['msg'] = "Đã cập nhật hàng loạt thành công $successCount hồ sơ!";
         }
         header("Location: applications.php"); exit;
     }
@@ -103,170 +101,136 @@ unset($app);
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
-    <style>
-        :root { --brand-color: #1A3A6E; --sidebar-bg: #1A3A6E; }
-        body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; font-size: 0.9rem;}
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; position: fixed; height: 100%; z-index: 1000;}
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .main-content { margin-left: 16.666667%; padding: 30px; transition: margin-left 0.3s; }
-        @media (max-width: 767.98px) {
-            .main-content { margin-left: 0 !important; padding: 15px !important; }
-            .bulk-actions button { width: 100%; margin-bottom: 8px; margin-right: 0 !important; }
-        }
-        .badge-status { font-size: 0.8rem; padding: 0.4em 0.6em; }
-        table.dataTable td { vertical-align: middle; }
-        .bulk-actions { background: rgba(26, 58, 110, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #1A3A6E; display: none; }
-    </style>
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
-    <!-- Sidebar -->
-    <div class="col-md-2 sidebar d-none d-md-block px-0">
-        <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
-        <a href="/tsdhhl26/admin/index.php">Bảng điều khiển</a>
-        <a href="/tsdhhl26/admin/admission_settings.php">Cấu hình Đợt/Ngành</a>
-        <a href="/tsdhhl26/admin/applications.php" class="active">Quản lý Hồ sơ</a>
-        <a href="/tsdhhl26/admin/documents.php">Tài liệu tải lên</a>
-        <a href="/tsdhhl26/admin/users.php">Quản lý Thí sinh</a>
-        <hr class="text-secondary mx-3">
-        <a href="/tsdhhl26/admin/logout.php" class="text-danger">Đăng xuất</a>
-    </div>
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <!-- Sidebar -->
+        <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
-    <!-- Main Content -->
-    <div class="col-md-10 main-content">
-        <h3 class="fw-bold mb-4">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
+        <!-- Main Content -->
+        <div class="main-content">
+            <h3 class="fw-bold mb-4 text-brand">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
 
-        <?php if($message): ?><div class="alert alert-success alert-dismissible fade show"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-        <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
 
-        <form method="POST" action="" id="bulkForm">
-            <input type="hidden" name="action" value="bulk_update">
-            <input type="hidden" name="bulk_type" id="bulkTypeInput" value="">
+            <form method="POST" action="" id="bulkForm">
+                <input type="hidden" name="action" value="bulk_update">
+                <input type="hidden" name="bulk_type" id="bulkTypeInput" value="">
 
-            <div class="bulk-actions" id="bulkActionsPanel">
-                <span class="fw-bold text-brand me-3">Đã chọn <span id="selectedCount">0</span> hồ sơ:</span>
-                <button type="button" class="btn btn-success btn-sm me-2" onclick="submitBulk('mark_paid')"><i class="bi bi-cash-coin"></i> Đánh dấu Đã Nộp Lệ Phí (PAID)</button>
-                <button type="button" class="btn btn-brand btn-sm me-2" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt Hợp lệ (APPROVED)</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="submitBulk('mark_rejected')"><i class="bi bi-x-circle"></i> Từ chối (REJECTED)</button>
-            </div>
-
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="appsTable" width="100%">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 40px" class="text-center"><input type="checkbox" class="form-check-input" id="checkAll"></th>
-                                    <th>Thí sinh</th>
-                                    <th>Thông tin liên hệ</th>
-                                    <th>Ngành đăng ký</th>
-                                    <th>Biên lai</th>
-                                    <th>TT Thanh toán</th>
-                                    <th>TT Hồ sơ</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($applications as $app): 
-                                    $user = $app['user_profiles'] ?? [];
-                                    $period = $app['admission_periods'] ?? [];
-                                    $major = $app['majors'] ?? [];
-                                    $method = $app['admission_methods'] ?? [];
-                                    
-                                    $statusClass = $app['status'] == 'APPROVED' ? 'bg-success' : ($app['status'] == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark');
-                                    $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
-
-                                    $payClass = $app['payment_status'] == 'PAID' ? 'bg-success' : ($app['payment_status'] == 'REFUNDED' ? 'bg-secondary' : 'bg-danger');
-                                    $payText = $app['payment_status'] == 'PAID' ? 'Đã nộp' : ($app['payment_status'] == 'REFUNDED' ? 'Hoàn tiền' : 'Chưa nộp');
-                                ?>
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="checkbox" class="form-check-input row-checkbox" name="app_ids[]" value="<?php echo htmlspecialchars($app['id']); ?>">
-                                    </td>
-                                    <td>
-                                        <strong class="d-block text-brand"><?php echo htmlspecialchars($user['full_name'] ?? 'Không rõ'); ?></strong>
-                                        <span class="text-muted small">CMND: <?php echo htmlspecialchars($user['identity_card'] ?? 'N/A'); ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="d-block small"><i class="bi bi-telephone text-muted"></i> <?php echo htmlspecialchars($user['phone_number'] ?? 'N/A'); ?></span>
-                                        <span class="d-block small mt-1 text-muted">Nộp: <?php echo date('d/m/Y H:i', strtotime($app['submitted_at'])); ?></span>
-                                    </td>
-                                    <td>
-                                        <strong class="d-block text-dark"><?php echo htmlspecialchars($major['major_name'] ?? 'Không rõ'); ?></strong>
-                                        <span class="badge bg-light text-dark border mt-1" title="Phương thức">
-                                            <?php echo htmlspecialchars($method['method_name'] ?? 'Không rõ'); ?>
-                                        </span>
-                                        <div class="small text-muted mt-1">Đợt: <?php echo htmlspecialchars($period['name'] ?? 'Không rõ'); ?></div>
-                                        <div class="small text-info mt-1 fw-bold">NV: <?php echo htmlspecialchars($app['priority'] ?? '1'); ?></div>
-                                    </td>
-                                    <td>
-                                        <?php if (!empty($app['receipt_url'])): ?>
-                                            <a href="<?php echo htmlspecialchars($app['receipt_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand">
-                                                <i class="bi bi-image"></i> Xem BL
-                                            </a>
-                                            <div class="small text-muted mt-1"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>
-                                        <?php else: ?>
-                                            <span class="text-muted small">Chưa nộp</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-status <?php echo $payClass; ?>"><?php echo $payText; ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-status <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-brand" onclick="openUpdateModal('<?php echo $app['id']; ?>', '<?php echo $app['status']; ?>', '<?php echo $app['payment_status']; ?>')">
-                                            <i class="bi bi-pencil-square"></i> Duyệt
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                <div class="bulk-actions mb-4 p-3 rounded-3 border-brand border-start border-5 shadow-sm bg-white d-none" id="bulkActionsPanel">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <span class="fw-bold text-brand me-2"><i class="bi bi-check2-all"></i> Đã chọn <span id="selectedCount" class="badge bg-brand">0</span> hồ sơ:</span>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" onclick="submitBulk('mark_pending')"><i class="bi bi-hourglass-split"></i> Chờ duyệt</button>
+                            <button type="button" class="btn btn-brand btn-sm px-3 rounded-pill" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt</button>
+                            <button type="button" class="btn btn-danger btn-sm px-3 rounded-pill" onclick="submitBulk('mark_rejected')"><i class="bi bi-x-circle"></i> Từ chối</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="appsTable" width="100%">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px" class="text-center"><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                                        <th>Thí sinh</th>
+                                        <th>Liên hệ & Ngày nộp</th>
+                                        <th>Ngành đăng ký</th>
+                                        <th>Biên lai</th>
+                                        <th>Hồ sơ</th>
+                                        <th class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($applications as $app): 
+                                        $user = $app['user_profiles'] ?? [];
+                                        $period = $app['admission_periods'] ?? [];
+                                        $major = $app['majors'] ?? [];
+                                        $method = $app['admission_methods'] ?? [];
+                                        
+                                        $statusClass = $app['status'] == 'APPROVED' ? 'bg-success' : ($app['status'] == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark');
+                                        $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
+                                    ?>
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input row-checkbox" name="app_ids[]" value="<?php echo htmlspecialchars($app['id']); ?>">
+                                        </td>
+                                        <td>
+                                            <strong class="d-block text-brand"><?php echo htmlspecialchars($user['full_name'] ?? 'Không rõ'); ?></strong>
+                                            <span class="text-muted small">CMND: <?php echo htmlspecialchars($user['identity_card'] ?? 'N/A'); ?></span>
+                                        </td>
+                                        <td class="small">
+                                            <div class="mb-1"><i class="bi bi-telephone text-muted me-1"></i> <?php echo htmlspecialchars($user['phone_number'] ?? 'N/A'); ?></div>
+                                            <div class="text-muted"><i class="bi bi-clock text-muted me-1"></i> <?php echo date('d/m/Y H:i', strtotime($app['submitted_at'])); ?></div>
+                                        </td>
+                                        <td class="small">
+                                            <strong class="d-block text-dark"><?php echo htmlspecialchars($major['major_name'] ?? 'Không rõ'); ?></strong>
+                                            <div class="mt-1 d-flex gap-2 flex-wrap">
+                                                <span class="badge bg-light text-dark border-0 shadow-xs" style="font-size: 0.7rem;"><?php echo htmlspecialchars($method['method_name'] ?? 'Không rõ'); ?></span>
+                                                <span class="badge bg-light text-info border-0 shadow-xs" style="font-size: 0.7rem;">NV: <?php echo htmlspecialchars($app['priority'] ?? '1'); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($app['receipt_url'])): ?>
+                                                <a href="<?php echo htmlspecialchars($app['receipt_url']); ?>" target="_blank" class="btn btn-xs btn-outline-brand py-1 px-2 border-0 bg-light" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-image"></i> Biên lai
+                                                </a>
+                                                <div class="small fw-bold mt-1 text-center" style="font-size: 0.7rem;"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?>đ</div>
+                                            <?php else: ?>
+                                                <span class="text-muted italic small">N/A</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-status <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-brand rounded-pill px-3" onclick="openUpdateModal('<?php echo $app['id']; ?>', '<?php echo $app['status']; ?>')">
+                                                <i class="bi bi-check2-square"></i> Duyệt
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Modal Update Status Single -->
 <div class="modal fade" id="updateModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-lg">
             <form method="POST" action="">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Cập nhật 1 Hồ sơ</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-brand text-white border-0">
+                    <h5 class="modal-title fw-bold">Cập nhật Hồ sơ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" name="action" value="update_status">
                     <input type="hidden" name="app_id" id="modal_app_id">
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Trạng thái Thanh toán</label>
-                        <select class="form-select" name="payment_status" id="modal_payment_status">
-                            <option value="UNPAID">Chưa nộp (Hoặc không hợp lệ)</option>
-                            <option value="PAID">Đã nộp (Thanh toán thành công)</option>
-                            <option value="REFUNDED">Đã hoàn tiền</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Trạng thái Hồ sơ</label>
-                        <select class="form-select" name="status" id="modal_status">
+                    <div class="">
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Trạng thái Hồ sơ</label>
+                        <select class="form-select border-0 bg-light" name="status" id="modal_status">
                             <option value="PENDING">Chờ duyệt</option>
                             <option value="APPROVED">Hợp lệ (Trúng tuyển)</option>
                             <option value="REJECTED">Từ chối (Tài liệu không hợp lệ)</option>
                         </select>
-                        <div class="form-text">Hồ sơ trúng tuyển phải có trạng thái thanh toán PAID.</div>
                     </div>
                 </div>
-                <div class="modal-footer text-center">
-                    <button type="submit" class="btn btn-brand w-100">Cập nhật nhanh</button>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-brand w-100 py-2 fw-bold">XÁC NHẬN CẬP NHẬT</button>
                 </div>
             </form>
         </div>
@@ -274,17 +238,19 @@ unset($app);
 </div>
 
 <!-- Modal Confirm Bulk Action -->
-<div class="modal fade" id="confirmBulkModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="confirmBulkModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-warning text-dark border-0">
                 <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Xác nhận thao tác</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-center">
-                <i class="bi bi-info-circle text-brand" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0" style="font-size: 1.1rem;">Bạn có chắc chắn muốn áp dụng thao tác này cho <strong id="confirmCount" class="text-danger">0</strong> hồ sơ đã chọn không?</p>
-                <p class="text-muted small mt-2 mb-0">Hành động này sẽ thay đổi dữ liệu trên hệ thống ngay lập tức.</p>
+                <div class="mb-3">
+                    <i class="bi bi-question-circle text-brand display-1 opacity-25"></i>
+                </div>
+                <p class="mb-0 fs-5">Bạn muốn áp dụng thao tác này cho <strong id="confirmCount" class="badge bg-danger">0</strong> hồ sơ đã chọn không?</p>
+                <p class="text-muted small mt-2">Dữ liệu sẽ được cập nhật đồng loạt trên hệ thống.</p>
             </div>
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy bỏ</button>
@@ -332,7 +298,7 @@ unset($app);
             var selectedCount = $('.row-checkbox:checked').length;
             $('#selectedCount').text(selectedCount);
             if(selectedCount > 0) {
-                $('#bulkActionsPanel').slideDown(200);
+                $('#bulkActionsPanel').removeClass('d-none').hide().slideDown(200);
             } else {
                 $('#bulkActionsPanel').slideUp(200);
                 $('#checkAll').prop('checked', false);
@@ -358,15 +324,12 @@ unset($app);
     });
 
     const updateModal = new bootstrap.Modal(document.getElementById('updateModal'));
-    function openUpdateModal(appId, currentStatus, currentPaymentStatus) {
+    function openUpdateModal(appId, currentStatus) {
         document.getElementById('modal_app_id').value = appId;
         document.getElementById('modal_status').value = currentStatus;
-        document.getElementById('modal_payment_status').value = currentPaymentStatus;
         updateModal.show();
-
     }
 </script>
-</div>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

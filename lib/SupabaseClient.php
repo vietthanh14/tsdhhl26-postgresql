@@ -111,4 +111,15 @@ class SupabaseClient {
         $endpoint = "/rest/v1/" . $table . "?$matchField=eq." . $matchValue;
         return $this->request('DELETE', $endpoint, null, $token);
     }
+
+    /**
+     * Cập nhật nhiều hàng cùng lúc bằng IN filter — 1 API call thay vì N calls.
+     * $ids: mảng các giá trị cần match (thường là UUID hoặc integer).
+     */
+    public function updateBulk($table, $matchField, array $ids, $data, $token = null) {
+        if (empty($ids)) return ['code' => 400, 'data' => ['error' => 'No IDs provided']];
+        $inList = implode(',', array_map('strval', $ids));
+        $endpoint = "/rest/v1/{$table}?{$matchField}=in.({$inList})";
+        return $this->request('PATCH', $endpoint, $data, $token);
+    }
 }

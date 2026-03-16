@@ -110,7 +110,7 @@ if ($appsResponse['code'] == 200) {
                                     <table class="table table-hover mb-0 align-middle">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="ps-3" style="width:80px">Nguyện vọng</th>
+                                                <th class="ps-3" style="width:90px; white-space:nowrap;">Nguyện vọng</th>
                                                 <th>Ngành đăng ký</th>
                                                 <th>Đợt tuyển sinh</th>
                                                 <th>Ngày nộp</th>
@@ -122,13 +122,16 @@ if ($appsResponse['code'] == 200) {
                                             <?php foreach ($applications as $app): ?>
                                             <tr>
                                                 <td class="ps-3 text-center">
-                                                    <div class="d-flex align-items-center gap-1" style="width:90px">
+                                                    <?php $isApproved = ($app['status'] === 'APPROVED'); ?>
+                                                    <div class="d-flex align-items-center gap-1" style="width:90px; <?php echo $isApproved ? 'opacity:0.4; pointer-events:none;' : ''; ?>">
                                                         <input type="number" class="form-control form-control-sm text-center priority-input" 
                                                                value="<?php echo intval($app['priority'] ?? 1); ?>" min="1" max="10"
                                                                data-app-id="<?php echo $app['id']; ?>"
-                                                               style="width:55px;font-weight:600;">
+                                                               style="width:55px;font-weight:600;"
+                                                               <?php echo $isApproved ? 'disabled' : ''; ?>>
                                                         <button class="btn btn-sm btn-outline-success save-priority-btn" title="Lưu thứ tự"
-                                                                data-app-id="<?php echo $app['id']; ?>"><i class="bi bi-check-lg"></i></button>
+                                                                data-app-id="<?php echo $app['id']; ?>"
+                                                                <?php echo $isApproved ? 'disabled' : ''; ?>><i class="bi bi-check-lg"></i></button>
                                                     </div>
                                                 </td>
                                                 <td class="fw-bold text-brand"><?php echo htmlspecialchars($app['majors']['major_name'] ?? 'N/A'); ?></td>
@@ -140,7 +143,7 @@ if ($appsResponse['code'] == 200) {
                                                         $statusClass = 'bg-secondary';
                                                         $statusText = 'Chưa xác định';
                                                         if($app['status'] == 'PENDING') { $statusClass = 'bg-warning text-dark'; $statusText = '⏳ Đang chờ duyệt'; }
-                                                        elseif($app['status'] == 'APPROVED') { $statusClass = 'bg-success'; $statusText = '✅ Đã trúng tuyển'; }
+                                                        elseif($app['status'] == 'APPROVED') { $statusClass = 'bg-success'; $statusText = '✅ Đã duyệt'; }
                                                         elseif($app['status'] == 'REJECTED') { $statusClass = 'bg-danger'; $statusText = '❌ Từ chối'; }
                                                     ?>
                                                     <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>

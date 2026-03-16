@@ -68,14 +68,28 @@ $activePeriods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
 
 // Danh sách ngành/phương thức sẽ được load động qua AJAX (candidate/api/)
 // Không cần fetch toàn bộ ở đây nữa
-$majors = []; // Giữ lại để validate phía server khi POST
-$periodMajors = [];
+// Khi POST: fetch ngành và mapping từ DB để validate phía server
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $majorsRes = $supabaseAdmin->select('majors', 'select=*');
+    $majors = ($majorsRes['code'] == 200) ? $majorsRes['data'] : [];
 
+    $periodMajorsRes = $supabaseAdmin->select('admission_period_majors', 'select=period_id,major_id');
+    $periodMajors = ($periodMajorsRes['code'] == 200) ? $periodMajorsRes['data'] : [];
+} else {
+    // Khi GET: dùng mảng rỗng, dữ liệu load qua AJAX
+    $majors = [];
+    $periodMajors = [];
+}
 
 $majorsMap = [];
 foreach ($majors as $m) {
     $majorsMap[$m['id']] = $m;
 }
+
+// PRG pattern — đọc thông báo từ session (set bởi POST redirect)
+$message = $_SESSION['apply_msg'] ?? '';
+$error   = $_SESSION['apply_err'] ?? '';
+unset($_SESSION['apply_msg'], $_SESSION['apply_err']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admission_period_id = $_POST['admission_period_id'] ?? '';
@@ -85,24 +99,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $priority = intval($_POST['priority'] ?? 1);
     if ($priority < 1) $priority = 1;
 
+    $redirect_url = $_SERVER['REQUEST_URI'];
+
     if (empty($admission_period_id) || empty($major_id) || empty($admission_method_id)) {
-        $error = "Vui lòng chọn đầy đủ thông tin: Đợt tuyển sinh, Ngành học và Phương thức xét tuyển.";
+        $_SESSION['apply_err'] = "Vui lòng chọn đầy đủ thông tin: Đợt tuyển sinh, Ngành học và Phương thức xét tuyển.";
     } elseif (!isset($majorsMap[$major_id])) {
-        $error = "Ngành học không hợp lệ.";
+        $_SESSION['apply_err'] = "Ngành học không hợp lệ.";
     } elseif (empty($receipt_url)) {
-        $error = "Vui lòng tải lên ảnh chụp biên lai thanh toán trước khi nộp hồ sơ.";
+        $_SESSION['apply_err'] = "Vui lòng tải lên ảnh chụp biên lai thanh toán trước khi nộp hồ sơ.";
     } elseif (!filter_var($receipt_url, FILTER_VALIDATE_URL) || !str_starts_with($receipt_url, 'https://')) {
-        $error = "Link biên lai không hợp lệ. Vui lòng tải lại ảnh biên lai.";
+        $_SESSION['apply_err'] = "Link biên lai không hợp lệ. Vui lòng tải lại ảnh biên lai.";
     } else {
         $fee_amount = $majorsMap[$major_id]['application_fee'];
 
         // == Xác thực phía Server (backend guard) ==
-        // 1. Kiểm tra đợt tuyển sinh còn mở không
         $validPeriod = false;
         foreach ($activePeriods as $ap) {
             if ((string)$ap['id'] === (string)$admission_period_id) { $validPeriod = true; break; }
         }
-        // 2. Kiểm tra ngành có thuộc đợt tuyển sinh không
         $validMajorInPeriod = false;
         foreach ($periodMajors as $pm) {
             if ((string)$pm['period_id'] === (string)$admission_period_id && (string)$pm['major_id'] === (string)$major_id) {
@@ -111,35 +125,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!$validPeriod) {
-            $error = "Đợt tuyển sinh đã đóng hoặc không hợp lệ.";
+            $_SESSION['apply_err'] = "Đợt tuyển sinh đã đóng hoặc không hợp lệ.";
         } elseif (!$validMajorInPeriod) {
-            $error = "Ngành học này không thuộc đợt tuyển sinh đã chọn. Vui lòng thực hiện lại từ Bước 1.";
+            $_SESSION['apply_err'] = "Ngành học này không thuộc đợt tuyển sinh đã chọn. Vui lòng thực hiện lại từ Bước 1.";
         } else {
             $appData = [
-                'user_id' => $user_id,
-                'admission_period_id' => $admission_period_id,
-                'major_id' => $major_id,
-                'admission_method_id' => $admission_method_id,
-                'fee_amount' => $fee_amount,
-                'priority' => $priority,
-                'status' => 'PENDING',
-                'payment_status' => 'UNPAID',
-                'receipt_url' => $receipt_url
+                'user_id'              => $user_id,
+                'admission_period_id'  => $admission_period_id,
+                'major_id'             => $major_id,
+                'admission_method_id'  => $admission_method_id,
+                'fee_amount'           => $fee_amount,
+                'priority'             => $priority,
+                'status'               => 'PENDING',
+                'payment_status'       => 'UNPAID',
+                'receipt_url'          => $receipt_url
             ];
 
             $insertRes = $supabaseAdmin->insert('applications', $appData);
 
             if (in_array($insertRes['code'], [201, 200])) {
-                $message = "Nộp hồ sơ và Minh chứng lệ phí thành công! Mời bạn quay lại Bảng điều khiển để theo dõi kết quả.";
+                $_SESSION['apply_msg'] = "Nộp hồ sơ và Minh chứng lệ phí thành công! Mời bạn quay lại Bảng điều khiển để theo dõi kết quả.";
             } else {
                 if (strpos(json_encode($insertRes['data']), 'duplicate key value') !== false) {
-                    $error = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
+                    $_SESSION['apply_err'] = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
                 } else {
-                    $error = "Lỗi không xác định khi nộp hồ sơ. Vui lòng thử lại sau.";
+                    $_SESSION['apply_err'] = "Lỗi không xác định khi nộp hồ sơ. Vui lòng thử lại sau.";
                 }
             }
         }
     }
+
+    // PRG: redirect về trang hiện tại bằng GET để tránh resubmit
+    header("Location: $redirect_url");
+    exit;
 }
 ?>
 <!DOCTYPE html>

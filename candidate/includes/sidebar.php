@@ -20,10 +20,10 @@ $educationLevelsSidebar = ($levelsResSidebar['code'] == 200) ? $levelsResSidebar
 
     <a href="/tsdhhl26/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
     
-    <div class="text-secondary small fw-bold px-4 mt-3 mb-1 text-uppercase" style="letter-spacing: 0.5px; opacity: 0.7;">Đăng Ký Xét Tuyển</div>
+    <div class="mt-2" style="padding: 12px 24px; color: #f59e0b; font-weight: 600; border-left: 3px solid #f59e0b; display: flex; align-items: center; gap: 8px; font-size: inherit;">
+        <i class="bi bi-pencil-square"></i> Đăng Ký Xét Tuyển
+    </div>
     <?php
-    // Mapping tên hệ (chữ thường) → file form riêng
-    // Thêm hệ mới vào đây khi cần tạo form riêng biệt
     $levelFileMap = [
         'đại học chính quy' => 'apply_university.php',
         'cao đẳng chính quy' => 'apply_college.php',
@@ -36,8 +36,9 @@ $educationLevelsSidebar = ($levelsResSidebar['code'] == 200) ? $levelsResSidebar
     ?>
         <a href="/tsdhhl26/candidate/<?php echo $lvlFile; ?>"
            class="<?php echo $isActive ? 'active' : ''; ?>"
-           style="padding-left: 32px; font-size: 0.95rem;">
-            ▶ Hệ <?php echo htmlspecialchars($lvl['name']); ?>
+           style="padding-left: 32px; font-size: 0.92rem; font-weight: 600;">
+            <i class="bi bi-arrow-right-circle<?php echo $isActive ? '-fill' : ''; ?> me-1 text-warning"></i>
+            Hệ <?php echo htmlspecialchars($lvl['name']); ?>
         </a>
     <?php endforeach; ?>
     

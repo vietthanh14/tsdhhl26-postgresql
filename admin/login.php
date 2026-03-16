@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Hardcoded Admin Credentials for Demo
     if ($username === 'admin' && $password === 'admin123') {
+        // Xóa session thí sinh nếu có (tránh lẫn lộn vai trò)
+        unset($_SESSION['user_id'], $_SESSION['access_token'], $_SESSION['email']);
         $_SESSION['admin_logged_in'] = true;
         header('Location: /tsdhhl26/admin/index.php');
         exit;

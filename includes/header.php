@@ -35,16 +35,41 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </a>
 
-            <!-- Menu Navigation -->
             <div class="d-none d-md-flex align-items-center gap-4">
-                <a href="/tsdhhl26/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                    <i class="bi bi-house-door-fill"></i> Trang chủ
-                </a>
-                <a href="/tsdhhl26/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                    <i class="bi bi-search"></i> Tra cứu
-                </a>
+                <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+                    <a href="/tsdhhl26/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <i class="bi bi-speedometer2"></i> Bảng điều khiển
+                    </a>
+                <?php else: ?>
+                    <a href="/tsdhhl26/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <i class="bi bi-house-door-fill"></i> Trang chủ
+                    </a>
+                    <a href="/tsdhhl26/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <i class="bi bi-search"></i> Tra cứu
+                    </a>
+                <?php endif; ?>
                 
-                <?php if (isset($_SESSION['user_id'])): ?>
+                <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+                    <div class="dropdown">
+                        <a href="#" class="text-white text-decoration-none fw-medium dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.9;">
+                            <i class="bi bi-shield-lock-fill text-warning"></i>
+                            <span>Xin chào, <span class="fw-bold text-warning">Quản trị viên</span></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/tsdhhl26/admin/index.php">
+                                    <i class="bi bi-speedometer2 text-secondary"></i> Bảng điều khiển
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="/tsdhhl26/admin/logout.php">
+                                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                <?php elseif (isset($_SESSION['user_id'])): ?>
                     <div class="dropdown">
                         <a href="#" class="text-white text-decoration-none fw-medium dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.9;">
                             <span>Xin chào, <span class="fw-bold text-warning"><?php echo htmlspecialchars($header_user_name); ?></span></span>
