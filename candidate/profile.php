@@ -273,15 +273,23 @@ document.getElementById('uploadBtn').addEventListener('click', async function() 
         statusDiv.innerText = 'Đang tải hồ sơ lên Google Drive...';
         
         try {
+            // Tên file: DOC_D{docTypeId}_{cccdLast6}_{timestamp}.{ext}
+            // Ví dụ: DOC_D3_789012_1710567890123.pdf
+            const ext      = file.type === 'application/pdf' ? 'pdf' : (file.type === 'image/png' ? 'png' : 'jpg');
+            const cccdRaw  = "<?php echo addslashes($profile['identity_card'] ?? '000000'); ?>";
+            const cccd6    = cccdRaw.replace(/\D/g, '').slice(-6);
+            const safeFileName = `DOC_D${docTypeId}_${cccd6}_${Date.now()}.${ext}`;
+
             // 1. Upload lên Google Drive qua GAS
             const response = await fetch(GAS_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     base64: base64,
-                    fileName: `CANDIDATE_${USER_ID}_${Date.now()}_${file.name}`,
+                    fileName: safeFileName,
                     mimeType: file.type
                 })
             });
+
             
             const gasData = await response.json();
             

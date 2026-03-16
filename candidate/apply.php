@@ -33,16 +33,22 @@ $levelsRes = $supabase->select('education_levels', 'order=id.asc');
 $levels = ($levelsRes['code'] == 200) ? $levelsRes['data'] : [];
 
 // Hỗ trợ forced level từ các file wrapper (apply_university.php, apply_college.php…)
+// Wrapper đặt $forced_level_id (integer ID) thay vì so sánh chuỗi tên — an toàn hơn khi tên thay đổi
 $selected_level_id = $_GET['level_id'] ?? '';
-if (!$selected_level_id && isset($forced_level_name)) {
+if (!$selected_level_id && isset($forced_level_id)) {
+    $selected_level_id = $forced_level_id;
+}
+
+// Lấy tên hệ để hiển thị trên tiêu đề (chỉ dùng cho UI, không dùng để lọc)
+$form_title_suffix = '';
+if ($selected_level_id) {
     foreach ($levels as $l) {
-        if (mb_strtolower(trim($l['name'])) === mb_strtolower(trim($forced_level_name))) {
-            $selected_level_id = $l['id'];
+        if ((string)$l['id'] === (string)$selected_level_id) {
+            $form_title_suffix = " Hệ {$l['name']}";
             break;
         }
     }
 }
-$form_title_suffix = isset($forced_level_name) ? " Hệ {$forced_level_name}" : '';
 
 // Cấu hình bước 2 — được khai báo trong wrapper file (apply_university.php, apply_college.php…)
 // Nếu không có wrapper đặt giá trị thì dùng mặc định bên dưới
@@ -55,23 +61,16 @@ if (!isset($step2_fields)) {
     ];
 }
 
-// Lấy danh sách Ngành học (lọc theo hệ nếu đã xác định — giảm tải dữ liệu gửi xuống trình duyệt)
-$majorsQuery = 'select=*,education_levels(name)&order=major_name.asc';
-if ($selected_level_id) {
-    $majorsQuery .= "&education_level_id=eq.{$selected_level_id}";
-}
-$majorsRes = $supabase->select('majors', $majorsQuery);
-$majors = ($majorsRes['code'] == 200) ? $majorsRes['data'] : [];
+// Kiểm tra xem có đợt tuyển sinh nào đang mở không (chỉ dùng để hiện cảnh báo)
+$today = date('Y-m-d');
+$periodsRes = $supabase->select('admission_periods', "is_active=eq.true&end_date=gte.{$today}");
+$activePeriods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
 
-// Lấy danh sách Phương thức
-$methodsRes = $supabaseAdmin->select('admission_methods', 'order=id.asc');
-$methods = ($methodsRes['code'] == 200) ? $methodsRes['data'] : [];
+// Danh sách ngành/phương thức sẽ được load động qua AJAX (candidate/api/)
+// Không cần fetch toàn bộ ở đây nữa
+$majors = []; // Giữ lại để validate phía server khi POST
+$periodMajors = [];
 
-$periodMajorsRes = $supabaseAdmin->select('admission_period_majors', 'select=*');
-$periodMajors = ($periodMajorsRes['code'] == 200) ? $periodMajorsRes['data'] : [];
-
-$periodMajorMethodsRes = $supabaseAdmin->select('admission_period_major_methods', 'select=period_id,major_id,method_id');
-$periodMajorMethods = ($periodMajorMethodsRes['code'] == 200) ? $periodMajorMethodsRes['data'] : [];
 
 $majorsMap = [];
 foreach ($majors as $m) {
@@ -203,9 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <p><?php echo $message; ?></p>
                                     <a href="/tsdhhl26/candidate/index.php" class="btn btn-success mt-2 px-4 shadow-sm">Về Bảng điều khiển</a>
                                 </div>
-                            <?php elseif(empty($activePeriods) || empty($majors)): ?>
+                            <?php elseif(empty($activePeriods)): ?>
                                 <div class="alert alert-warning text-center">
-                                    Hiện tại nhà trường chưa mở Đợt tuyển sinh nào hoặc danh mục Ngành học trống. Vui lòng quay lại sau!
+                                    Hiện tại nhà trường chưa mở Đợt tuyển sinh nào. Vui lòng quay lại sau!
                                 </div>
                             <?php else: ?>
                                 <?php if($error): ?><div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
@@ -357,118 +356,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     });
 
-    const allPeriods = <?php echo json_encode($activePeriods); ?>;
-    const allMethods = <?php echo json_encode($methods); ?>;
-    const allPeriodMajorMethods = <?php echo json_encode($periodMajorMethods); ?>;
+    // ── HELPER ────────────────────────────────────────────────────
+    function setLoading(sel, text = 'Đang tải...') {
+        sel.innerHTML = `<option value="">${text}</option>`;
+        sel.disabled = true;
+    }
+    function resetSelect(sel, text) {
+        sel.innerHTML = `<option value="">${text}</option>`;
+        sel.disabled = false;
+    }
 
-    const allMajors = <?php 
-        $mList = [];
-        foreach($majors as $m) {
-            $pIds = [];
-            foreach($periodMajors as $pm) { if($pm['major_id'] == $m['id']) $pIds[] = strval($pm['period_id']); }
-            $mList[] = [
-                'id' => $m['id'],
-                'name' => '['.($m['education_levels']['name'] ?? 'N/A').'] - '.$m['major_name'].' (Mã: '.($m['major_code'] ?? 'N/A').')',
-                'fee' => $m['application_fee'] ?? 0,
-                'periods' => $pIds
-            ];
-        }
-        echo json_encode($mList);
-    ?>;
-
-    function filterPeriods() {
-        const levelId = document.getElementById('levelSelect').value;
+    // ── Bước 1: Chọn Hệ → fetch Đợt qua AJAX ─────────────────────
+    async function filterPeriods() {
+        const levelId      = document.getElementById('levelSelect').value;
         const periodSelect = document.getElementById('periodSelect');
-        const majorSelect = document.getElementById('majorSelect');
+        const majorSelect  = document.getElementById('majorSelect');
         const methodSelect = document.getElementById('methodSelect');
-        
-        const selectedVal = periodSelect.value;
-        periodSelect.innerHTML = '<option value="">-- Chọn Đợt Tuyển Sinh --</option>';
-        majorSelect.innerHTML = '<option value="" data-fee="0">-- Vui lòng chọn Đợt Tuyển Sinh trước --</option>';
-        methodSelect.innerHTML = '<option value="">-- Vui lòng chọn Ngành học trước --</option>';
-        
-        if(levelId) {
-            let hasPeriods = false;
-            allPeriods.forEach(p => {
-                if(p.education_level_id == levelId) {
-                    let opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.text = p.name;
-                    if(selectedVal && p.id == selectedVal) opt.selected = true;
-                    periodSelect.appendChild(opt);
-                    hasPeriods = true;
-                }
-            });
-            if(!hasPeriods) {
-                periodSelect.innerHTML = '<option value="">-- Hệ này chưa mở đợt tuyển sinh nào --</option>';
-            }
-        } else {
-            periodSelect.innerHTML = '<option value="">-- Vui lòng chọn Hệ Đào tạo trước --</option>';
-        }
+
+        resetSelect(majorSelect,  '-- Vui lòng chọn Đợt Tuyển Sinh trước --');
+        resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --');
         updateFeePreview();
-        filterMethods();
+
+        if (!levelId) { resetSelect(periodSelect, '-- Vui lòng chọn Hệ Đào tạo trước --'); return; }
+
+        setLoading(periodSelect, 'Đang tải đợt tuyển sinh...');
+        try {
+            const data = await fetch(`/tsdhhl26/candidate/api/periods.php?level_id=${levelId}`).then(r => r.json());
+            periodSelect.disabled = false;
+            if (!data.length) { resetSelect(periodSelect, '-- Hệ này chưa mở đợt tuyển sinh nào --'); return; }
+            periodSelect.innerHTML = '<option value="">-- Chọn Đợt Tuyển Sinh --</option>';
+            data.forEach(p => periodSelect.appendChild(new Option(p.name, p.id)));
+        } catch(e) { resetSelect(periodSelect, '-- Lỗi tải dữ liệu --'); }
     }
 
-    function filterMajors() {
-        const periodId = document.querySelector('select[name="admission_period_id"]').value;
-        const majorSelect = document.getElementById('majorSelect');
-        
-        const selectedVal = majorSelect.value;
-        majorSelect.innerHTML = '<option value="" data-fee="0">-- Chọn Ngành đăng ký --</option>';
-        
-        if(periodId) {
-            let hasMajors = false;
-            allMajors.forEach(m => {
-                if(m.periods.includes(periodId)) {
-                    let opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.text = m.name;
-                    opt.setAttribute('data-fee', m.fee);
-                    if(selectedVal && m.id == selectedVal) opt.selected = true;
-                    majorSelect.appendChild(opt);
-                    hasMajors = true;
-                }
-            });
-            if(!hasMajors) {
-                majorSelect.innerHTML = '<option value="" data-fee="0">-- Đợt tuyển sinh này chưa mở ngành nào --</option>';
-            }
-        } else {
-            majorSelect.innerHTML = '<option value="" data-fee="0">-- Vui lòng chọn Đợt Tuyển Sinh trước --</option>';
-        }
+    // ── Bước 3a: Chọn Đợt → fetch Ngành qua AJAX ─────────────────
+    async function filterMajors() {
+        const periodId     = document.querySelector('select[name="admission_period_id"]').value;
+        const majorSelect  = document.getElementById('majorSelect');
+        const methodSelect = document.getElementById('methodSelect');
+
+        resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --');
         updateFeePreview();
-        filterMethods();
+
+        if (!periodId) { resetSelect(majorSelect, '-- Vui lòng chọn Đợt Tuyển Sinh trước --'); return; }
+
+        setLoading(majorSelect, 'Đang tải danh sách ngành...');
+        try {
+            const data = await fetch(`/tsdhhl26/candidate/api/majors.php?period_id=${periodId}`).then(r => r.json());
+            majorSelect.disabled = false;
+            if (!data.length) { resetSelect(majorSelect, '-- Đợt này chưa mở ngành nào --'); return; }
+            majorSelect.innerHTML = '<option value="" data-fee="0">-- Chọn Ngành đăng ký --</option>';
+            data.forEach(m => {
+                const opt = new Option(m.name, m.id);
+                opt.dataset.fee = m.fee;
+                majorSelect.appendChild(opt);
+            });
+            updateFeePreview();
+        } catch(e) { resetSelect(majorSelect, '-- Lỗi tải dữ liệu --'); }
     }
 
-    function filterMethods() {
-        const periodId = document.querySelector('select[name="admission_period_id"]').value;
-        const majorId = document.getElementById('majorSelect').value;
+    // ── Bước 3b: Chọn Ngành → fetch Phương thức qua AJAX ─────────
+    async function filterMethods() {
+        const periodId     = document.querySelector('select[name="admission_period_id"]').value;
+        const majorId      = document.getElementById('majorSelect').value;
         const methodSelect = document.getElementById('methodSelect');
-        
-        const selectedVal = methodSelect.value;
-        methodSelect.innerHTML = '<option value="">-- Chọn phương thức xét tuyển --</option>';
-        
-        if(periodId && majorId) {
-            let hasMethods = false;
-            const validMethodIds = allPeriodMajorMethods
-                .filter(m => m.period_id == periodId && m.major_id == majorId)
-                .map(m => m.method_id);
-                
-            allMethods.forEach(method => {
-                if(validMethodIds.includes(method.id)) {
-                    let opt = document.createElement('option');
-                    opt.value = method.id;
-                    opt.text = method.method_name;
-                    if(selectedVal && method.id == selectedVal) opt.selected = true;
-                    methodSelect.appendChild(opt);
-                    hasMethods = true;
-                }
-            });
-            if(!hasMethods) {
-                methodSelect.innerHTML = '<option value="">-- Ngành này chưa thiết lập phương thức --</option>';
-            }
-        } else {
-            methodSelect.innerHTML = '<option value="">-- Vui lòng chọn Ngành học trước --</option>';
-        }
+
+        if (!periodId || !majorId) { resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --'); return; }
+
+        setLoading(methodSelect, 'Đang tải phương thức...');
+        try {
+            const data = await fetch(`/tsdhhl26/candidate/api/methods.php?period_id=${periodId}&major_id=${majorId}`).then(r => r.json());
+            methodSelect.disabled = false;
+            if (!data.length) { resetSelect(methodSelect, '-- Ngành này chưa thiết lập phương thức --'); return; }
+            methodSelect.innerHTML = '<option value="">-- Chọn phương thức xét tuyển --</option>';
+            data.forEach(m => methodSelect.appendChild(new Option(m.method_name, m.id)));
+        } catch(e) { resetSelect(methodSelect, '-- Lỗi tải dữ liệu --'); }
     }
 
     function updateFeePreview() {
@@ -553,15 +515,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
 
-            // Tạo VietQR Data khi sang bước thanh toán
-            const fullNameRaw = "<?php echo addslashes($profileData['full_name'] ?? ''); ?>";
-            // Lược bỏ dấu tiếng việt + dấu cách cho phù hợp chuẩn ngân hàng
-            const normalizeStr = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const fullNameClean = normalizeStr(fullNameRaw);
-            const cccd = "<?php echo addslashes($profileData['identity_card'] ?? '000000000000'); ?>";
-            
-            // Giới hạn max 50 kí tự do một số NH giới hạn nội dung chuyển tiền
-            const content = `HD ${fullNameClean} ${cccd}`.substring(0, 50); 
+            // Tạo mã nội dung chuyển khoản ngắn gọn, truy vết được
+            // Định dạng: TS{periodId}M{majorId} {6 số cuối CCCD}
+            // Ví dụ: TS1M24 789012  — luôn < 25 ký tự, không cần chuẩn hóa tiếng Việt
+            const periodId = document.getElementById('periodSelect').value;
+            const majorId  = document.getElementById('majorSelect').value;
+            const cccd     = "<?php echo addslashes($profileData['identity_card'] ?? '000000000000'); ?>";
+            const cccdLast6 = cccd.replace(/\D/g, '').slice(-6); // 6 số cuối CCCD
+            const content  = `TS${periodId}M${majorId} ${cccdLast6}`;
+
             
             const select = document.getElementById('majorSelect');
             const fee = select.options[select.selectedIndex].getAttribute('data-fee');
@@ -606,16 +568,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         reader.onload = async function() {
             const base64 = reader.result.split(',')[1];
+
+            // Tên file: BIENL_TS{periodId}M{majorId}_{cccdLast6}_{timestamp}.{ext}
+            // Đồng nhất với mã nội dung chuyển khoản → dễ đối soát trên Google Drive
+            const ext         = file.type === 'image/png' ? 'png' : 'jpg';
+            const periodIdVal = document.getElementById('periodSelect').value;
+            const majorIdVal  = document.getElementById('majorSelect').value;
+            const cccdRaw     = "<?php echo addslashes($profileData['identity_card'] ?? '000000'); ?>";
+            const cccdSuffix  = cccdRaw.replace(/\D/g, '').slice(-6);
+            const safeFileName = `BIENL_TS${periodIdVal}M${majorIdVal}_${cccdSuffix}_${Date.now()}.${ext}`;
             
             try {
                 const response = await fetch(GAS_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         base64: base64,
-                        fileName: `RECEIPT_${USER_ID}_${Date.now()}_${file.name}`,
+                        fileName: safeFileName,
                         mimeType: file.type
                     })
                 });
+
                 
                 const gasData = await response.json();
                 

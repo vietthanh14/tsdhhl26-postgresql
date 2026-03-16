@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         $res = $supabaseAdmin->insert('admission_periods', $data);
         if (in_array($res['code'], [201, 200, 204])) {
-            // Lấy ID đợt vừa tạo
-            $pRes = $supabaseAdmin->select('admission_periods', "name=eq." . urlencode($data['name']) . "&order=id.desc&limit=1");
-            if ($pRes['code'] == 200 && !empty($pRes['data'])) {
-                $new_period_id = $pRes['data'][0]['id'];
+            // Lấy ID đợt vừa tạo trực tiếp từ response (Prefer: return=representation)
+            $new_period_id = $res['data'][0]['id'] ?? null;
+            if ($new_period_id) {
+
                 $methods_matrix = $_POST['methods'] ?? [];
                 foreach ($major_ids as $m_id) {
                     $supabaseAdmin->insert('admission_period_majors', ['period_id' => $new_period_id, 'major_id' => $m_id]);

@@ -16,14 +16,23 @@ class SupabaseClient {
         }
     }
 
-    private function request($method, $endpoint, $data = null, $token = null) {
+    private function request($method, $endpoint, $data = null, $token = null, $extraHeaders = []) {
         $ch = curl_init($this->url . $endpoint);
 
         $headers = [
             'apikey: ' . $this->key,
             'Content-Type: application/json',
-            'Prefer: return=representation'
+            'Prefer: return=representation',
         ];
+
+        // Cho phép override/thêm header (dùng bởi upsert, v.v.)
+        foreach ($extraHeaders as $h) {
+            // Nếu header đã tồn tại (cùng tên), ghi đè; nếu chưa, thêm vào
+            $hName = strtolower(explode(':', $h)[0]);
+            $headers = array_filter($headers, fn($existing) => strtolower(explode(':', $existing)[0]) !== $hName);
+            $headers[] = $h;
+        }
+        $headers = array_values($headers);
 
         if ($token) {
             $headers[] = 'Authorization: Bearer ' . $token;
@@ -89,33 +98,13 @@ class SupabaseClient {
     }
 
     public function upsert($table, $data, $token = null) {
-        $endpoint = "/rest/v1/" . $table;
-        
-        $ch = curl_init($this->url . $endpoint);
-        $headers = [
-            'apikey: ' . $this->key,
-            'Content-Type: application/json',
-            'Prefer: return=representation,resolution=merge-duplicates'
-        ];
-        if ($token) {
-            $headers[] = 'Authorization: Bearer ' . $token;
-        } else {
-            $headers[] = 'Authorization: Bearer ' . $this->key;
-        }
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) return ['error' => $error, 'code' => $httpCode];
-        return ['data' => json_decode($response, true), 'code' => $httpCode];
+        return $this->request(
+            'POST',
+            "/rest/v1/{$table}",
+            $data,
+            $token,
+            ['Prefer: return=representation,resolution=merge-duplicates']
+        );
     }
 
     public function delete($table, $matchField, $matchValue, $token = null) {

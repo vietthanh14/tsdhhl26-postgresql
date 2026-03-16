@@ -1,6 +1,8 @@
 <?php
 // candidate/apply_university.php
-$forced_level_name = 'Đại học Chính quy';
+// ID hệ Đại học Chính quy trong bảng education_levels
+// Thay bằng ID thực tế nếu DB của bạn khác (xem bảng education_levels)
+$forced_level_id = 1;
 
 // Bước 2 — Đại học hiển thị: Họ tên, CMND, Ngày sinh, Email
 $step2_fields = [

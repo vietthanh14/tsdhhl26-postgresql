@@ -1,6 +1,7 @@
 <?php
 // candidate/apply_college.php
-$forced_level_name = 'Cao đẳng Chính quy';
+// ID hệ Cao đẳng Chính quy trong bảng education_levels (id=2)
+$forced_level_id = 2;
 
 // Bước 2 — Cao đẳng hiển thị thêm: Số điện thoại, Địa chỉ
 $step2_fields = [
