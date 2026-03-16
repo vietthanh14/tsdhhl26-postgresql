@@ -44,6 +44,8 @@ if ($appsResponse['code'] == 200) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+
     <style>
         :root {
             --brand-color: #1A3A6E;
@@ -68,8 +70,9 @@ if ($appsResponse['code'] == 200) {
     </style>
 </head>
 <body>
-
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container-fluid">
+
     <div class="row">
         <!-- Sidebar Component -->
         <?php include __DIR__ . '/includes/sidebar.php'; ?>
@@ -235,6 +238,7 @@ document.querySelectorAll('.save-priority-btn').forEach(btn => {
     });
 });
 </script>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
 

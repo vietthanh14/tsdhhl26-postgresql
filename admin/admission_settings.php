@@ -199,9 +199,9 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
+<?php include __DIR__ . '/../includes/header.php'; ?>
+<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
+    <!-- Sidebar -->
         <div class="col-md-2 sidebar d-none d-md-block px-0 shadow">
             <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
             <a href="/tsdhhl26/admin/index.php">Bảng điều khiển</a>

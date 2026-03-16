@@ -82,6 +82,8 @@ $profile = $profileResponse['data'][0];
     <title>Thông tin cá nhân - Tuyển sinh</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
         :root {
             --brand-color: #1A3A6E;
@@ -107,8 +109,9 @@ $profile = $profileResponse['data'][0];
     </style>
 </head>
 <body>
-
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container-fluid">
+
     <div class="row">
         <!-- Sidebar Component -->
         <?php include __DIR__ . '/includes/sidebar.php'; ?>
@@ -387,5 +390,6 @@ document.getElementById('btnConfirmDeleteDoc').addEventListener('click', async f
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

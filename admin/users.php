@@ -49,6 +49,7 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     
     <style>
         :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
@@ -61,7 +62,8 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
     </style>
 </head>
 <body>
-<div class="row m-0 w-100">
+<?php include __DIR__ . '/../includes/header.php'; ?>
+<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
     <!-- Sidebar -->
     <div class="col-md-2 sidebar d-none d-md-block px-0">
         <h5 class="text-white text-center mb-4">ADMIN PORTAL</h5>
@@ -214,5 +216,7 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
         });
     });
 </script>
+</div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

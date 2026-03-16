@@ -23,6 +23,8 @@ $totalUsers = ($userRes['code'] == 200) ? count($userRes['data']) : 0;
     <title>Bảng Điều Khiển Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
         :root { --brand-color: #1A3A6E; --sidebar-bg: #0f2444; }
         body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; }
@@ -33,7 +35,9 @@ $totalUsers = ($userRes['code'] == 200) ? count($userRes['data']) : 0;
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container-fluid">
+
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-2 sidebar d-none d-md-block px-0">
@@ -72,6 +76,9 @@ $totalUsers = ($userRes['code'] == 200) ? count($userRes['data']) : 0;
             </div>
         </div>
     </div>
-</div>
+</div><!-- /container-fluid -->
+<?php include __DIR__ . '/../includes/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

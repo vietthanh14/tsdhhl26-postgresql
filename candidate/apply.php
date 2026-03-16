@@ -152,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Thêm Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
         :root {
             --brand-color: #1A3A6E;
@@ -178,9 +179,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../includes/header.php'; ?>
+<div class="row m-0 w-100 p-0 text-start" style="padding: 0; min-height: 80vh;">
 
-<div class="container-fluid">
-    <div class="row">
         <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
         <div class="col-md-10 content-area">
@@ -610,5 +611,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</div><!-- /container-fluid -->
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

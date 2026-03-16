@@ -25,15 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Admin Login - HALOU</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; width: 400px; }
-        .btn-brand { background-color: #1A3A6E; color: white; }
-        .btn-brand:hover { background-color: #12284c; color: white; }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
 </head>
 <body>
-    <div class="card p-4">
+<?php include __DIR__ . '/../includes/header.php'; ?>
+<div class="page-wrapper">
+<div class="card p-4">
         <h4 class="text-center fw-bold text-dark mb-4">Màn Hình Quản Trị Hệ Thống</h4>
         <?php if($error): ?><div class="alert alert-danger py-2 small"><?php echo $error; ?></div><?php endif; ?>
         <form method="POST">
@@ -49,5 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="text-center mt-3"><a href="/tsdhhl26/index.php" class="small text-decoration-none">Quay lại trang thí sinh</a></div>
         </form>
     </div>
+</div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
