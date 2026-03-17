@@ -14,3 +14,9 @@ config/supabase.php
 logs/
 uploads/
 *.log
+
+# Google Service Account Credentials (BẢO MẬT - KHÔNG ĐẨY LÊN GITHUB)
+serious-app-415103-baf99d68d251.json
+
+# Cache thư mục tra cứu Google Sheets
+storage/

@@ -111,7 +111,12 @@ unset($app);
 
         <!-- Main Content -->
         <div class="main-content">
-            <h3 class="fw-bold mb-4 text-brand">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold m-0 text-brand">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
+                <a href="api_export_csv.php" class="btn btn-success rounded-pill fw-bold shadow-sm" id="btnExportDocs">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Tải xuống Excel (CSV)
+                </a>
+            </div>
 
             <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
             <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
