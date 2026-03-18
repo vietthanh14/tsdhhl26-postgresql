@@ -30,12 +30,14 @@ $appsQuery = "select=*,majors(major_name,zalo_link,education_levels(name)),admis
 $appsResponse = $supabase->select('applications', $appsQuery, $token);
 $applications = ($appsResponse['code'] == 200) ? $appsResponse['data'] : [];
 
-// Lấy danh sách phương thức xét tuyển để map ID -> tên
-$methodsRes = $supabase->select('admission_methods', 'select=id,method_name&order=id.asc');
+// Lấy danh sách phương thức xét tuyển (từ cache, TTL 1 giờ)
+require_once __DIR__ . '/../lib/Cache.php';
+$methodsData = Cache::remember('admission_methods', 3600, function() use ($supabase) {
+    $res = $supabase->select('admission_methods', 'select=id,method_name&order=id.asc');
+    return ($res['code'] == 200) ? $res['data'] : [];
+});
 $methodsMap = [];
-if ($methodsRes['code'] == 200) {
-    foreach ($methodsRes['data'] as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
-}
+foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -47,29 +49,7 @@ if ($methodsRes['code'] == 200) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
-
-    <style>
-        :root {
-            --brand-color: #1A3A6E;
-            --brand-hover: #12284c;
-            --sidebar-bg: #1A3A6E; /* Darker version for sidebar */
-            --bg-color: #f7f9fc;
-            --border-radius: 4px;
-        }
-        body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: #333; }
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; transition: all 0.2s; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .content-area { padding: 40px; }
-        .card { border: 1px solid #e2e8f0; border-radius: var(--border-radius); box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 24px; }
-        .card-header { border-bottom: 1px solid #e2e8f0; background: white; }
-        .btn-brand { background-color: var(--brand-color); color: white; border: none; border-radius: var(--border-radius); }
-        .btn-brand:hover { background-color: var(--brand-hover); color: white; }
-        .text-brand { color: var(--brand-color) !important; }
-        .badge { border-radius: 4px; padding: 0.4em 0.6em; font-weight: 500; }
-        .table th { font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom-width: 1px; }
-        .table td { vertical-align: middle; }
-    </style>
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/dashboard.css">
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>

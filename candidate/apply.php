@@ -24,13 +24,12 @@ $supabaseAdmin = new SupabaseClient('service');
 $message = '';
 $error = '';
 
-// Lấy danh sách Đợt tuyển sinh đang mở
-$periodsRes = $supabase->select('admission_periods', 'is_active=eq.true&order=created_at.desc');
-$activePeriods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
-
-// Lấy danh sách Hệ Đào tạo
-$levelsRes = $supabase->select('education_levels', 'order=id.asc');
-$levels = ($levelsRes['code'] == 200) ? $levelsRes['data'] : [];
+// Lấy danh sách Hệ Đào tạo (từ cache, TTL 1 giờ)
+require_once __DIR__ . '/../lib/Cache.php';
+$levels = Cache::remember('education_levels', 3600, function() use ($supabase) {
+    $res = $supabase->select('education_levels', 'order=id.asc');
+    return ($res['code'] == 200) ? $res['data'] : [];
+});
 
 // Hỗ trợ forced level từ các file wrapper (apply_university.php, apply_college.php…)
 // Wrapper đặt $forced_level_id (integer ID) thay vì so sánh chuỗi tên — an toàn hơn khi tên thay đổi
@@ -76,11 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $periodMajorsRes = $supabaseAdmin->select('admission_period_majors', 'select=period_id,major_id');
     $periodMajors = ($periodMajorsRes['code'] == 200) ? $periodMajorsRes['data'] : [];
 
-    $methodsRes = $supabaseAdmin->select('admission_methods', 'select=id,method_name');
+    $methodsData = Cache::remember('admission_methods', 3600, function() use ($supabaseAdmin) {
+        $res = $supabaseAdmin->select('admission_methods', 'select=id,method_name');
+        return ($res['code'] == 200) ? $res['data'] : [];
+    });
     $methodsMap = [];
-    if ($methodsRes['code'] == 200) {
-        foreach ($methodsRes['data'] as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
-    }
+    foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
 } else {
     // Khi GET: dùng mảng rỗng, dữ liệu load qua AJAX
     $majors = [];
@@ -192,34 +192,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Thêm Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/dashboard.css">
     <style>
-        :root {
-            --brand-color: #1A3A6E;
-            --brand-hover: #12284c;
-            --sidebar-bg: #1A3A6E; 
-            --bg-color: #f7f9fc;
-            --border-radius: 4px;
-        }
-        body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: #333; }
-        .sidebar { background-color: var(--sidebar-bg); min-height: 100vh; padding-top: 25px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
-        .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 24px; display: block; border-left: 3px solid transparent; font-weight: 500; transition: all 0.2s; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: #3b82f6; }
-        .card { border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .card-header { border-bottom: 1px solid #e2e8f0; background: white; border-top-left-radius: 8px; border-top-right-radius: 8px; }
-        .btn-brand { background-color: var(--brand-color); color: white; border: none; border-radius: 6px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-weight: 500;}
-        .btn-brand:hover { background-color: var(--brand-hover); color: white; }
-        .btn-secondary { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 6px; }
-        .text-brand { color: var(--brand-color) !important; }
-        .form-control, .form-select { border-radius: 6px; border: 1px solid #cbd5e1; min-height: 44px; }
-        .form-control:focus, .form-select:focus { border-color: var(--brand-color); box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15); }
-        .form-label { font-size: 0.85rem; color: #64748b; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* Wizard-specific styles (apply.php only) */
         .wizard-step { animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* Wizard Button overrides */
         .wizard-step .d-flex.justify-content-between { flex-direction: column; gap: 10px; }
         @media (min-width: 768px) { .wizard-step .d-flex.justify-content-between { flex-direction: row; gap: 0; } }
-        .content-area { padding: 40px; transition: padding 0.3s; }
-        @media (max-width: 767.98px) { .content-area { padding: 20px; } }
     </style>
 </head>
 <body>
@@ -386,7 +365,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <!-- Bước 4 -->
                                     <div class="wizard-step d-none" id="step-4">
                                         <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 4: THANH TOÁN VÀ TẢI LÊN MINH CHỨNG</h6>
-                                        
+
+                                        <!-- Tóm tắt nguyện vọng -->
+                                        <div class="rounded-3 border mb-3 p-3" style="background: #f0f9ff; border-color: #bae6fd !important;">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-clipboard-check text-brand me-2" style="font-size: 1.1rem;"></i>
+                                                <span class="fw-bold text-dark small">TÓM TẮT HỒ SƠ ĐĂNG KÝ</span>
+                                            </div>
+                                            <table class="table table-sm table-borderless mb-0" style="font-size: .85rem;">
+                                                <tr>
+                                                    <td class="text-muted py-1" style="width: 140px;">Ngành học</td>
+                                                    <td class="fw-bold text-dark py-1" id="summaryMajor"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted py-1">Phương thức XT</td>
+                                                    <td class="fw-bold text-dark py-1" id="summaryMethod"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted py-1">Nguyện vọng</td>
+                                                    <td class="fw-bold text-dark py-1" id="summaryPriority"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted py-1">Lệ phí</td>
+                                                    <td class="fw-bold text-danger py-1" id="summaryFee"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
                                         <!-- Payment Card -->
                                         <div class="rounded-3 border overflow-hidden mb-3 shadow-sm">
                                             <!-- Header -->
@@ -452,12 +457,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <button type="button" id="uploadReceiptBtn" class="btn btn-brand btn-sm w-100 fw-bold mt-2"><i class="bi bi-cloud-arrow-up-fill me-1"></i> TẢI ẢNH BIÊN LAI</button>
                                         </div>
 
-                                        <div class="form-check mb-4 bg-light p-3 rounded border">
-                                            <input class="form-check-input ms-1" type="checkbox" id="flexCheckDefault" required>
-                                            <label class="form-check-label text-dark small fw-semibold ms-2" for="flexCheckDefault">
-                                                Tôi cam đoan thông tin hồ sơ và ảnh biên lai chuyển tiền là trung thực và hợp pháp.
-                                            </label>
-                                        </div>
+
 
                                         <div class="d-flex justify-content-between">
                                             <button type="button" class="btn btn-secondary px-4 py-2 text-white fw-semibold" onclick="goToStep(3)">&laquo; Sửa Nguyện vọng</button>
@@ -674,8 +674,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
             document.getElementById('paymentAmountText').innerText = formatter.format(fee);
             document.getElementById('paymentContentText').innerText = content;
+
+            // Populate tóm tắt hồ sơ
+            const majorText = select.options[select.selectedIndex].text;
+            const methodSel = document.getElementById('methodSelect');
+            const methodText = methodSel.options[methodSel.selectedIndex].text;
+            const priority = document.getElementById('priorityInput').value;
+            document.getElementById('summaryMajor').innerText = majorText;
+            document.getElementById('summaryMethod').innerText = methodText;
+            document.getElementById('summaryPriority').innerText = 'NV ' + priority;
+            document.getElementById('summaryFee').innerText = formatter.format(fee);
             
-            // Sử dụng Fake Account (Vidu: VietinBank 970415, 113366668888)
+            // VietQR: MSB (BIN 970426), STK 05001012531817, Chủ TK: NGUYEN THI THU HIEN
             const qrUrl = `https://img.vietqr.io/image/970426-05001012531817-compact2.png?amount=${fee}&addInfo=${encodeURIComponent(content)}&accountName=NGUYEN%20THI%20THU%20HIEN`;
             document.getElementById('vietqrImage').src = qrUrl;
         }

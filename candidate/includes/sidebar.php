@@ -3,9 +3,12 @@
 $currentPage = basename($_SERVER['PHP_SELF']);
 $currentLevelId = $_GET['level_id'] ?? null;
 
-// Lấy danh sách Hệ Đào tạo để render menu (cần $supabase đã được khởi tạo ở file cha)
-$levelsResSidebar = $supabase->select('education_levels', 'order=id.asc');
-$educationLevelsSidebar = ($levelsResSidebar['code'] == 200) ? $levelsResSidebar['data'] : [];
+// Lấy danh sách Hệ Đào tạo từ cache (TTL 1 giờ)
+require_once __DIR__ . '/../../lib/Cache.php';
+$educationLevelsSidebar = Cache::remember('education_levels', 3600, function() use ($supabase) {
+    $res = $supabase->select('education_levels', 'order=id.asc');
+    return ($res['code'] == 200) ? $res['data'] : [];
+});
 ?>
 <!-- Mobile Overlay -->
 <div class="sidebar-mobile-overlay" id="sidebarOverlay"></div>

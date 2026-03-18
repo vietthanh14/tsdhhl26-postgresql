@@ -6,6 +6,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/Cache.php';
 $supabaseAdmin = new SupabaseClient('service');
 $message = $_SESSION['msg'] ?? '';
 $error = $_SESSION['err'] ?? '';
@@ -51,12 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['msg'] = "Thêm Đợt tuyển sinh và cấu hình Ngành thành công!";
         }
         else $_SESSION['err'] = "Lỗi thêm đợt tuyển sinh: " . json_encode($res['data']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     } 
     elseif ($action === 'delete_period') {
         $res = $supabaseAdmin->delete('admission_periods', 'id', $_POST['id']);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Xóa đợt thành công!";
         else $_SESSION['err'] = "Lỗi xóa: Phải xóa các hồ sơ liên quan trước (Ràng buộc dữ liệu).";
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'edit_period') {
@@ -98,10 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['err'] = "Lỗi cập nhật đợt tuyển sinh: " . json_encode($res['data']);
         }
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'toggle_period') {
         $res = $supabaseAdmin->update('admission_periods', 'id', $_POST['id'], ['is_active' => $_POST['is_active'] === 'true']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     
@@ -110,18 +115,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $res = $supabaseAdmin->insert('education_levels', ['name' => $_POST['name'], 'description' => $_POST['description']]);
         if (in_array($res['code'], [201, 200, 204])) $_SESSION['msg'] = "Thêm Hệ đào tạo thành công!";
         else $_SESSION['err'] = "Lỗi thêm hệ đào tạo (có thể trùng tên): " . json_encode($res['data']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'edit_level') {
         $res = $supabaseAdmin->update('education_levels', 'id', $_POST['id'], ['name' => $_POST['name'], 'description' => $_POST['description']]);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Cập nhật Hệ đào tạo thành công!";
         else $_SESSION['err'] = "Lỗi sửa hệ đào tạo: " . json_encode($res['data']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'delete_level') {
         $res = $supabaseAdmin->delete('education_levels', 'id', $_POST['id']);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Xóa Hệ đào tạo thành công!";
         else $_SESSION['err'] = "Lỗi: Không thể xóa Hệ đang có chứa ngành học.";
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     
@@ -137,6 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $res = $supabaseAdmin->insert('majors', $data);
         if (in_array($res['code'], [201, 200, 204])) $_SESSION['msg'] = "Thêm Ngành học thành công!";
         else $_SESSION['err'] = "Lỗi thêm ngành (có thể trùng mã): " . json_encode($res['data']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'edit_major') {
@@ -150,12 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $res = $supabaseAdmin->update('majors', 'id', $_POST['id'], $data);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Cập nhật Ngành học thành công!";
         else $_SESSION['err'] = "Lỗi sửa ngành học: " . json_encode($res['data']);
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
     elseif ($action === 'delete_major') {
         $res = $supabaseAdmin->delete('majors', 'id', $_POST['id']);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Xóa Ngành thành công!";
         else $_SESSION['err'] = "Lỗi: Không thể xóa ngành đã có hồ sơ nộp vào.";
+        Cache::flush();
         header("Location: admission_settings.php"); exit;
     }
 }

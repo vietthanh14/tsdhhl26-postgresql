@@ -32,10 +32,9 @@
             <div class="col-md-4">
                 <h6 class="footer-heading justify-content-center d-flex align-items-center"><i class="bi bi-people-fill me-2"></i>NHÓM ZALO HỖ TRỢ</h6>
                 <div class="mt-3 d-inline-block position-relative">
-                    <img src="/tsdhhl26/assets/zalo_qr.png" alt="QR Zalo" width="130" class="rounded border border-white border-opacity-25"
-                         onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://zalo.me/g/halouniversity'">
+                    <img src="/tsdhhl26/assets/qr-zalo.jpg" alt="QR Zalo" width="130" class="rounded border border-white border-opacity-25">
                     <div class="mt-2">
-                        <a href="https://zalo.me" target="_blank"
+                        <a href="https://docs.google.com/spreadsheets/d/1tyKS6r47TQEJOm0Io5jI35AukdhxBGJtmJY2ei-NcmE/edit?gid=0#gid=0" target="_blank"
                            class="btn btn-sm btn-light text-dark fw-semibold rounded-pill px-3"
                            style="font-size:.75rem;">
                             Quét mã QR hoặc Nhấn vào đây để tham gia

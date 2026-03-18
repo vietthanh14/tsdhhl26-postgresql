@@ -47,12 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'updated_at' => date('Y-m-d H:i:sP'),
         ];
 
-        $updateRes = $supabaseAdmin->update('user_profiles', 'id', $user_id, $updateData);
+        $updateRes = $supabase->update('user_profiles', 'id', $user_id, $updateData, $token);
 
         if (in_array($updateRes['code'], [200, 204])) {
             $_SESSION['profile_success'] = "Cập nhật hồ sơ thành công!";
         } else {
-            $_SESSION['profile_error'] = "Lỗi cập nhật: " . json_encode($updateRes['data']);
+            $_SESSION['profile_error'] = "Lỗi cập nhật hồ sơ. Vui lòng thử lại hoặc liên hệ quản trị viên.";
         }
     }
 
@@ -93,226 +93,36 @@ $profile = $profileResponse['data'][0];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="/tsdhhl26/assets/css/dashboard.css">
     <style>
-        :root {
-            --brand-color: #1A3A6E;
-            --brand-hover: #12284c;
-            --sidebar-bg: #1A3A6E;
-            --bg-color: #f7f9fc;
-            --border-radius: 4px;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Inter', sans-serif;
-            color: #333;
-        }
-
-        .sidebar {
-            background-color: var(--sidebar-bg);
-            min-height: 100vh;
-            padding-top: 25px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .sidebar a {
-            color: #cbd5e1;
-            text-decoration: none;
-            padding: 12px 24px;
-            display: block;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border-left-color: #3b82f6;
-        }
-
-        .content-area {
-            padding: 40px;
-        }
-
-        .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card-header {
-            border-bottom: 1px solid #e2e8f0;
-            background: white;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-
-        .btn-brand {
-            background-color: var(--brand-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-        }
-
-        .btn-brand:hover {
-            background-color: var(--brand-hover);
-            color: white;
-        }
-
-        .text-brand {
-            color: var(--brand-color) !important;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            min-height: 44px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--brand-color);
-            box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15);
-        }
-
-        .form-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 0.3rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .bg-brand {
-            background-color: var(--brand-color) !important;
-        }
-
-        .content-area {
-            padding: 40px;
-            transition: padding 0.3s;
-        }
-
-        @media (max-width: 767.98px) {
-            .content-area {
-                padding: 20px;
-            }
-        }
-
-        /* Searchable Combobox */
-        .combo-wrapper {
-            position: relative;
-        }
-
+        /* Searchable Combobox (profile.php only) */
+        .combo-wrapper { position: relative; }
         .combo-wrapper .combo-input {
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            min-height: 44px;
-            width: 100%;
-            padding: .375rem .75rem;
-            font-size: 1rem;
+            border-radius: 6px; border: 1px solid #cbd5e1; min-height: 44px; width: 100%;
+            padding: .375rem .75rem; font-size: 1rem;
             transition: border-color .15s ease, box-shadow .15s ease;
             background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right .75rem center;
-            padding-right: 2rem;
-            cursor: pointer;
+            padding-right: 2rem; cursor: pointer;
         }
-
-        .combo-wrapper .combo-input:focus {
-            outline: none;
-            border-color: var(--brand-color);
-            box-shadow: 0 0 0 2px rgba(26, 58, 110, .15);
-        }
-
-        .combo-wrapper .combo-input:disabled {
-            background-color: #f8fafc;
-            cursor: not-allowed;
-            color: #94a3b8;
-        }
-
+        .combo-wrapper .combo-input:focus { outline: none; border-color: var(--brand-color); box-shadow: 0 0 0 2px rgba(26, 58, 110, .15); }
+        .combo-wrapper .combo-input:disabled { background-color: #f8fafc; cursor: not-allowed; color: #94a3b8; }
         .combo-dropdown {
-            display: none;
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 0;
-            right: 0;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
-            max-height: 230px;
-            overflow-y: auto;
-            z-index: 1050;
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .1); max-height: 230px; overflow-y: auto; z-index: 1050;
         }
-
-        .combo-dropdown.open {
-            display: block;
-        }
-
-        .combo-dropdown .combo-search {
-            position: sticky;
-            top: 0;
-            padding: 8px;
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .combo-dropdown .combo-search input {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: .875rem;
-            outline: none;
-        }
-
-        .combo-dropdown .combo-search input:focus {
-            border-color: var(--brand-color);
-        }
-
-        .combo-option {
-            padding: 9px 14px;
-            cursor: pointer;
-            font-size: .9rem;
-            transition: background .1s;
-        }
-
-        .combo-option:hover,
-        .combo-option.active {
-            background: #eff6ff;
-            color: var(--brand-color);
-        }
-
-        .combo-option.no-result {
-            color: #94a3b8;
-            cursor: default;
-            font-style: italic;
-        }
-
+        .combo-dropdown.open { display: block; }
+        .combo-dropdown .combo-search { position: sticky; top: 0; padding: 8px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .combo-dropdown .combo-search input { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: .875rem; outline: none; }
+        .combo-dropdown .combo-search input:focus { border-color: var(--brand-color); }
+        .combo-option { padding: 9px 14px; cursor: pointer; font-size: .9rem; transition: background .1s; }
+        .combo-option:hover, .combo-option.active { background: #eff6ff; color: var(--brand-color); }
+        .combo-option.no-result { color: #94a3b8; cursor: default; font-style: italic; }
         .combo-clear {
-            position: absolute;
-            right: 28px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: .85rem;
-            display: none;
-            line-height: 1;
-            z-index: 1;
+            position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #94a3b8; font-size: .85rem; display: none; line-height: 1; z-index: 1;
         }
-
-        .combo-clear:hover {
-            color: #ef4444;
-        }
+        .combo-clear:hover { color: #ef4444; }
     </style>
 </head>
 

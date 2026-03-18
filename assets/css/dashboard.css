@@ -1,0 +1,140 @@
+/* ==========================================================
+   dashboard.css — Shared styles for candidate dashboard pages
+   Used by: index.php, apply.php, profile.php
+   ========================================================== */
+
+/* ── Design Tokens ── */
+:root {
+    --brand-color: #1A3A6E;
+    --brand-hover: #12284c;
+    --sidebar-bg: #1A3A6E;
+    --bg-color: #f7f9fc;
+    --border-radius: 4px;
+}
+
+/* ── Base ── */
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    min-height: 100vh;
+    padding-top: 25px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+.sidebar a {
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 12px 24px;
+    display: block;
+    border-left: 3px solid transparent;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-left-color: #3b82f6;
+}
+
+/* ── Content Area ── */
+.content-area {
+    padding: 40px;
+    transition: padding 0.3s;
+}
+@media (max-width: 767.98px) {
+    .content-area {
+        padding: 20px;
+    }
+}
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* ── Buttons ── */
+.btn-brand {
+    background-color: var(--brand-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+.btn-brand:hover {
+    background-color: var(--brand-hover);
+    color: white;
+}
+.btn-secondary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* ── Brand Utilities ── */
+.text-brand {
+    color: var(--brand-color) !important;
+}
+.bg-brand {
+    background-color: var(--brand-color) !important;
+}
+
+/* ── Forms ── */
+.form-control,
+.form-select {
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    min-height: 44px;
+}
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15);
+}
+.form-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Table (Dashboard) ── */
+.table th {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom-width: 1px;
+}
+.table td {
+    vertical-align: middle;
+}
+.badge {
+    border-radius: 4px;
+    padding: 0.4em 0.6em;
+    font-weight: 500;
+}

@@ -21,7 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone_number   = trim($_POST['phone_number'] ?? '');
     $identity_card  = trim($_POST['identity_card'] ?? '');
 
-    if (!$full_name) {
+    if (!$username) {
+        $error = 'Vui lòng nhập tên đăng nhập.';
+    } elseif (!preg_match('/^[a-z0-9_]{3,30}$/', $username)) {
+        $error = 'Tên đăng nhập chỉ gồm chữ thường, số và dấu gạch dưới (3-30 ký tự).';
+    } elseif (!$full_name) {
         $error = 'Vui lòng nhập họ và tên.';
     } elseif (!$date_of_birth) {
         $error = 'Vui lòng nhập ngày sinh.';
@@ -35,49 +39,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Mật khẩu xác nhận không khớp.';
     } elseif (strlen($password) < 6) {
         $error = 'Mật khẩu phải chứa ít nhất 6 ký tự.';
-    } elseif ($username && $password) {
+    } else {
         try {
-            // Nối Username thành email ảo để đăng ký qua hệ thống của Supabase
-            $fake_email = $username . '@halou.system';
-
-            $supabase = new SupabaseClient('anon');
-            $response = $supabase->signUp($fake_email, $password);
-
-            if ($response['code'] == 200 && isset($response['data']['user'])) {
-                $user_id = $response['data']['user']['id'];
-
-                $supabaseAdmin = new SupabaseClient('service');
-
-                $profileData = [
-                    'id'            => $user_id,
-                    'username'      => $username,
-                    'full_name'     => $full_name,
-                    'date_of_birth' => $date_of_birth,
-                    'contact_email' => $contact_email,
-                    'phone_number'  => $phone_number,
-                    'identity_card' => $identity_card,
-                ];
-
-                $profileResponse = $supabaseAdmin->insert('user_profiles', $profileData);
-
-                if ($profileResponse['code'] == 201 || $profileResponse['code'] == 200) {
-                    $success = 'Đăng ký tài khoản thành công! Bạn có thể sử dụng <strong>Tên đăng nhập</strong> và Mật khẩu vừa tạo để đăng nhập.';
-                } else {
-                    $error = "Tạo tài khoản thành công, nhưng lỗi lưu hồ sơ: " . json_encode($profileResponse['data']);
-                }
+            // Kiểm tra trùng username trước khi tạo tài khoản Supabase
+            $supabaseAdmin = new SupabaseClient('service');
+            $chkUsername = $supabaseAdmin->select('user_profiles', "username=eq.{$username}&select=id");
+            if ($chkUsername['code'] == 200 && !empty($chkUsername['data'])) {
+                $error = 'Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác.';
             } else {
-                $supabaseError = $response['data']['error_description'] ?? $response['data']['msg'] ?? 'Lỗi không xác định.';
-                if (strpos(strtolower($supabaseError), 'already registered') !== false || strpos(strtolower($supabaseError), 'exists') !== false) {
-                    $error = 'Tên đăng nhập này đã được sử dụng trên hệ thống.';
+                // Nối Username thành email ảo để đăng ký qua hệ thống của Supabase
+                $fake_email = $username . '@halou.system';
+
+                $supabase = new SupabaseClient('anon');
+                $response = $supabase->signUp($fake_email, $password);
+
+                if ($response['code'] == 200 && isset($response['data']['user'])) {
+                    $user_id = $response['data']['user']['id'];
+
+                    $profileData = [
+                        'id'            => $user_id,
+                        'username'      => $username,
+                        'full_name'     => $full_name,
+                        'date_of_birth' => $date_of_birth,
+                        'contact_email' => $contact_email,
+                        'phone_number'  => $phone_number,
+                        'identity_card' => $identity_card,
+                    ];
+
+                    $profileResponse = $supabaseAdmin->insert('user_profiles', $profileData);
+
+                    if ($profileResponse['code'] == 201 || $profileResponse['code'] == 200) {
+                        $success = 'Đăng ký tài khoản thành công! Bạn có thể sử dụng <strong>Tên đăng nhập</strong> và Mật khẩu vừa tạo để đăng nhập.';
+                    } else {
+                        $error = "Tạo tài khoản thành công, nhưng lỗi lưu hồ sơ. Vui lòng liên hệ quản trị viên.";
+                    }
                 } else {
-                    $error = 'Lỗi đăng ký: ' . $supabaseError;
+                    $supabaseError = $response['data']['error_description'] ?? $response['data']['msg'] ?? 'Lỗi không xác định.';
+                    if (strpos(strtolower($supabaseError), 'already registered') !== false || strpos(strtolower($supabaseError), 'exists') !== false) {
+                        $error = 'Tên đăng nhập này đã được sử dụng trên hệ thống.';
+                    } else {
+                        $error = 'Lỗi đăng ký: ' . $supabaseError;
+                    }
                 }
             }
         } catch (Exception $e) {
             $error = "Lỗi hệ thống: " . $e->getMessage();
         }
-    } else {
-        $error = 'Vui lòng điền đầy đủ các thông tin bắt buộc.';
     }
 }
 ?>
