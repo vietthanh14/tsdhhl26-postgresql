@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/supabase.php';
+
 // admin/login.php
 session_start();
 $error = '';
@@ -12,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Xóa session thí sinh nếu có (tránh lẫn lộn vai trò)
         unset($_SESSION['user_id'], $_SESSION['access_token'], $_SESSION['email']);
         $_SESSION['admin_logged_in'] = true;
-        header('Location: /tsdhhl26/admin/index.php');
+        header('Location: ' . BASE_URL . '/admin/index.php');
         exit;
     } else {
         $error = "Tài khoản hoặc mật khẩu quản trị không hợp lệ.";
@@ -28,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -46,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="password" name="password" class="form-control" required>
             </div>
             <button class="btn btn-brand w-100 fw-bold">ĐĂNG NHẬP QUẢN TRỊ</button>
-            <div class="text-center mt-3"><a href="/tsdhhl26/index.php" class="small text-decoration-none">Quay lại trang thí sinh</a></div>
+            <div class="text-center mt-3"><a href="<?php echo BASE_URL; ?>/index.php" class="small text-decoration-none">Quay lại trang thí sinh</a></div>
         </form>
     </div>
 </div>

@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /tsdhhl26/auth/login.php');
+    header('Location: ' . BASE_URL . '/auth/login.php');
     exit;
 }
 
@@ -15,7 +15,7 @@ $supabase = new SupabaseClient('anon');
 $chkUser = $supabase->select('user_profiles', "id=eq.{$user_id}", $token);
 if ($chkUser['code'] == 401 || empty($chkUser['data'])) {
     session_destroy();
-    header('Location: /tsdhhl26/auth/login.php');
+    header('Location: ' . BASE_URL . '/auth/login.php');
     exit;
 }
 $profileData = $chkUser['data'][0];
@@ -191,8 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Thêm Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css">
     <style>
         /* Wizard-specific styles (apply.php only) */
         .wizard-step { animation: fadeIn 0.3s; }
@@ -268,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <?php endif; ?>
 
                                     <div class="mt-4">
-                                        <a href="/tsdhhl26/candidate/index.php" class="btn btn-success px-4 py-2 shadow-sm fw-semibold"><i class="bi bi-columns-gap me-1"></i> Về Bảng điều khiển</a>
+                                        <a href="<?php echo BASE_URL; ?>/candidate/index.php" class="btn btn-success px-4 py-2 shadow-sm fw-semibold"><i class="bi bi-columns-gap me-1"></i> Về Bảng điều khiển</a>
                                     </div>
                                 </div>
                             <?php elseif(empty($activePeriods)): ?>
@@ -321,7 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                         <div class="alert alert-warning small py-2 mb-4">
                                             <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> 
-                                            Nếu thông tin chưa chính xác, hệ thống có thể từ chối hồ sơ. Vui lòng <a href="/tsdhhl26/candidate/profile.php" class="fw-bold text-decoration-none" target="_blank">cập nhật tại đây</a> trước khi nộp.
+                                            Nếu thông tin chưa chính xác, hệ thống có thể từ chối hồ sơ. Vui lòng <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="fw-bold text-decoration-none" target="_blank">cập nhật tại đây</a> trước khi nộp.
                                         </div>
                                         <div class="d-flex justify-content-between">
                                             <button type="button" class="btn btn-secondary px-4 py-2 text-white fw-semibold" onclick="goToStep(1)">&laquo; Xác chọn lại Đợt</button>
@@ -524,7 +524,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         setLoading(periodSelect, 'Đang tải đợt tuyển sinh...');
         try {
-            const data = await fetch(`/tsdhhl26/candidate/api/periods.php?level_id=${levelId}`).then(r => r.json());
+            const data = await fetch(`<?php echo BASE_URL; ?>/candidate/api/periods.php?level_id=${levelId}`).then(r => r.json());
             periodSelect.disabled = false;
             if (!data.length) { resetSelect(periodSelect, '-- Hệ này chưa mở đợt tuyển sinh nào --'); return; }
             periodSelect.innerHTML = '<option value="">-- Chọn Đợt Tuyển Sinh --</option>';
@@ -545,7 +545,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         setLoading(majorSelect, 'Đang tải danh sách ngành...');
         try {
-            const data = await fetch(`/tsdhhl26/candidate/api/majors.php?period_id=${periodId}`).then(r => r.json());
+            const data = await fetch(`<?php echo BASE_URL; ?>/candidate/api/majors.php?period_id=${periodId}`).then(r => r.json());
             majorSelect.disabled = false;
             if (!data.length) { resetSelect(majorSelect, '-- Đợt này chưa mở ngành nào --'); return; }
             majorSelect.innerHTML = '<option value="" data-fee="0">-- Chọn Ngành đăng ký --</option>';
@@ -568,7 +568,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         setLoading(methodSelect, 'Đang tải phương thức...');
         try {
-            const data = await fetch(`/tsdhhl26/candidate/api/methods.php?period_id=${periodId}&major_id=${majorId}`).then(r => r.json());
+            const data = await fetch(`<?php echo BASE_URL; ?>/candidate/api/methods.php?period_id=${periodId}&major_id=${majorId}`).then(r => r.json());
             methodSelect.disabled = false;
             if (!data.length) { resetSelect(methodSelect, '-- Ngành này chưa thiết lập phương thức --'); return; }
             methodSelect.innerHTML = '<option value="">-- Chọn phương thức xét tuyển --</option>';

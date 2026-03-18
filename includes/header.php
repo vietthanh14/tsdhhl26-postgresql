@@ -1,5 +1,6 @@
 <?php
 // includes/header.php — Header chung cho các trang public
+require_once __DIR__ . '/../config/supabase.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -27,8 +28,8 @@ if (isset($_SESSION['user_id'])) {
             </button>
 
             <!-- Logo + Tên trường -->
-            <a href="/tsdhhl26/" class="header-brand d-flex align-items-center gap-2 gap-md-3 text-decoration-none flex-grow-1 flex-md-grow-0">
-                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" width="42" height="42" class="d-none d-sm-block"
+            <a href="<?php echo BASE_URL; ?>/" class="header-brand d-flex align-items-center gap-2 gap-md-3 text-decoration-none flex-grow-1 flex-md-grow-0">
+                <img src="<?php echo BASE_URL; ?>/assets/logo.png" alt="Logo ĐH Hạ Long" width="42" height="42" class="d-none d-sm-block"
                      onerror="this.style.display='none'">
                 <div>
                     <div class="fw-bold text-white" style="font-size:clamp(.8rem,2vw,1rem);letter-spacing:.3px;">TRƯỜNG ĐẠI HỌC HẠ LONG</div>
@@ -39,14 +40,14 @@ if (isset($_SESSION['user_id'])) {
             <!-- Right side: Nav links (desktop) + User dropdown (always) -->
             <div class="d-flex align-items-center gap-3 gap-md-4 ms-auto ps-2">
                 <!-- Nav links -->
-                <a href="/tsdhhl26/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                <a href="<?php echo BASE_URL; ?>/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
                     <i class="bi bi-house-door-fill" aria-hidden="true"></i> <span class="d-none d-md-inline">Trang chủ</span>
                 </a>
-                <a href="/tsdhhl26/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                <a href="<?php echo BASE_URL; ?>/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
                     <i class="bi bi-search" aria-hidden="true"></i> <span class="d-none d-md-inline">Tra cứu</span>
                 </a>
                 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
-                    <a href="/tsdhhl26/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
                         <i class="bi bi-speedometer2" aria-hidden="true"></i> <span class="d-none d-md-inline">Bảng điều khiển</span>
                     </a>
                 <?php endif; ?>
@@ -60,13 +61,13 @@ if (isset($_SESSION['user_id'])) {
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
                             <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/tsdhhl26/admin/index.php">
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/admin/index.php">
                                     <i class="bi bi-speedometer2 text-secondary"></i> Bảng điều khiển
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="/tsdhhl26/admin/logout.php">
+                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/admin/logout.php">
                                     <i class="bi bi-box-arrow-right"></i> Đăng xuất
                                 </a>
                             </li>
@@ -84,23 +85,23 @@ if (isset($_SESSION['user_id'])) {
                             </li>
                             <li class="d-md-none"><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/tsdhhl26/candidate/profile.php">
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/candidate/profile.php">
                                     <i class="bi bi-person text-secondary"></i> Thông tin cá nhân
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="/tsdhhl26/auth/logout.php">
+                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/auth/logout.php">
                                     <i class="bi bi-box-arrow-right"></i> Đăng xuất
                                 </a>
                             </li>
                         </ul>
                     </div>
                 <?php else: ?>
-                    <a href="/tsdhhl26/auth/login.php" class="text-white text-decoration-none fw-bold header-nav-link small">
+                    <a href="<?php echo BASE_URL; ?>/auth/login.php" class="text-white text-decoration-none fw-bold header-nav-link small">
                         Đăng nhập
                     </a>
-                    <a href="/tsdhhl26/auth/register.php" class="btn fw-bold px-3 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; font-size:.85rem;">
+                    <a href="<?php echo BASE_URL; ?>/auth/register.php" class="btn fw-bold px-3 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; font-size:.85rem;">
                         Đăng ký
                     </a>
                 <?php endif; ?>

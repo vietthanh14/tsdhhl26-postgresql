@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: /tsdhhl26/candidate/index.php');
+    header('Location: ' . BASE_URL . '/candidate/index.php');
     exit;
 }
 
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
     <style>
         h6 { color: var(--brand); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-text { font-size: 0.8rem; color: #94a3b8; }
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if($success): ?>
         <div class="alert alert-success py-3 rounded-1 border-0 bg-success text-white small" role="alert" aria-live="polite"><?php echo $success; ?></div>
         <div class="text-center mt-4">
-            <a href="/tsdhhl26/" class="btn btn-brand px-4 py-2">ĐẾN TRANG ĐĂNG NHẬP</a>
+            <a href="<?php echo BASE_URL; ?>/" class="btn btn-brand px-4 py-2">ĐẾN TRANG ĐĂNG NHẬP</a>
         </div>
     <?php else: ?>
 
@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <div class="text-center mt-4 pt-3 border-top pb-1">
         <span class="small text-muted">Đã có tài khoản?</span> 
-        <a href="/tsdhhl26/" class="text-decoration-none fw-semibold text-brand small">Đăng nhập ngay</a>
+        <a href="<?php echo BASE_URL; ?>/" class="text-decoration-none fw-semibold text-brand small">Đăng nhập ngay</a>
     </div>
     
     <?php endif; ?>

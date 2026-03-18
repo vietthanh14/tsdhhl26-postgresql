@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/supabase.php';
+
 // includes/footer.php — Footer chung cho các trang public
 ?>
 <footer class="site-footer">
@@ -6,7 +8,7 @@
         <div class="row g-4 justify-content-center text-center">
             <!-- Logo + Mạng xã hội -->
             <div class="col-md-4">
-                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" width="80" height="80" class="mb-3 mx-auto d-block"
+                <img src="<?php echo BASE_URL; ?>/assets/logo.png" alt="Logo ĐH Hạ Long" width="80" height="80" class="mb-3 mx-auto d-block"
                      onerror="this.style.display='none'">
                 <div class="fw-bold text-white mb-1" style="font-size:.85rem;letter-spacing:.5px;">ĐẠI HỌC HẠ LONG</div>
                 <div class="d-flex gap-3 justify-content-center mt-3">
@@ -32,7 +34,7 @@
             <div class="col-md-4">
                 <h6 class="footer-heading justify-content-center d-flex align-items-center"><i class="bi bi-people-fill me-2"></i>NHÓM ZALO HỖ TRỢ</h6>
                 <div class="mt-3 d-inline-block position-relative">
-                    <img src="/tsdhhl26/assets/qr-zalo.jpg" alt="QR Zalo" width="130" height="130" class="rounded border border-white border-opacity-25">
+                    <img src="<?php echo BASE_URL; ?>/assets/qr-zalo.jpg" alt="QR Zalo" width="130" height="130" class="rounded border border-white border-opacity-25">
                     <div class="mt-2">
                         <a href="https://docs.google.com/spreadsheets/d/1tyKS6r47TQEJOm0Io5jI35AukdhxBGJtmJY2ei-NcmE/edit?gid=0#gid=0" target="_blank"
                            class="btn btn-sm btn-light text-dark fw-semibold rounded-pill px-3"

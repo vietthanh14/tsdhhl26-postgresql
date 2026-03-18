@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/supabase.php';
+
 // auth/logout.php
 session_start();
 
@@ -18,5 +20,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Điều hướng người dùng về trang chủ
-header('Location: /tsdhhl26/');
+header('Location: ' . BASE_URL . '/');
 exit;

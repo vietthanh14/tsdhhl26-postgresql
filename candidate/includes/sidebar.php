@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../config/supabase.php';
+
 // candidate/includes/sidebar.php
 $currentPage = basename($_SERVER['PHP_SELF']);
 $currentLevelId = $_GET['level_id'] ?? null;
@@ -21,7 +23,7 @@ $educationLevelsSidebar = Cache::remember('education_levels', 3600, function() u
         </button>
     </div>
 
-    <a href="/tsdhhl26/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
+    <a href="<?php echo BASE_URL; ?>/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
     
     <div class="mt-2" style="padding: 12px 24px; color: #f59e0b; font-weight: 600; border-left: 3px solid #f59e0b; display: flex; align-items: center; gap: 8px; font-size: inherit;">
         <i class="bi bi-pencil-square" aria-hidden="true"></i> Đăng Ký Xét Tuyển
@@ -40,7 +42,7 @@ $educationLevelsSidebar = Cache::remember('education_levels', 3600, function() u
         $lvlBase = explode('?', $lvlFile)[0];
         $isActive = ($currentPage === $lvlBase) || ($currentPage === 'apply.php' && $currentLevelId == $lvl['id']);
     ?>
-        <a href="/tsdhhl26/candidate/<?php echo $lvlFile; ?>"
+        <a href="<?php echo BASE_URL; ?>/candidate/<?php echo $lvlFile; ?>"
            class="<?php echo $isActive ? 'active' : ''; ?>"
            style="padding-left: 32px; font-size: 0.92rem; font-weight: 600;">
             <i class="bi bi-arrow-right-circle<?php echo $isActive ? '-fill' : ''; ?> me-1 text-warning"></i>

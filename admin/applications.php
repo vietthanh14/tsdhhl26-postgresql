@@ -2,7 +2,7 @@
 // admin/applications.php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /tsdhhl26/admin/login.php');
+    header('Location: ' . BASE_URL . '/admin/login.php');
     exit;
 }
 require_once __DIR__ . '/../lib/SupabaseClient.php';
@@ -99,7 +99,7 @@ unset($app);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
     
 </head>
 <body>

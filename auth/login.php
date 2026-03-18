@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: /tsdhhl26/candidate/index.php');
+    header('Location: ' . BASE_URL . '/candidate/index.php');
     exit;
 }
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $response['data']['user']['id'];
                 $_SESSION['email'] = $response['data']['user']['email'];
                 
-                header('Location: /tsdhhl26/candidate/index.php');
+                header('Location: ' . BASE_URL . '/candidate/index.php');
                 exit;
             } else {
                 // Lỗi từ Supabase (Vd: Sai MK)
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
 </head>
 <body>
 
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <div class="d-flex justify-content-end mb-3">
-                <a href="/tsdhhl26/auth/forgot_password.php" class="text-decoration-none small text-brand fw-medium">Quên mật khẩu?</a>
+                <a href="<?php echo BASE_URL; ?>/auth/forgot_password.php" class="text-decoration-none small text-brand fw-medium">Quên mật khẩu?</a>
             </div>
             
             <button type="submit" class="btn btn-brand w-100 py-2">ĐĂNG NHẬP</button>
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="text-center mt-4 pt-3 border-top pb-1">
             <span class="small text-muted">Chưa có tài khoản?</span> 
-            <a href="/tsdhhl26/auth/register.php" class="text-decoration-none fw-semibold text-brand small">Đăng ký mới</a>
+            <a href="<?php echo BASE_URL; ?>/auth/register.php" class="text-decoration-none fw-semibold text-brand small">Đăng ký mới</a>
         </div>
     </div>
 </div>

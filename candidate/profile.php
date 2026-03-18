@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /tsdhhl26/auth/login.php');
+    header('Location: ' . BASE_URL . '/auth/login.php');
     exit;
 }
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    header('Location: /tsdhhl26/candidate/profile.php');
+    header('Location: ' . BASE_URL . '/candidate/profile.php');
     exit;
 }
 
@@ -76,7 +76,7 @@ $profileResponse = $supabase->select('user_profiles', "id=eq.{$user_id}", $token
 // Bảo mật: Nếu token hết hạn (401) hoặc user đã bị xoá khỏi DB (empty data), xoá session cũ
 if ($profileResponse['code'] == 401 || empty($profileResponse['data'])) {
     session_destroy();
-    header('Location: /tsdhhl26/auth/login.php');
+    header('Location: ' . BASE_URL . '/auth/login.php');
     exit;
 }
 
@@ -92,8 +92,8 @@ $profile = $profileResponse['data'][0];
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css">
     <style>
         /* Searchable Combobox (profile.php only) */
         .combo-wrapper { position: relative; }
@@ -349,7 +349,7 @@ $profile = $profileResponse['data'][0];
         // Địa danh 2 cấp: Tỉnh/TP → Phường/Xã
         // ============================================================
         (function () {
-            const API_BASE = '/tsdhhl26/api/dia_danh.php';
+            const API_BASE = '<?php echo BASE_URL; ?>/api/dia_danh.php';
             const savedProvince = <?php echo json_encode($profile['province'] ?? ''); ?>;
             const savedWard = <?php echo json_encode($profile['ward'] ?? ''); ?>;
             const savedAddressDetail = <?php echo json_encode($profile['address_detail'] ?? ''); ?>;

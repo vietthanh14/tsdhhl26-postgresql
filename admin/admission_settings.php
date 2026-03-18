@@ -2,7 +2,7 @@
 // admin/admission_settings.php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /tsdhhl26/admin/login.php');
+    header('Location: ' . BASE_URL . '/admin/login.php');
     exit;
 }
 require_once __DIR__ . '/../lib/SupabaseClient.php';
@@ -200,7 +200,7 @@ $periodMajorMethods = $periodMajorMethodsRes['code'] == 200 ? $periodMajorMethod
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
     <style>
         .major-checkboxes { max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; }
         .nav-tabs .nav-link.active { color: var(--brand) !important; border-bottom: 3px solid var(--brand) !important; }

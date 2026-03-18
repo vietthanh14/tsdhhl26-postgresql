@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/config/supabase.php';
+
 // search.php - Trang tra cứu kết quả tuyển sinh từ Google Sheets
 session_start();
 ?>
@@ -11,7 +13,7 @@ session_start();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
     <style>
         .search-hero {
             background: #f7f9fc;
