@@ -10,7 +10,8 @@ if (isset($_SESSION['user_id'])) {
     } else {
         require_once __DIR__ . '/../lib/SupabaseClient.php';
         $sb_header = new SupabaseClient('anon');
-        $p_header = $sb_header->select('user_profiles', "id=eq.".$_SESSION['user_id']);
+        $header_token = $_SESSION['access_token'] ?? null;
+        $p_header = $sb_header->select('user_profiles', "id=eq.".$_SESSION['user_id'], $header_token);
         if ($p_header['code'] == 200 && !empty($p_header['data'])) {
             $header_user_name = $p_header['data'][0]['full_name'] ?? 'Thí sinh';
         }

@@ -25,14 +25,16 @@ if ($profileResponse['code'] == 401 || empty($profileResponse['data'])) {
 
 $profile = $profileResponse['data'][0];
 
-// Lấy danh sách hồ sơ (các ngành đã nộp) của thí sinh
-// Note: Sẽ cần kết nối (Join) các bảng majos, admission_periods để lấy tên thay vì ID.
-// Ở đây Supabase cho phép join tự động thông qua khóa ngoại, ví dụ: select=*,majors(major_name),admission_periods(name)
-$appsQuery = "select=*,majors(major_name),admission_periods(name)&user_id=eq.{$user_id}&order=priority.asc,submitted_at.desc";
+// Lấy danh sách hồ sơ (đã nộp) của thí sinh với các join liên quan
+$appsQuery = "select=*,majors(major_name,zalo_link,education_levels(name)),admission_periods(name)&user_id=eq.{$user_id}&order=priority.asc,submitted_at.desc";
 $appsResponse = $supabase->select('applications', $appsQuery, $token);
-$applications = [];
-if ($appsResponse['code'] == 200) {
-    $applications = $appsResponse['data'];
+$applications = ($appsResponse['code'] == 200) ? $appsResponse['data'] : [];
+
+// Lấy danh sách phương thức xét tuyển để map ID -> tên
+$methodsRes = $supabase->select('admission_methods', 'select=id,method_name&order=id.asc');
+$methodsMap = [];
+if ($methodsRes['code'] == 200) {
+    foreach ($methodsRes['data'] as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
 }
 ?>
 <!DOCTYPE html>
@@ -110,12 +112,14 @@ if ($appsResponse['code'] == 200) {
                                     <table class="table table-hover mb-0 align-middle">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="ps-3" style="width:90px; white-space:nowrap;">Nguyện vọng</th>
-                                                <th>Ngành đăng ký</th>
-                                                <th>Đợt tuyển sinh</th>
-                                                <th>Ngày nộp</th>
+                                                <th class="ps-3" style="width:90px; white-space:nowrap;">NV</th>
+                                                <th>Hệ đào tạo</th>
+                                                <th>Ngành học</th>
+                                                <th>Phương thức XT</th>
+                                                <th>Đợt xét tuyển</th>
                                                 <th>Lệ phí</th>
-                                                <th>Trạng thái hồ sơ</th>
+                                                <th>Trạng thái</th>
+                                                <th>Nhóm Zalo</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -134,19 +138,30 @@ if ($appsResponse['code'] == 200) {
                                                                 <?php echo $isApproved ? 'disabled' : ''; ?>><i class="bi bi-check-lg"></i></button>
                                                     </div>
                                                 </td>
-                                                <td class="fw-bold text-brand"><?php echo htmlspecialchars($app['majors']['major_name'] ?? 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($app['majors']['education_levels']['name'] ?? 'N/A'); ?></td>
+                                                <td class="fw-semibold text-brand"><?php echo htmlspecialchars($app['majors']['major_name'] ?? 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($methodsMap[$app['admission_method_id']] ?? 'N/A'); ?></td>
                                                 <td><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></td>
-                                                <td><?php echo date('d/m/Y', strtotime($app['submitted_at'])); ?></td>
                                                 <td><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</td>
                                                 <td>
                                                     <?php 
                                                         $statusClass = 'bg-secondary';
                                                         $statusText = 'Chưa xác định';
-                                                        if($app['status'] == 'PENDING') { $statusClass = 'bg-warning text-dark'; $statusText = '⏳ Đang chờ duyệt'; }
+                                                        if($app['status'] == 'PENDING') { $statusClass = 'bg-warning text-dark'; $statusText = '⏳ Chờ duyệt'; }
                                                         elseif($app['status'] == 'APPROVED') { $statusClass = 'bg-success'; $statusText = '✅ Đã duyệt'; }
                                                         elseif($app['status'] == 'REJECTED') { $statusClass = 'bg-danger'; $statusText = '❌ Từ chối'; }
                                                     ?>
                                                     <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <?php $zalo = $app['majors']['zalo_link'] ?? ''; ?>
+                                                    <?php if (!empty($zalo)): ?>
+                                                    <a href="<?php echo htmlspecialchars($zalo); ?>" target="_blank" class="text-primary" title="Vào nhóm Zalo" style="font-size: 1.2rem;">
+                                                        <i class="bi bi-chat-dots-fill"></i>
+                                                    </a>
+                                                    <?php else: ?>
+                                                    <span class="text-muted">—</span>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>

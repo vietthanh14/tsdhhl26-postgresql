@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     contact_email VARCHAR(255), -- Email thật để liên lạc (có thể thay đổi)
     date_of_birth DATE,
     phone_number VARCHAR(15),
+    gender VARCHAR(10), -- Giới tính: Nam, Nữ, Khác
+    ethnicity VARCHAR(50), -- Dân tộc
     province VARCHAR(100), -- Tỉnh / Thành phố
     ward VARCHAR(100), -- Phường / Xã
     address_detail TEXT, -- Địa chỉ chi tiết (số nhà, thôn, đường...)
@@ -276,3 +278,7 @@ ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS province VARCHAR(100);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ward VARCHAR(100);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS address_detail TEXT;
 ALTER TABLE public.user_profiles DROP COLUMN IF EXISTS address;
+
+-- MIGRATION: Thêm cột giới tính và dân tộc
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ethnicity VARCHAR(50);

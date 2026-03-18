@@ -75,6 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $periodMajorsRes = $supabaseAdmin->select('admission_period_majors', 'select=period_id,major_id');
     $periodMajors = ($periodMajorsRes['code'] == 200) ? $periodMajorsRes['data'] : [];
+
+    $methodsRes = $supabaseAdmin->select('admission_methods', 'select=id,method_name');
+    $methodsMap = [];
+    if ($methodsRes['code'] == 200) {
+        foreach ($methodsRes['data'] as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
+    }
 } else {
     // Khi GET: dùng mảng rỗng, dữ liệu load qua AJAX
     $majors = [];
@@ -89,7 +95,8 @@ foreach ($majors as $m) {
 // PRG pattern — đọc thông báo từ session (set bởi POST redirect)
 $message = $_SESSION['apply_msg'] ?? '';
 $error   = $_SESSION['apply_err'] ?? '';
-unset($_SESSION['apply_msg'], $_SESSION['apply_err']);
+$success_info = $_SESSION['apply_success_info'] ?? null;
+unset($_SESSION['apply_msg'], $_SESSION['apply_err'], $_SESSION['apply_success_info']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admission_period_id = $_POST['admission_period_id'] ?? '';
@@ -144,7 +151,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insertRes = $supabaseAdmin->insert('applications', $appData);
 
             if (in_array($insertRes['code'], [201, 200])) {
-                $_SESSION['apply_msg'] = "Nộp hồ sơ và Minh chứng lệ phí thành công! Mời bạn quay lại Bảng điều khiển để theo dõi kết quả.";
+                $_SESSION['apply_msg'] = "Nộp hồ sơ và Minh chứng lệ phí thành công!";
+                // Lưu thông tin chi tiết để hiển thị trên màn hình thành công
+                $edu_level_name = '';
+                foreach ($levels as $lv) {
+                    if (isset($majorsMap[$major_id]['education_level_id']) && (string)$lv['id'] === (string)$majorsMap[$major_id]['education_level_id']) {
+                        $edu_level_name = $lv['name']; break;
+                    }
+                }
+                $_SESSION['apply_success_info'] = [
+                    'edu_level'  => $edu_level_name,
+                    'major'      => $majorsMap[$major_id]['major_name'] ?? '',
+                    'method'     => $methodsMap[$admission_method_id] ?? '',
+                    'zalo_link'  => $majorsMap[$major_id]['zalo_link'] ?? '',
+                    'fee'        => $fee_amount,
+                ];
             } else {
                 if (strpos(json_encode($insertRes['data']), 'duplicate key value') !== false) {
                     $_SESSION['apply_err'] = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
@@ -212,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3 class="fw-bold mb-0 text-dark">Mở Hồ sơ Xét tuyển Mới</h3>
             </div>
 
-            <div class="row justify-content-center">
+            <div class="row">
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header py-3">
@@ -220,11 +241,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="card-body p-4">
                             <?php if($message): ?>
-                                <div class="alert alert-success text-center py-4">
-                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-                                    <h5 class="mt-3 fw-bold">HOÀN TẤT THÀNH CÔNG</h5>
-                                    <p><?php echo $message; ?></p>
-                                    <a href="/tsdhhl26/candidate/index.php" class="btn btn-success mt-2 px-4 shadow-sm">Về Bảng điều khiển</a>
+                                <div class="text-center py-4">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 70px; height: 70px; background: linear-gradient(135deg, #16a34a, #22c55e);">
+                                        <i class="bi bi-check-lg text-white" style="font-size: 2.2rem;"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-dark">Đăng ký thành công!</h4>
+                                    <p class="text-muted mb-4"><?php echo $message; ?></p>
+
+                                    <?php if ($success_info): ?>
+                                    <div class="card border-0 shadow-sm mx-auto" style="max-width: 420px;">
+                                        <div class="card-body p-0">
+                                            <div class="px-4 py-3" style="background: linear-gradient(135deg, #1A3A6E, #2563eb); border-radius: .5rem .5rem 0 0;">
+                                                <span class="text-white fw-bold small"><i class="bi bi-file-earmark-check me-1"></i> Thông tin hồ sơ đã nộp</span>
+                                            </div>
+                                            <div class="text-start px-4 py-3">
+                                                <?php if (!empty($success_info['edu_level'])): ?>
+                                                <div class="d-flex justify-content-between py-2 border-bottom" style="font-size: .88rem;">
+                                                    <span class="text-muted">Hệ đào tạo</span>
+                                                    <span class="fw-bold text-dark"><?php echo htmlspecialchars($success_info['edu_level']); ?></span>
+                                                </div>
+                                                <?php endif; ?>
+                                                <div class="d-flex justify-content-between py-2 border-bottom" style="font-size: .88rem;">
+                                                    <span class="text-muted">Ngành</span>
+                                                    <span class="fw-bold text-dark"><?php echo htmlspecialchars($success_info['major']); ?></span>
+                                                </div>
+                                                <?php if (!empty($success_info['method'])): ?>
+                                                <div class="d-flex justify-content-between py-2 border-bottom" style="font-size: .88rem;">
+                                                    <span class="text-muted">Phương thức</span>
+                                                    <span class="fw-bold text-dark"><?php echo htmlspecialchars($success_info['method']); ?></span>
+                                                </div>
+                                                <?php endif; ?>
+                                                <div class="d-flex justify-content-between py-2" style="font-size: .88rem;">
+                                                    <span class="text-muted">Lệ phí</span>
+                                                    <span class="fw-bold text-danger"><?php echo number_format($success_info['fee'], 0, ',', '.'); ?> đ</span>
+                                                </div>
+                                            </div>
+                                            <?php if (!empty($success_info['zalo_link'])): ?>
+                                            <div class="px-4 py-3 text-center" style="background: #f0fdf4; border-top: 1px solid #dcfce7;">
+                                                <p class="mb-2 small text-muted">Tham gia nhóm Zalo để nhận thông báo mới nhất</p>
+                                                <a href="<?php echo htmlspecialchars($success_info['zalo_link']); ?>" target="_blank" class="btn px-4 py-2 fw-bold text-white shadow-sm" style="background: linear-gradient(135deg, #0068ff, #0098ff); border: none; border-radius: 50px;">
+                                                    <i class="bi bi-chat-dots-fill me-2"></i>Vào nhóm Zalo ngành
+                                                </a>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <div class="mt-4">
+                                        <a href="/tsdhhl26/candidate/index.php" class="btn btn-success px-4 py-2 shadow-sm fw-semibold"><i class="bi bi-columns-gap me-1"></i> Về Bảng điều khiển</a>
+                                    </div>
                                 </div>
                             <?php elseif(empty($activePeriods)): ?>
                                 <div class="alert alert-warning text-center">
@@ -237,11 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <!-- Bước 1 -->
                                     <div class="wizard-step" id="step-1">
                                         <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 1: CHỌN ĐỢT TUYỂN SINH</h6>
-                                        <?php if (!empty($step1_info)): ?>
-                                        <div class="mb-3 p-3 rounded border-start border-4 border-brand bg-light">
-                                            <?php echo $step1_info; ?>
-                                        </div>
-                                        <?php endif; ?>
                                         <div class="mb-3" <?php echo $selected_level_id ? 'style="display:none;"' : ''; ?>>
                                             <label class="form-label text-muted fw-bold">Hệ Đào tạo <span class="text-danger">*</span></label>
                                             <select class="form-select" id="levelSelect" <?php echo $selected_level_id ? '' : 'required'; ?> onchange="filterPeriods()">
@@ -269,7 +330,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <?php foreach ($step2_fields as $f): ?>
                                             <div class="col-md-6 mb-3">
                                                 <span class="text-muted small d-block mb-1"><?php echo htmlspecialchars($f['label']); ?></span>
-                                                <strong class="text-dark fs-6"><?php echo htmlspecialchars($profileData[$f['key']] ?? 'Chưa cập nhật'); ?></strong>
+                                                <?php
+                                                    $val = $profileData[$f['key']] ?? '';
+                                                    if ($f['key'] === 'date_of_birth' && !empty($val)) {
+                                                        $val = date('d/m/Y', strtotime($val));
+                                                    }
+                                                ?>
+                                                <strong class="text-dark fs-6"><?php echo htmlspecialchars($val ?: 'Chưa cập nhật'); ?></strong>
                                             </div>
                                             <?php endforeach; ?>
                                         </div>
@@ -319,31 +386,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <!-- Bước 4 -->
                                     <div class="wizard-step d-none" id="step-4">
                                         <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 4: THANH TOÁN VÀ TẢI LÊN MINH CHỨNG</h6>
-                                        <div class="text-center mb-4">
-                                            <div class="d-inline-block bg-white p-3 rounded shadow-sm border mb-3">
-                                                <p class="mb-2 fw-bold text-dark"><i class="bi bi-qr-code-scan me-2"></i>Sử dụng App Ngân hàng để quét mã VietQR</p>
-                                                <img id="vietqrImage" src="" alt="VietQR" style="width: 200px; height: 200px; object-fit: contain;">
-                                                <h5 class="text-danger fw-bold mt-2 mb-0">Tổng tiền: <span id="paymentAmountText"></span></h5>
+                                        
+                                        <!-- Payment Card -->
+                                        <div class="rounded-3 border overflow-hidden mb-3 shadow-sm">
+                                            <!-- Header -->
+                                            <div class="px-3 py-2" style="background: linear-gradient(135deg, #1A3A6E 0%, #2563eb 100%);">
+                                                <span class="text-white fw-bold small"><i class="bi bi-bank me-1"></i> Thông tin chuyển khoản</span>
                                             </div>
-                                            <div>
-                                                <p class="small text-dark mb-0 bg-warning bg-opacity-10 d-inline-block px-3 py-2 rounded border border-warning">
-                                                    Nội dung chuyển khoản (Hệ thống tự điền): <br><strong class="fs-6" id="paymentContentText"></strong>
-                                                </p>
+                                            <!-- Body: 2 columns -->
+                                            <div class="row g-0">
+                                                <!-- Left: QR -->
+                                                <div class="col-md-4 d-flex flex-column align-items-center justify-content-center py-3 px-2" style="background: #f8fafc; border-right: 1px solid #e2e8f0;">
+                                                    <img id="vietqrImage" src="" alt="VietQR" class="rounded" style="width: 180px; height: 180px; object-fit: contain;">
+                                                    <div class="mt-2 px-3 py-1 rounded-pill text-center" style="background: #dc2626;">
+                                                        <span class="text-white fw-bold" id="paymentAmountText"></span>
+                                                    </div>
+                                                    <span class="text-muted mt-1" style="font-size: .7rem;">Quét mã bằng App Ngân hàng</span>
+                                                </div>
+                                                <!-- Right: Bank Info -->
+                                                <div class="col-md-8 p-3">
+                                                    <table class="table table-sm table-borderless mb-0" style="font-size: .85rem;">
+                                                        <tr>
+                                                            <td class="text-muted py-1" style="width: 130px;">Chủ tài khoản</td>
+                                                            <td class="fw-bold text-dark py-1">NGUYỄN THỊ THU HIỀN</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="py-0"></td>
+                                                            <td class="text-muted fst-italic py-0" style="font-size: .78rem;">Phòng Đào tạo — Trường ĐH Hạ Long</td>
+                                                        </tr>
+                                                        <tr><td colspan="2" class="py-1"><hr class="my-0" style="border-color: #e2e8f0;"></td></tr>
+                                                        <tr>
+                                                            <td class="text-muted py-1">Số tài khoản</td>
+                                                            <td class="fw-bold text-dark py-1" style="letter-spacing: 1px; font-family: 'Courier New', monospace; font-size: .95rem;">05001012531817</td>
+                                                        </tr>
+                                                        <tr><td colspan="2" class="py-1"><hr class="my-0" style="border-color: #e2e8f0;"></td></tr>
+                                                        <tr>
+                                                            <td class="text-muted py-1">Ngân hàng</td>
+                                                            <td class="fw-bold text-dark py-1">MSB — NH TMCP Hàng hải VN</td>
+                                                        </tr>
+                                                        <tr><td colspan="2" class="py-1"><hr class="my-0" style="border-color: #e2e8f0;"></td></tr>
+                                                        <tr>
+                                                            <td class="text-muted py-1">Nội dung CK</td>
+                                                            <td class="py-1">
+                                                                <code class="fw-bold text-dark bg-light px-2 py-1 rounded border" style="font-size: .9rem;" id="paymentContentText"></code>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
                                             </div>
-                                            <p class="small text-muted mt-2 mb-0">Vui lòng kiểm tra kỹ nội dung và tên người hưởng thụ "TRUONG DAI HOC HA LONG" hoặc đại diện hợp pháp.</p>
+                                            <!-- Footer -->
+                                            <div class="px-3 py-2 text-center" style="background: #fffbeb; border-top: 1px solid #fde68a;">
+                                                <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Kiểm tra tên người thụ hưởng <strong>NGUYEN THI THU HIEN</strong> trước khi chuyển.</small>
+                                            </div>
                                         </div>
 
-                                        <div class="mb-4 p-3 border rounded shadow-sm">
-                                            <label class="form-label fw-bold text-dark">Tải lên ảnh chụp màn hình Biên lai chuyển khoản <span class="text-danger">*</span></label>
-                                            <input type="file" id="receiptFileInput" class="form-control" accept=".jpg,.jpeg,.png">
+                                        <!-- Upload Section -->
+                                        <div class="mb-3 p-3 border rounded">
+                                            <label class="form-label fw-bold text-dark mb-2"><i class="bi bi-cloud-arrow-up me-1 text-brand"></i>Tải lên ảnh Biên lai <span class="text-danger">*</span></label>
+                                            <input type="file" id="receiptFileInput" class="form-control form-control-sm" accept=".jpg,.jpeg,.png">
                                             <input type="hidden" name="receipt_url" id="receiptUrlInput" required>
-                                            
-                                            <div id="uploadReceiptProgress" class="progress mt-3 d-none" style="height: 6px;">
+                                            <div id="uploadReceiptProgress" class="progress mt-2 d-none" style="height: 5px;">
                                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%"></div>
                                             </div>
-                                            <div id="uploadReceiptStatus" class="small mt-2 text-center text-muted">Vui lòng tải ảnh hóa đơn giao dịch hiển thị rõ số tiền và nội dung.</div>
-                                            
-                                            <button type="button" id="uploadReceiptBtn" class="btn btn-outline-primary w-100 fw-bold mt-3 border-2"><i class="bi bi-cloud-arrow-up-fill me-1"></i> BẮT ĐẦU TẢI ẢNH BIÊN LAI LÊN HỆ THỐNG</button>
+                                            <div id="uploadReceiptStatus" class="small mt-1 text-center text-muted">Chọn ảnh biên lai hiển thị rõ số tiền và nội dung.</div>
+                                            <button type="button" id="uploadReceiptBtn" class="btn btn-brand btn-sm w-100 fw-bold mt-2"><i class="bi bi-cloud-arrow-up-fill me-1"></i> TẢI ẢNH BIÊN LAI</button>
                                         </div>
 
                                         <div class="form-check mb-4 bg-light p-3 rounded border">
@@ -363,6 +469,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                 </div>
+
+                <?php if (!empty($step1_info)): ?>
+                <div class="col-md-4">
+                    <div class="card" style="position: sticky; top: 80px;">
+                        <div class="card-header py-3">
+                            <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle me-1"></i> Thông tin hệ đào tạo</h6>
+                        </div>
+                        <div class="card-body">
+                            <?php echo $step1_info; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -557,7 +676,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('paymentContentText').innerText = content;
             
             // Sử dụng Fake Account (Vidu: VietinBank 970415, 113366668888)
-            const qrUrl = `https://img.vietqr.io/image/970415-113366668888-compact2.png?amount=${fee}&addInfo=${encodeURIComponent(content)}&accountName=TRUONG%20DAI%20HOC%20HA%20LONG`;
+            const qrUrl = `https://img.vietqr.io/image/970426-05001012531817-compact2.png?amount=${fee}&addInfo=${encodeURIComponent(content)}&accountName=NGUYEN%20THI%20THU%20HIEN`;
             document.getElementById('vietqrImage').src = qrUrl;
         }
 
