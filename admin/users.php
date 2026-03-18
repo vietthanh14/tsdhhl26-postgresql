@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/supabase.php';
+
 // admin/users.php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {

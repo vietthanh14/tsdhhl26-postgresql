@@ -1,8 +1,0 @@
-Bản cập nhật 18.3.2026: Fix lỗi đường dẫn cứng (hardcoded paths) bằng cấu hình BASE_URL động
-
-Chi tiết các thay đổi trong phiên bản:
-- Thêm cấu hình tự động nhận diện `BASE_URL` trong `config/supabase.php`.
-- Thay thế toàn bộ các đường dẫn cứng `/tsdhhl26/` bằng biến PHP `BASE_URL` cho tài nguyên tĩnh (CSS, JS, ảnh) và API endpoints.
-- Xử lý các lệnh redirect PHP `header('Location: ...')` bằng `BASE_URL` để ngăn lỗi 404 khi đổi tên thư mục.
-- Bổ sung lệnh `require_once` cho file `config/supabase.php` vào các file độc lập như `auth/logout.php`, `admin/logout.php`, `search.php` để đảm bảo không bị lỗi Undefined Constant.
-- Đảm bảo source code hoạt động linh hoạt ngay cả khi di chuyển sang thư mục gốc (root domain) hoặc copy thành tên thư mục khác mà không cần cấu hình bằng tay.
