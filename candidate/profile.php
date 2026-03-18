@@ -17,37 +17,41 @@ $error = '';
 
 // Xử lý CẬP NHẬT thông tin
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $full_name = trim($_POST['full_name'] ?? '');
+    $full_name     = trim($_POST['full_name'] ?? '');
     $identity_card = trim($_POST['identity_card'] ?? '');
     $contact_email = trim($_POST['contact_email'] ?? '');
     $date_of_birth = trim($_POST['date_of_birth'] ?? '');
-    $phone_number = trim($_POST['phone_number'] ?? '');
-    $address = trim($_POST['address'] ?? '');
+    $phone_number  = trim($_POST['phone_number'] ?? '');
+    $province_code = trim($_POST['province_code'] ?? '');
+    $province_name = trim($_POST['province_name'] ?? '');
+    $ward_code     = trim($_POST['ward_code'] ?? '');
+    $ward_name     = trim($_POST['ward_name'] ?? '');
+    $address_detail= trim($_POST['address_detail'] ?? '');
 
     if (empty($full_name)) {
         $_SESSION['profile_error'] = "Họ tên không được để trống.";
     } else {
         $updateData = [
-            'full_name' => $full_name,
-            'identity_card' => $identity_card,
-            'contact_email' => $contact_email,
-            'date_of_birth' => $date_of_birth ? $date_of_birth : null,
-            'phone_number' => $phone_number,
-            'address' => $address,
-            'updated_at' => date('Y-m-d H:i:sP')
+            'full_name'      => $full_name,
+            'identity_card'  => $identity_card,
+            'contact_email'  => $contact_email,
+            'date_of_birth'  => $date_of_birth ?: null,
+            'phone_number'   => $phone_number,
+            'province'       => $province_name ?: null,
+            'ward'           => $ward_name ?: null,
+            'address_detail' => $address_detail ?: null,
+            'updated_at'     => date('Y-m-d H:i:sP'),
         ];
-        
-        // Gọi Service Role tạm để Update (Bypass RLS safety gap)
+
         $updateRes = $supabaseAdmin->update('user_profiles', 'id', $user_id, $updateData);
-        
+
         if (in_array($updateRes['code'], [200, 204])) {
-            $_SESSION['profile_success'] = "Cập nhật hồ sơ và Email liên hệ thành công!";
+            $_SESSION['profile_success'] = "Cập nhật hồ sơ thành công!";
         } else {
             $_SESSION['profile_error'] = "Lỗi cập nhật: " . json_encode($updateRes['data']);
         }
     }
-    
-    // Áp dụng mô hình chuẩn Post-Redirect-Get để tránh lỗi Resubmit form khi F5
+
     header('Location: /tsdhhl26/candidate/profile.php');
     exit;
 }
@@ -108,6 +112,51 @@ $profile = $profileResponse['data'][0];
         .bg-brand { background-color: var(--brand-color) !important; }
         .content-area { padding: 40px; transition: padding 0.3s; }
         @media (max-width: 767.98px) { .content-area { padding: 20px; } }
+
+        /* Searchable Combobox */
+        .combo-wrapper { position: relative; }
+        .combo-wrapper .combo-input {
+            border-radius: 6px; border: 1px solid #cbd5e1; min-height: 44px;
+            width: 100%; padding: .375rem .75rem; font-size: 1rem;
+            transition: border-color .15s ease, box-shadow .15s ease;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right .75rem center;
+            padding-right: 2rem; cursor: pointer;
+        }
+        .combo-wrapper .combo-input:focus {
+            outline: none; border-color: var(--brand-color);
+            box-shadow: 0 0 0 2px rgba(26,58,110,.15);
+        }
+        .combo-wrapper .combo-input:disabled {
+            background-color: #f8fafc; cursor: not-allowed; color: #94a3b8;
+        }
+        .combo-dropdown {
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.1); max-height: 230px;
+            overflow-y: auto; z-index: 1050;
+        }
+        .combo-dropdown.open { display: block; }
+        .combo-dropdown .combo-search {
+            position: sticky; top: 0; padding: 8px; background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .combo-dropdown .combo-search input {
+            width: 100%; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 6px 10px; font-size: .875rem; outline: none;
+        }
+        .combo-dropdown .combo-search input:focus { border-color: var(--brand-color); }
+        .combo-option {
+            padding: 9px 14px; cursor: pointer; font-size: .9rem;
+            transition: background .1s;
+        }
+        .combo-option:hover, .combo-option.active { background: #eff6ff; color: var(--brand-color); }
+        .combo-option.no-result { color: #94a3b8; cursor: default; font-style: italic; }
+        .combo-clear {
+            position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #94a3b8; font-size: .85rem; display: none;
+            line-height: 1; z-index: 1;
+        }
+        .combo-clear:hover { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -165,11 +214,46 @@ $profile = $profileResponse['data'][0];
                                         <input type="date" name="date_of_birth" class="form-control" value="<?php echo htmlspecialchars($profile['date_of_birth'] ?? ''); ?>">
                                     </div>
                                 </div>
-                                <div class="mb-4">
-                                    <label class="form-label text-muted fw-bold">Địa chỉ lưu trú</label>
-                                    <textarea name="address" class="form-control" rows="3"><?php echo htmlspecialchars($profile['address'] ?? ''); ?></textarea>
+                                <!-- Địa danh 2 cấp (Searchable Combobox) -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted fw-bold">Tỉnh / Thành phố</label>
+                                        <div class="combo-wrapper" id="provinceWrapper">
+                                            <span class="combo-clear" id="provinceClear" title="Xóa">&times;</span>
+                                            <input type="text" class="combo-input" id="provinceInput"
+                                                   placeholder="-- Chọn Tỉnh/Thành phố --" readonly>
+                                            <div class="combo-dropdown" id="provinceDropdown">
+                                                <div class="combo-search">
+                                                    <input type="text" id="provinceSearch" placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off">
+                                                </div>
+                                                <div id="provinceList"></div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="province_name" id="provinceName">
+                                        <input type="hidden" name="province_code" id="provinceCode">
+                                    </div>
+                                    <div class="col-md-6 mt-3 mt-md-0">
+                                        <label class="form-label text-muted fw-bold">Phường / Xã</label>
+                                        <div class="combo-wrapper" id="wardWrapper">
+                                            <span class="combo-clear" id="wardClear" title="Xóa">&times;</span>
+                                            <input type="text" class="combo-input" id="wardInput"
+                                                   placeholder="-- Chọn Phường/Xã --" readonly disabled>
+                                            <div class="combo-dropdown" id="wardDropdown">
+                                                <div class="combo-search">
+                                                    <input type="text" id="wardSearch" placeholder="🔍 Tìm phường/xã..." autocomplete="off">
+                                                </div>
+                                                <div id="wardList"></div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="ward_name" id="wardName">
+                                        <input type="hidden" name="ward_code" id="wardCode">
+                                    </div>
                                 </div>
-                                
+                                <div class="mb-4">
+                                    <label class="form-label text-muted fw-bold">Địa chỉ chi tiết (số nhà, thôn, đường...)</label>
+                                    <input type="text" name="address_detail" id="addressDetail" class="form-control" placeholder="Ví dụ: Số 12, Đường Lê Lợi" value="<?php echo htmlspecialchars($profile['address_detail'] ?? ''); ?>">
+                                </div>
+
                                 <button type="submit" class="btn btn-brand px-4 py-2 fw-semibold">LƯU THAY ĐỔI</button>
                             </form>
                         </div>
@@ -252,6 +336,194 @@ $profile = $profileResponse['data'][0];
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// ============================================================
+// Địa danh 2 cấp: Tỉnh/TP → Phường/Xã
+// ============================================================
+(function () {
+    const API_BASE = '/tsdhhl26/api/dia_danh.php';
+    const savedProvince      = <?php echo json_encode($profile['province'] ?? ''); ?>;
+    const savedWard          = <?php echo json_encode($profile['ward'] ?? ''); ?>;
+    const savedAddressDetail = <?php echo json_encode($profile['address_detail'] ?? ''); ?>;
+
+    let allProvinces = [];
+    let allWards     = [];
+    let selectedProvinceCode = '';
+
+    // ---- Elements ----
+    const provinceInput    = document.getElementById('provinceInput');
+    const provinceDropdown = document.getElementById('provinceDropdown');
+    const provinceSearch   = document.getElementById('provinceSearch');
+    const provinceList     = document.getElementById('provinceList');
+    const provinceName     = document.getElementById('provinceName');
+    const provinceClear    = document.getElementById('provinceClear');
+
+    const wardInput        = document.getElementById('wardInput');
+    const wardDropdown     = document.getElementById('wardDropdown');
+    const wardSearch       = document.getElementById('wardSearch');
+    const wardList         = document.getElementById('wardList');
+    const wardName         = document.getElementById('wardName');
+    const wardClear        = document.getElementById('wardClear');
+
+    const addressDetail    = document.getElementById('addressDetail');
+
+    // ---- Combobox factory ----
+    function makeCombo({ triggerEl, dropdown, searchEl, listEl, onSelect, onClear }) {
+        // Mở dropdown khi click vào input
+        triggerEl.addEventListener('click', () => {
+            if (triggerEl.disabled) return;
+            const isOpen = dropdown.classList.contains('open');
+            closeAll();
+            if (!isOpen) {
+                dropdown.classList.add('open');
+                searchEl.value = '';
+                searchEl.dispatchEvent(new Event('input'));
+                setTimeout(() => searchEl.focus(), 50);
+            }
+        });
+
+        // Lọc danh sách khi gõ
+        searchEl.addEventListener('input', () => {
+            const q = searchEl.value.toLowerCase().trim();
+            listEl.querySelectorAll('.combo-option').forEach(opt => {
+                const match = opt.textContent.toLowerCase().includes(q);
+                opt.style.display = match ? '' : 'none';
+            });
+            const visible = [...listEl.querySelectorAll('.combo-option')].filter(o => o.style.display !== 'none');
+            // Hàng không kết quả
+            let noRes = listEl.querySelector('.no-result');
+            if (!visible.length) {
+                if (!noRes) { noRes = document.createElement('div'); noRes.className = 'combo-option no-result'; noRes.textContent = 'Không tìm thấy kết quả'; listEl.appendChild(noRes); }
+            } else { if (noRes) noRes.remove(); }
+        });
+
+        // Nút xóa
+        onClear && document.getElementById(triggerEl.id.replace('Input','Clear')).addEventListener('click', () => {
+            onClear();
+        });
+
+        return { onSelect };
+    }
+
+    function closeAll() {
+        document.querySelectorAll('.combo-dropdown.open').forEach(d => d.classList.remove('open'));
+    }
+
+    // Đóng khi click ra ngoài
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.combo-wrapper')) closeAll();
+    });
+
+    // ---- Render options ----
+    function renderProvinces(provinces) {
+        provinceList.innerHTML = '';
+        provinces.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'combo-option';
+            div.textContent = p.name;
+            div.dataset.code = p.code;
+            div.addEventListener('click', () => {
+                selectProvince(p);
+                closeAll();
+            });
+            provinceList.appendChild(div);
+        });
+    }
+
+    function renderWards(wards) {
+        wardList.innerHTML = '';
+        wards.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'combo-option';
+            div.textContent = w.name;
+            div.dataset.code = w.code;
+            div.addEventListener('click', () => {
+                selectWard(w);
+                closeAll();
+            });
+            wardList.appendChild(div);
+        });
+    }
+
+    // ---- Select actions ----
+    function selectProvince(p, skipWardReset) {
+        selectedProvinceCode = p.code;
+        provinceInput.value  = p.name;
+        provinceName.value   = p.name;
+        provinceClear.style.display = 'block';
+
+        if (!skipWardReset) {
+            clearWard();
+            wardInput.disabled = false;
+        }
+
+        fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(p.code)}`)
+            .then(r => r.json())
+            .then(wards => {
+                allWards = wards;
+                renderWards(wards);
+            });
+    }
+
+    function selectWard(w) {
+        wardInput.value = w.name;
+        wardName.value  = w.name;
+        wardClear.style.display = 'block';
+    }
+
+    function clearProvince() {
+        selectedProvinceCode = '';
+        provinceInput.value  = '';
+        provinceName.value   = '';
+        provinceClear.style.display = 'none';
+        clearWard();
+        wardInput.disabled = true;
+    }
+
+    function clearWard() {
+        wardInput.value = '';
+        wardName.value  = '';
+        wardClear.style.display = 'none';
+    }
+
+    // ---- Init ----
+    makeCombo({ triggerEl: provinceInput, dropdown: provinceDropdown, searchEl: provinceSearch, listEl: provinceList, onClear: clearProvince });
+    makeCombo({ triggerEl: wardInput,     dropdown: wardDropdown,     searchEl: wardSearch,     listEl: wardList,     onClear: clearWard });
+
+    provinceClear.addEventListener('click', clearProvince);
+    wardClear.addEventListener('click', clearWard);
+
+    // Khởi động: tải tỉnh
+    fetch(API_BASE + '?action=provinces')
+        .then(r => r.json())
+        .then(provinces => {
+            allProvinces = provinces;
+            renderProvinces(provinces);
+
+            // Restore
+            if (savedAddressDetail && addressDetail) addressDetail.value = savedAddressDetail;
+            if (savedProvince) {
+                const match = provinces.find(p => p.name === savedProvince);
+                if (match) {
+                    selectProvince(match, true); // load wards
+                    // Sau khi load wards xong mới set ward
+                    fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(match.code)}`)
+                        .then(r => r.json())
+                        .then(wards => {
+                            allWards = wards;
+                            renderWards(wards);
+                            wardInput.disabled = false;
+                            if (savedWard) {
+                                const mw = wards.find(w => w.name === savedWard);
+                                if (mw) selectWard(mw);
+                            }
+                        });
+                }
+            }
+        })
+        .catch(() => console.warn('Không thể tải dữ liệu địa danh.'));
+})();
+
+// ============================================================
 const GAS_URL = '<?php echo GAS_WEBAPP_URL; ?>';
 const USER_ID = '<?php echo $user_id; ?>';
 

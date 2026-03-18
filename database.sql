@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     contact_email VARCHAR(255), -- Email thật để liên lạc (có thể thay đổi)
     date_of_birth DATE,
     phone_number VARCHAR(15),
-    address TEXT,
+    province VARCHAR(100), -- Tỉnh / Thành phố
+    ward VARCHAR(100), -- Phường / Xã
+    address_detail TEXT, -- Địa chỉ chi tiết (số nhà, thôn, đường...)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -266,3 +268,11 @@ INSERT INTO public.document_types (type_name, is_required) VALUES
 ('Giấy chứng nhận tốt nghiệp THPT tạm thời hoặc Bằng TN', true),
 ('Giấy chứng nhận kết quả thi tốt nghiệp THPT', false),
 ('Giấy tờ ưu tiên (Nếu có)', false);
+
+-- ==============================================================================
+-- MIGRATION: Thêm cột địa danh vào user_profiles (chạy nếu bảng đã tồn tại)
+-- ==============================================================================
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS province VARCHAR(100);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ward VARCHAR(100);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS address_detail TEXT;
+ALTER TABLE public.user_profiles DROP COLUMN IF EXISTS address;
