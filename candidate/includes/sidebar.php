@@ -30,6 +30,9 @@ $educationLevelsSidebar = Cache::remember('education_levels', 3600, function() u
     $levelFileMap = [
         'đại học chính quy' => 'apply_university.php',
         'cao đẳng chính quy' => 'apply_college.php',
+        'thạc sĩ' => 'apply_master.php',
+        'trung cấp' => 'apply_vocational.php',
+        'văn bằng 2, vừa làm vừa học' => 'apply_degree2.php',
     ];
     foreach ($educationLevelsSidebar as $lvl):
         $lvlKey  = mb_strtolower(trim($lvl['name']));

@@ -13,97 +13,147 @@ session_start();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/tsdhhl26/assets/css/public.css">
     <style>
-        .search-container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        .search-hero {
+            background: #f7f9fc;
+            padding: 48px 0 32px;
         }
-        .result-card {
-            display: none;
-            margin-top: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
+        .search-box {
+            max-width: 560px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
-        .result-header {
-            background-color: var(--brand-color, #0f4c81);
+        .search-box .form-control {
+            height: 52px;
+            border: none;
+            border-radius: 12px 0 0 12px;
+            font-size: 1rem;
+            padding-left: 44px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .search-box .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            z-index: 5;
+            font-size: 1.1rem;
+        }
+        .search-box .btn-search {
+            height: 52px;
+            border-radius: 0 12px 12px 0;
+            padding: 0 24px;
+            font-weight: 600;
+            background: #f59e0b;
+            border: none;
             color: #fff;
-            padding: 15px 20px;
-            font-weight: 600;
+            white-space: nowrap;
+            transition: background .2s;
         }
-        .result-body {
-            padding: 20px;
-            background-color: #f8f9fa;
+        .search-box .btn-search:hover { background: #d97706; }
+
+        /* Result cards */
+        .result-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
         }
-        .info-row {
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .result-card .card-top {
+            background: #1A3A6E;
+            padding: 14px 20px;
             display: flex;
-            padding: 10px 0;
-            border-bottom: 1px dashed #ddd;
+            justify-content: space-between;
+            align-items: center;
         }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            width: 40%;
-            font-weight: 500;
-            color: #555;
-        }
-        .info-value {
-            width: 60%;
-            font-weight: 600;
-            color: #222;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
+        .result-card .card-top .nv-label { color: #fff; font-weight: 700; font-size: .9rem; }
+        .result-card .card-top .badge-status {
+            font-size: .75rem;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
+            font-weight: 600;
         }
-        .status-success { background: #d1e7dd; color: #0f5132; }
-        .status-warning { background: #fff3cd; color: #664d03; }
-        .status-danger { background: #f8d7da; color: #842029; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .info-cell {
+            padding: 10px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .info-cell:nth-child(odd) { border-right: 1px solid #f1f5f9; }
+        .info-cell .label { font-size: .75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
+        .info-cell .value { font-size: .9rem; font-weight: 600; color: #1e293b; }
+        .info-cell .value.highlight { color: #dc2626; font-size: 1.05rem; }
+        .info-cell .value.major { color: #1A3A6E; }
+        .download-bar {
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-top: 2px solid #10b981;
+            text-align: center;
+        }
+        .download-bar a {
+            display: inline-block;
+            padding: 8px 24px;
+            font-size: .88rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 8px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .download-bar a:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.4); color: #fff; }
+
+        @media (max-width: 575px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .info-cell:nth-child(odd) { border-right: none; }
+            .search-hero { padding: 32px 0 44px; }
+        }
     </style>
 </head>
-<body class="bg-light">
+<body style="background: #f7f9fc;">
 
 <?php include __DIR__ . '/includes/header.php'; ?>
 
-<div class="container pb-5">
-    <div class="search-container">
-        <h2 class="text-center fw-bold mb-4" style="color: var(--brand-color, #0f4c81);">
-            <i class="bi bi-search me-2"></i>TRA CỨU KẾT QUẢ XÉT TUYỂN
-        </h2>
-        <p class="text-center text-muted mb-4">Nhập số Căn cước công dân (CMND/CCCD) của thí sinh để tra cứu kết quả xét tuyển ĐH Hạ Long năm 2026.</p>
-
+<!-- Hero Search -->
+<div class="search-hero">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-2" style="font-size: 1.6rem; color: #1A3A6E;">
+            <i class="bi bi-search me-2"></i>Tra cứu kết quả xét tuyển
+        </h1>
+        <p class="text-muted mb-4" style="font-size: .9rem;">Nhập số CCCD/CMND để tra cứu kết quả tuyển sinh ĐH Hạ Long 2026</p>
         <form id="searchForm" onsubmit="handleSearch(event)">
-            <div class="input-group input-group-lg mb-3 shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-vcard"></i></span>
-                <input type="text" class="form-control border-start-0 ps-0" id="cccdInput" placeholder="Nhập số CCCD/CMND..." required pattern="[0-9]{9,12}" title="Vui lòng nhập từ 9 đến 12 chữ số">
-                <button class="btn btn-primary px-4 fw-bold" type="submit" id="btnSearch" style="background-color: var(--brand-color, #0f4c81); border-color: var(--brand-color, #0f4c81);">
-                    <i class="bi bi-search"></i> Tra cứu
+            <div class="search-box d-flex">
+                <div class="position-relative flex-grow-1">
+                    <i class="bi bi-person-vcard input-icon"></i>
+                    <input type="text" class="form-control" id="cccdInput" placeholder="Nhập số CCCD/CMND..." required pattern="[0-9]{9,12}" title="Nhập từ 9-12 chữ số">
+                </div>
+                <button class="btn btn-search" type="submit" id="btnSearch">
+                    <i class="bi bi-search me-1"></i> Tra cứu
                 </button>
             </div>
-            <div id="loadingIndicator" class="text-center mt-3 d-none">
-                <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
-                    <span class="visually-hidden">Đang tải...</span>
-                </div>
-                <span class="ms-2 text-muted">Đang kết nối hệ thống dữ liệu tra cứu...</span>
-            </div>
         </form>
-
-        <div id="alertError" class="alert alert-danger mt-4 d-none" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="errorMsg">Không tìm thấy dữ liệu.</span>
-        </div>
-
-        <!-- Vùng hiển thị kết quả -->
-        <div id="resultsContainer"></div>
-
     </div>
 </div>
+
+<!-- Results Area -->
+<div class="container" style="max-width: 720px;">
+    <div id="loadingIndicator" class="text-center py-4 d-none">
+        <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+        <span class="ms-2 text-muted small">Đang tra cứu dữ liệu...</span>
+    </div>
+    <div id="alertError" class="alert alert-danger border-0 shadow-sm d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="errorMsg"></span>
+    </div>
+    <div id="resultsContainer"></div>
+</div>
+
+<div class="pb-5"></div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 
@@ -111,124 +161,80 @@ session_start();
 function handleSearch(e) {
     e.preventDefault();
     const cccd = document.getElementById('cccdInput').value.trim();
-    if(!cccd) return;
+    if (!cccd) return;
 
-    // Reset UI
     document.getElementById('resultsContainer').innerHTML = '';
     document.getElementById('alertError').classList.add('d-none');
     document.getElementById('loadingIndicator').classList.remove('d-none');
     document.getElementById('btnSearch').disabled = true;
 
     fetch(`api_search_sheets.php?cccd=${encodeURIComponent(cccd)}`)
-        .then(res => res.json())
+        .then(r => r.json())
         .then(data => {
             document.getElementById('loadingIndicator').classList.add('d-none');
             document.getElementById('btnSearch').disabled = false;
-
             if (data.status === 'success' && Array.isArray(data.data) && data.data.length > 0) {
                 showResults(data.data);
             } else {
-                document.getElementById('errorMsg').innerText = data.message || "Không tìm thấy dữ liệu tra cứu cho CCCD này.";
-                document.getElementById('alertError').classList.remove('d-none');
+                showError(data.message || 'Không tìm thấy kết quả cho số CCCD này.');
             }
         })
-        .catch(err => {
-            console.error(err);
+        .catch(() => {
             document.getElementById('loadingIndicator').classList.add('d-none');
             document.getElementById('btnSearch').disabled = false;
-            document.getElementById('errorMsg').innerText = "Lỗi kết nối tới máy chủ tra cứu.";
-            document.getElementById('alertError').classList.remove('d-none');
+            showError('Lỗi kết nối máy chủ. Vui lòng thử lại.');
         });
 }
 
+function showError(msg) {
+    document.getElementById('errorMsg').innerText = msg;
+    document.getElementById('alertError').classList.remove('d-none');
+}
+
 function showResults(items) {
-    const container = document.getElementById('resultsContainer');
-    container.innerHTML = '';
-    
-    items.forEach((item, index) => {
-        // Status Badge
-        const statusText = item['Trạng thái hồ sơ trên cổng bộ GD&ĐT'] || 'Đã có kết quả';
-        let badgeClass = 'bg-warning text-dark';
-        if(statusText.toLowerCase().includes('trúng') || statusText.toLowerCase().includes('hợp lệ')) {
-            badgeClass = 'bg-success';
-        } else if(statusText.toLowerCase().includes('trượt') || statusText.toLowerCase().includes('từ chối')) {
-            badgeClass = 'bg-danger';
+    const c = document.getElementById('resultsContainer');
+    c.innerHTML = `<p class="text-muted small mb-3 text-center"><i class="bi bi-check-circle text-success me-1"></i>Tìm thấy <strong>${items.length}</strong> nguyện vọng</p>`;
+
+    items.forEach((item, i) => {
+        const st = item['Trạng thái hồ sơ trên cổng bộ GD&ĐT'] || '';
+        let badgeHtml = '';
+        if (st) {
+            let bc = 'bg-warning text-dark';
+            if (/trúng|hợp lệ/i.test(st)) bc = 'bg-success text-white';
+            else if (/trượt|từ chối/i.test(st)) bc = 'bg-danger text-white';
+            badgeHtml = `<span class="badge-status ${bc}">${st}</span>`;
         }
 
-        // Link Giấy báo
+        const majorName = item['Tên ngành'] || `Nguyện vọng ${i + 1}`;
+        const levelName = item['Trình độ'] || '';
+        const titleText = levelName ? `${majorName} — ${levelName}` : majorName;
         const link = item['Link Giấy Báo Nhập Học'];
-        const linkHtml = (link && link.trim() !== '') 
-            ? `<div class="mt-3 text-center">
-                   <a href="${link}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-                       <i class="bi bi-cloud-download me-1"></i> Tải Giấy Báo Nhập Học
-                   </a>
-               </div>` 
+        const dlBar = (link && link.trim())
+            ? `<div class="download-bar"><a href="${link}" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i>Tải Giấy Báo Nhập Học</a></div>`
             : '';
 
-        const cardHtml = `
-        <div class="result-card shadow-sm" style="display: block; margin-top: ${index === 0 ? '30px' : '40px'}; border-top-width: ${index === 0 ? '1px' : '4px'}; border-top-color: ${index === 0 ? '#e0e0e0' : 'var(--brand-color, #0f4c81)'};">
-            <div class="result-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-person me-2"></i> KẾT QUẢ NGUYỆN VỌNG ${index + 1}</span>
-                <span class="badge ${badgeClass}">${statusText}</span>
+        c.insertAdjacentHTML('beforeend', `
+        <div class="result-card mb-3">
+            <div class="card-top">
+                <span class="nv-label"><i class="bi bi-mortarboard me-1"></i>${titleText}</span>
+                ${badgeHtml}
             </div>
-            <div class="result-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="info-row">
-                            <div class="info-label">Họ và tên:</div>
-                            <div class="info-value text-uppercase">${item['Họ và tên'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Số CMND/CCCD:</div>
-                            <div class="info-value">${item['CMND'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Ngày sinh:</div>
-                            <div class="info-value">${item['Ngày sinh'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Giới tính:</div>
-                            <div class="info-value">${item['Giới tính'] || ''}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-row">
-                            <div class="info-label">Tên ngành:</div>
-                            <div class="info-value text-primary fw-bold">${item['Tên ngành'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Mã ngành:</div>
-                            <div class="info-value">${item['Mã ngành'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Điểm xét tuyển:</div>
-                            <div class="info-value text-danger fw-bold fs-5">${item['Điểm xét tuyển'] || ''}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Trình độ:</div>
-                            <div class="info-value">${item['Trình độ'] || ''}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 p-3 bg-white border rounded">
-                    <h6 class="fw-bold text-success mb-3"><i class="bi bi-info-circle-fill me-2"></i>Thông tin bổ sung</h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="small mb-2"><span class="text-muted">Phương thức xét tuyển:</span> <strong>${item['Mã PTXT'] || ''}</strong></div>
-                            <div class="small mb-2"><span class="text-muted">Khu vực/Đối tượng ƯT:</span> <strong>${(item['KV ƯT'] || '') + ' - ' + (item['ĐT ƯT'] || '')}</strong></div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="small mb-2"><span class="text-muted">Tổng điểm (Chưa ƯT):</span> <strong>${item['Tổng điểm chưa có ƯT (Thang 30)'] || ''}</strong></div>
-                            <div class="small mb-2"><span class="text-muted">Thời gian nhập học:</span> <strong>${item['Thời gian nhập học'] || ''}</strong></div>
-                        </div>
-                    </div>
-                    ${linkHtml}
-                </div>
+            <div class="info-grid">
+                <div class="info-cell"><div class="label">Họ và tên</div><div class="value">${item['Họ và tên'] || ''}</div></div>
+                <div class="info-cell"><div class="label">CCCD</div><div class="value">${item['CMND'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Ngày sinh</div><div class="value">${item['Ngày sinh'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Giới tính</div><div class="value">${item['Giới tính'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Ngành xét tuyển</div><div class="value major">${item['Tên ngành'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Mã ngành</div><div class="value">${item['Mã ngành'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Điểm xét tuyển</div><div class="value highlight">${item['Điểm xét tuyển'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Trình độ</div><div class="value">${item['Trình độ'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Phương thức XT</div><div class="value">${item['Mã PTXT'] || ''}</div></div>
+                <div class="info-cell"><div class="label">KV/ĐT ưu tiên</div><div class="value">${(item['KV ƯT'] || '') + (item['ĐT ƯT'] ? ' - ' + item['ĐT ƯT'] : '')}</div></div>
+                <div class="info-cell"><div class="label">Tổng điểm (chưa ƯT)</div><div class="value">${item['Tổng điểm chưa có ƯT (Thang 30)'] || ''}</div></div>
+                <div class="info-cell"><div class="label">Thời gian nhập học</div><div class="value">${item['Thời gian nhập học'] || ''}</div></div>
             </div>
-        </div>
-        `;
-        container.insertAdjacentHTML('beforeend', cardHtml);
+            ${dlBar}
+        </div>`);
     });
 }
 </script>

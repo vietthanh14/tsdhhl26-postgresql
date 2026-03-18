@@ -1,171 +1,173 @@
 -- ==============================================================================
 -- DATABASE SCHEMA CHO HỆ THỐNG ĐĂNG KÝ TUYỂN SINH (SUPABASE POSTGRESQL)
--- KỊCH BẢN NÀY LÀ CÀI MỚI HOÀN TOÀN: SẼ XÓA TOÀN BỘ DỮ LIỆU CŨ VÀ TẠO CHUẨN LẠI!
+-- Phiên bản: 18.3.2026v3
 -- ==============================================================================
 
--- Xóa sạch các bảng dữ liệu cũ (Xóa triệt để, cẩn thận nếu đã có data thật)
+-- Xóa sạch các bảng dữ liệu cũ (theo thứ tự phụ thuộc)
+DROP TABLE IF EXISTS public.admission_period_major_methods CASCADE;
+DROP TABLE IF EXISTS public.admission_period_majors CASCADE;
 DROP TABLE IF EXISTS public.applications CASCADE;
 DROP TABLE IF EXISTS public.user_documents CASCADE;
 DROP TABLE IF EXISTS public.user_profiles CASCADE;
+DROP TABLE IF EXISTS public.admission_periods CASCADE;
 DROP TABLE IF EXISTS public.majors CASCADE;
 DROP TABLE IF EXISTS public.education_levels CASCADE;
-DROP TABLE IF EXISTS public.admission_periods CASCADE;
 DROP TABLE IF EXISTS public.document_types CASCADE;
 DROP TABLE IF EXISTS public.admission_methods CASCADE;
 
--- 1. Tham chiếu đến bảng auth.users của Supabase (Không cần tạo lại, chỉ note lại để join)
--- auth.users (id, email, encrypted_password, created_at, ...)
+-- ==============================================================================
+-- TẠO BẢNG (theo đúng thứ tự phụ thuộc)
+-- ==============================================================================
 
--- 2. Bảng Thông tin cá nhân của người dùng (Thí sinh)
+-- 1. Bảng Thông tin cá nhân (Thí sinh)
 CREATE TABLE IF NOT EXISTS public.user_profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL, -- Tên đăng nhập
+    username VARCHAR(50) UNIQUE NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    identity_card VARCHAR(20), -- Số CMND/CCCD
-    contact_email VARCHAR(255), -- Email thật để liên lạc (có thể thay đổi)
+    identity_card VARCHAR(20),
+    contact_email VARCHAR(255),
     date_of_birth DATE,
     phone_number VARCHAR(15),
-    gender VARCHAR(10), -- Giới tính: Nam, Nữ, Khác
-    ethnicity VARCHAR(50), -- Dân tộc
-    province VARCHAR(100), -- Tỉnh / Thành phố
-    ward VARCHAR(100), -- Phường / Xã
-    address_detail TEXT, -- Địa chỉ chi tiết (số nhà, thôn, đường...)
+    gender VARCHAR(10),
+    ethnicity VARCHAR(50),
+    province VARCHAR(100),
+    ward VARCHAR(100),
+    address_detail TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Bảng Quản lý các đợt/chu kỳ tuyển sinh (Admin quản lý)
-CREATE TABLE IF NOT EXISTS public.admission_periods (
+-- 2. Bảng Hệ Đào Tạo (phải tạo TRƯỚC admission_periods và majors)
+CREATE TABLE IF NOT EXISTS public.education_levels (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL, -- Vd: Kì thi tuyển sinh mùa Xuân 2026
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    education_level_id INTEGER REFERENCES public.education_levels(id) ON DELETE CASCADE,
-    is_active BOOLEAN DEFAULT false, -- Trạng thái Mở/Đóng
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3.5. Bảng Mapping Đợt Xét Tuyển - Ngành Học
+-- 3. Bảng Ngành Học (phụ thuộc education_levels)
+CREATE TABLE IF NOT EXISTS public.majors (
+    id SERIAL PRIMARY KEY,
+    major_name VARCHAR(255) NOT NULL,
+    major_code VARCHAR(50),
+    education_level_id INTEGER REFERENCES public.education_levels(id) ON DELETE CASCADE,
+    application_fee NUMERIC(15, 2) DEFAULT 0.00,
+    zalo_link TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    -- Cho phép cùng mã ngành ở các hệ khác nhau
+    CONSTRAINT majors_code_level_unique UNIQUE (major_code, education_level_id)
+);
+
+-- 4. Bảng Đợt Tuyển Sinh (phụ thuộc education_levels)
+CREATE TABLE IF NOT EXISTS public.admission_periods (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    education_level_id INTEGER REFERENCES public.education_levels(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Bảng Phương Thức Xét Tuyển
+CREATE TABLE IF NOT EXISTS public.admission_methods (
+    id SERIAL PRIMARY KEY,
+    method_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 6. Bảng Mapping Đợt - Ngành (phụ thuộc admission_periods + majors)
 CREATE TABLE IF NOT EXISTS public.admission_period_majors (
     period_id INTEGER REFERENCES public.admission_periods(id) ON DELETE CASCADE,
     major_id INTEGER REFERENCES public.majors(id) ON DELETE CASCADE,
     PRIMARY KEY (period_id, major_id)
 );
-ALTER TABLE public.admission_period_majors ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Anyone can view period_majors" ON public.admission_period_majors;
-CREATE POLICY "Anyone can view period_majors" ON public.admission_period_majors FOR SELECT USING (true);
 
--- 4. Bảng Danh mục Cấp độ / Hệ đào tạo (Admin quản lý)
-CREATE TABLE IF NOT EXISTS public.education_levels (
+-- 7. Bảng Mapping Đợt - Ngành - Phương thức
+CREATE TABLE IF NOT EXISTS public.admission_period_major_methods (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL, -- Vd: Đại học, Thạc sĩ, Cao đẳng
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    period_id INTEGER REFERENCES public.admission_periods(id) ON DELETE CASCADE,
+    major_id INTEGER REFERENCES public.majors(id) ON DELETE CASCADE,
+    method_id INTEGER REFERENCES public.admission_methods(id) ON DELETE CASCADE,
+    UNIQUE (period_id, major_id, method_id)
 );
 
--- 5. Bảng Danh mục Ngành học kèm giá (Admin quản lý)
-CREATE TABLE IF NOT EXISTS public.majors (
-    id SERIAL PRIMARY KEY,
-    major_name VARCHAR(255) NOT NULL,
-    major_code VARCHAR(50) UNIQUE, -- Mã ngành
-    education_level_id INTEGER REFERENCES public.education_levels(id) ON DELETE CASCADE,
-    application_fee NUMERIC(15, 2) DEFAULT 0.00, -- Lệ phí hồ sơ riêng cho ngành này
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 6. Bảng Danh mục các loại tài liệu yêu cầu (Admin quản lý)
+-- 8. Bảng Loại Tài Liệu
 CREATE TABLE IF NOT EXISTS public.document_types (
     id SERIAL PRIMARY KEY,
-    type_name VARCHAR(150) NOT NULL, -- Vd: CCCD (Mặt trước), Học bạ THPT...
-    is_required BOOLEAN DEFAULT true, -- Có bắt buộc nộp không
+    type_name VARCHAR(150) NOT NULL,
+    is_required BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 7. Bảng Quản lý File tài liệu đã tải lên của User (Liên kết vòng ngoài)
+-- 9. Bảng Tài Liệu Đã Upload
 CREATE TABLE IF NOT EXISTS public.user_documents (
     id UUID DEFAULT extensions.uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     document_type_id INTEGER REFERENCES public.document_types(id) ON DELETE CASCADE,
-    drive_file_url TEXT NOT NULL, -- Link lưu trữ từ Google Drive Web App
+    drive_file_url TEXT NOT NULL,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-ALTER TABLE public.user_documents ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
-CREATE POLICY "Users can view own documents" ON public.user_documents FOR SELECT USING (auth.uid() = user_id);
-
--- 8. Bảng Quản lý Hồ sơ Đăng ký xét tuyển
+-- 10. Bảng Hồ Sơ Đăng Ký Xét Tuyển
 CREATE TABLE IF NOT EXISTS public.applications (
     id UUID DEFAULT extensions.uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     admission_period_id INTEGER REFERENCES public.admission_periods(id) ON DELETE RESTRICT,
     major_id INTEGER REFERENCES public.majors(id) ON DELETE RESTRICT,
-    admission_method_id INTEGER, 
-
-    
-    -- Lưu cứng lệ phí tại thời điểm nộp (bảo toàn dữ liệu hóa đơn)
-    fee_amount NUMERIC(15, 2) NOT NULL, 
-    
-    -- Các trạng thái của đơn
-    status VARCHAR(50) DEFAULT 'PENDING', -- PENDING, APPROVED, REJECTED
-    payment_status VARCHAR(50) DEFAULT 'UNPAID', -- UNPAID, PAID, REFUNDED
-    receipt_url TEXT, -- Link ảnh chụp biên lai thanh toán (qua Google Drive)
-    
+    admission_method_id INTEGER REFERENCES public.admission_methods(id) ON DELETE RESTRICT,
+    priority INTEGER DEFAULT 1,
+    fee_amount NUMERIC(15, 2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'PENDING',
+    payment_status VARCHAR(50) DEFAULT 'UNPAID',
+    receipt_url TEXT,
     submitted_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    
-    -- Một user trong một đợt có thể đăng ký cùng ngành nhưng phải khác phương thức tuyển sinh
-    UNIQUE(user_id, admission_period_id, major_id, admission_method_id) 
+    UNIQUE(user_id, admission_period_id, major_id, admission_method_id)
 );
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) - Cấu hình bảo mật nâng cao trên Supabase
+-- INDEXES (Tối ưu hiệu suất truy vấn)
 -- ==============================================================================
--- Kích hoạt RLS cho tất cả các bảng
+CREATE INDEX IF NOT EXISTS idx_applications_user_id ON public.applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_applications_period_id ON public.applications(admission_period_id);
+CREATE INDEX IF NOT EXISTS idx_applications_status ON public.applications(status);
+CREATE INDEX IF NOT EXISTS idx_user_documents_user_id ON public.user_documents(user_id);
+CREATE INDEX IF NOT EXISTS idx_majors_level_id ON public.majors(education_level_id);
+CREATE INDEX IF NOT EXISTS idx_periods_active_end ON public.admission_periods(is_active, end_date);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON public.user_profiles(username);
+
+-- ==============================================================================
+-- ROW LEVEL SECURITY (RLS)
+-- ==============================================================================
+
+-- user_profiles: Thí sinh chỉ xem/sửa profile của mình
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_documents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-
--- Chính sách: Thí sinh chỉ được xem & sửa Profile của chính mình
 DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
-CREATE POLICY "Users can view own profile" 
-ON public.user_profiles FOR SELECT USING (auth.uid() = id);
-
+CREATE POLICY "Users can view own profile" ON public.user_profiles FOR SELECT USING (auth.uid() = id);
 DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
-CREATE POLICY "Users can update own profile" 
-ON public.user_profiles FOR UPDATE USING (auth.uid() = id);
-
+CREATE POLICY "Users can update own profile" ON public.user_profiles FOR UPDATE USING (auth.uid() = id);
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
-CREATE POLICY "Users can insert own profile" 
-ON public.user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Chính sách: Thí sinh chỉ xem & quản lý Document của chính mình
+-- user_documents: Thí sinh chỉ xem/quản lý tài liệu của mình
+ALTER TABLE public.user_documents ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
-CREATE POLICY "Users can view own documents" 
-ON public.user_documents FOR SELECT USING (auth.uid() = user_id);
-
+CREATE POLICY "Users can view own documents" ON public.user_documents FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert own documents" ON public.user_documents;
-CREATE POLICY "Users can insert own documents" 
-ON public.user_documents FOR INSERT WITH CHECK (auth.uid() = user_id);
-
+CREATE POLICY "Users can insert own documents" ON public.user_documents FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own documents" ON public.user_documents;
-CREATE POLICY "Users can update own documents" 
-ON public.user_documents FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own documents" ON public.user_documents FOR UPDATE USING (auth.uid() = user_id);
 
--- Chính sách: Thí sinh chỉ xem & quản lý Application của chính mình
+-- applications: Thí sinh chỉ xem/quản lý hồ sơ của mình
+ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own applications" ON public.applications;
-CREATE POLICY "Users can view own applications" 
-ON public.applications FOR SELECT USING (auth.uid() = user_id);
-
+CREATE POLICY "Users can view own applications" ON public.applications FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert own applications" ON public.applications;
-CREATE POLICY "Users can insert own applications" 
-ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can insert own applications" ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- *Lưu ý: Các bảng danh mục (majors, education_levels, etc...) cấu hình RLS cho phép Public đọc (SELECT).
-ALTER TABLE public.admission_periods ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Anyone can view admission periods" ON public.admission_periods;
-CREATE POLICY "Anyone can view admission periods" ON public.admission_periods FOR SELECT USING (true);
-
+-- Bảng danh mục: Public đọc
 ALTER TABLE public.education_levels ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view education levels" ON public.education_levels;
 CREATE POLICY "Anyone can view education levels" ON public.education_levels FOR SELECT USING (true);
@@ -174,60 +176,53 @@ ALTER TABLE public.majors ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view majors" ON public.majors;
 CREATE POLICY "Anyone can view majors" ON public.majors FOR SELECT USING (true);
 
+ALTER TABLE public.admission_periods ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view admission periods" ON public.admission_periods;
+CREATE POLICY "Anyone can view admission periods" ON public.admission_periods FOR SELECT USING (true);
+
+ALTER TABLE public.admission_methods ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view admission methods" ON public.admission_methods;
+CREATE POLICY "Anyone can view admission methods" ON public.admission_methods FOR SELECT USING (true);
+
 ALTER TABLE public.document_types ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view document types" ON public.document_types;
 CREATE POLICY "Anyone can view document types" ON public.document_types FOR SELECT USING (true);
 
-ALTER TABLE public.admission_methods ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Anyone can view admission methods" ON public.admission_methods;
-CREATE POLICY "Anyone can view admission methods" ON public.admission_methods FOR SELECT USING (true);
--- 9. Bảng Danh mục Phương thức xét tuyển
-CREATE TABLE IF NOT EXISTS public.admission_methods (
-    id SERIAL PRIMARY KEY,
-    method_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+ALTER TABLE public.admission_period_majors ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view period_majors" ON public.admission_period_majors;
+CREATE POLICY "Anyone can view period_majors" ON public.admission_period_majors FOR SELECT USING (true);
 
--- Thêm cột admission_method_id vào bảng applications nếu chưa có (Tránh lỗi khi DB đã tồn tại)
-ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS admission_method_id INTEGER;
-
--- Bổ sung khóa ngoại cho bảng applications
-ALTER TABLE public.applications DROP CONSTRAINT IF EXISTS fk_admission_method;
-ALTER TABLE public.applications 
-ADD CONSTRAINT fk_admission_method 
-FOREIGN KEY (admission_method_id) REFERENCES public.admission_methods(id) ON DELETE RESTRICT;
-
-ALTER TABLE public.admission_methods ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Anyone can view admission methods" ON public.admission_methods;
-CREATE POLICY "Anyone can view admission methods" ON public.admission_methods FOR SELECT USING (true);
-
-ALTER TABLE public.document_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admission_period_major_methods ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view period_major_methods" ON public.admission_period_major_methods;
+CREATE POLICY "Anyone can view period_major_methods" ON public.admission_period_major_methods FOR SELECT USING (true);
 
 -- ==============================================================================
 -- DỮ LIỆU MẪU (SEED DATA)
 -- ==============================================================================
 
--- Thêm các loại tài liệu mẫu
-INSERT INTO public.document_types (type_name, is_required) VALUES 
-('Ảnh chân dung (4x6)', true),
-('Mặt trước CMND/CCCD', true),
-('Mặt sau CMND/CCCD', true),
-('Học bạ THPT (Trang 1)', true),
-('Bằng tốt nghiệp (hoặc Giấy chứng nhận tạm thời)', true),
-('Giấy chứng nhận ưu tiên (nếu có)', false);
-
--- Thêm hệ đào tạo mẫu
-INSERT INTO public.education_levels (name, description) VALUES 
+-- Hệ đào tạo
+INSERT INTO public.education_levels (name, description) VALUES
 ('Đại học Chính quy', 'Đào tạo tập trung 4 năm'),
 ('Liên thông Đại học', 'Dành cho người đã tốt nghiệp Cao đẳng'),
 ('Thạc sĩ', 'Chương trình cao học');
 
--- Thêm một số đợt tuyển sinh
-INSERT INTO public.admission_periods (name, start_date, end_date, is_active) VALUES 
-('Đợt xét tuyển đợt 1 - 2026', '2026-03-01', '2026-08-30', true);
--- Thêm danh sách ngành học
-INSERT INTO public.majors (major_code, major_name, education_level_id, application_fee) VALUES 
+-- Phương thức xét tuyển
+INSERT INTO public.admission_methods (method_name, description) VALUES
+('Xét kết quả thi tốt nghiệp THPT', 'Dựa trên tổ hợp môn đăng ký xét tuyển'),
+('Xét kết quả học tập cấp THPT (Học bạ)', 'Dựa trên điểm trung bình 3 năm hoặc học kỳ 1 lớp 12'),
+('Xét tuyển thẳng', 'Dành cho thí sinh đạt giải quốc gia, quốc tế hoặc có chứng chỉ ngoại ngữ');
+
+-- Loại tài liệu (chỉ 1 lần, không trùng)
+INSERT INTO public.document_types (type_name, is_required) VALUES
+('Ảnh chân dung (4x6)', true),
+('Bản sao Thẻ căn cước công dân (CCCD)', true),
+('Học bạ THPT (Bản sao công chứng)', true),
+('Giấy chứng nhận tốt nghiệp THPT hoặc Bằng TN', true),
+('Giấy chứng nhận kết quả thi tốt nghiệp THPT', false),
+('Giấy tờ ưu tiên (Nếu có)', false);
+
+-- Ngành học mẫu
+INSERT INTO public.majors (major_code, major_name, education_level_id, application_fee) VALUES
 ('51140201', 'Giáo dục Mầm non', 1, 300000.00),
 ('6210225', 'Thanh nhạc', 1, 300000.00),
 ('7810101', 'Du lịch (Du lịch và dịch vụ hàng không)', 1, 300000.00),
@@ -257,28 +252,26 @@ INSERT INTO public.majors (major_code, major_name, education_level_id, applicati
 ('7140221', 'Sư phạm Âm nhạc', 1, 300000.00),
 ('8220201', 'Ngôn ngữ Anh', 3, 500000.00);
 
--- Thêm các phương thức xét tuyển mẫu
-INSERT INTO public.admission_methods (method_name, description) VALUES 
-('Xét kết quả thi tốt nghiệp THPT', 'Dựa trên tổ hợp môn đăng ký xét tuyển'),
-('Xét kết quả học tập cấp THPT (Học bạ)', 'Dựa trên điểm trung bình 3 năm hoặc học kỳ 1 lớp 12'),
-('Xét tuyển thẳng', 'Dành cho thí sinh đạt giải quốc gia, quốc tế hoặc có chứng chỉ ngoại ngữ');
-
--- Thêm các loại tài liệu minh chứng cơ bản
-INSERT INTO public.document_types (type_name, is_required) VALUES 
-('Bản sao Thẻ căn cước công dân (CCCD)', true),
-('Học bạ THPT (Bản sao công chứng)', true),
-('Giấy chứng nhận tốt nghiệp THPT tạm thời hoặc Bằng TN', true),
-('Giấy chứng nhận kết quả thi tốt nghiệp THPT', false),
-('Giấy tờ ưu tiên (Nếu có)', false);
+-- Đợt tuyển sinh mẫu
+INSERT INTO public.admission_periods (name, start_date, end_date, education_level_id, is_active) VALUES
+('Đợt xét tuyển đợt 1 - 2026', '2026-03-01', '2026-08-30', 1, true);
 
 -- ==============================================================================
--- MIGRATION: Thêm cột địa danh vào user_profiles (chạy nếu bảng đã tồn tại)
+-- MIGRATION HELPERS (chạy trên DB đã có data, không phá dữ liệu)
 -- ==============================================================================
+
+-- Thêm cột thiếu (an toàn nếu đã tồn tại)
+ALTER TABLE public.majors ADD COLUMN IF NOT EXISTS zalo_link TEXT;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 1;
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS province VARCHAR(100);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ward VARCHAR(100);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS address_detail TEXT;
-ALTER TABLE public.user_profiles DROP COLUMN IF EXISTS address;
-
--- MIGRATION: Thêm cột giới tính và dân tộc
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ethnicity VARCHAR(50);
+
+-- Reset sequences (fix lỗi trùng ID sau insert thủ công)
+SELECT setval(pg_get_serial_sequence('education_levels', 'id'), (SELECT COALESCE(MAX(id), 0) FROM education_levels));
+SELECT setval(pg_get_serial_sequence('majors', 'id'), (SELECT COALESCE(MAX(id), 0) FROM majors));
+SELECT setval(pg_get_serial_sequence('admission_periods', 'id'), (SELECT COALESCE(MAX(id), 0) FROM admission_periods));
+SELECT setval(pg_get_serial_sequence('admission_methods', 'id'), (SELECT COALESCE(MAX(id), 0) FROM admission_methods));
+SELECT setval(pg_get_serial_sequence('document_types', 'id'), (SELECT COALESCE(MAX(id), 0) FROM document_types));

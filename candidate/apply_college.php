@@ -10,7 +10,7 @@ $step2_fields = [
     ['label' => 'Ngày sinh',         'key' => 'date_of_birth'],
     ['label' => 'Số điện thoại',     'key' => 'phone_number'],
     ['label' => 'Email liên lạc',   'key' => 'contact_email'],
-    ['label' => 'Địa chỉ liên lạc', 'key' => 'address'],
+    ['label' => 'Tỉnh/Thành phố',   'key' => 'province'],
 ];
 $step1_info = '
 <div class="d-flex align-items-start gap-2">
