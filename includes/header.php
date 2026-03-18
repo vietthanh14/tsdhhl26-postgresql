@@ -19,43 +19,45 @@ if (isset($_SESSION['user_id'])) {
 }
 ?>
 <header class="site-header">
-    <div class="container-fluid px-4">
+    <div class="container-fluid px-3 px-md-4">
         <div class="d-flex align-items-center justify-content-between py-2">
             <!-- Hamburger Menu (Mobile Only) -->
-            <button class="btn text-white d-md-none me-2" id="sidebarToggleBtn" style="border: none; background: transparent;">
-                <i class="bi bi-list fs-3"></i>
+            <button class="btn text-white d-md-none p-1" id="sidebarToggleBtn" aria-label="Mở menu" style="border: none; background: transparent;">
+                <i class="bi bi-list fs-3" aria-hidden="true"></i>
             </button>
 
             <!-- Logo + Tên trường -->
-            <a href="/tsdhhl26/" class="header-brand d-flex align-items-center gap-3 text-decoration-none">
-                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" height="52"
+            <a href="/tsdhhl26/" class="header-brand d-flex align-items-center gap-2 gap-md-3 text-decoration-none flex-grow-1 flex-md-grow-0">
+                <img src="/tsdhhl26/assets/logo.png" alt="Logo ĐH Hạ Long" width="42" height="42" class="d-none d-sm-block"
                      onerror="this.style.display='none'">
                 <div>
-                    <div class="fw-bold text-white" style="font-size:1rem;letter-spacing:.3px;">TRƯỜNG ĐẠI HỌC HẠ LONG</div>
-                    <div class="text-white-50" style="font-size:.78rem;letter-spacing:.5px;">Halong University</div>
+                    <div class="fw-bold text-white" style="font-size:clamp(.8rem,2vw,1rem);letter-spacing:.3px;">TRƯỜNG ĐẠI HỌC HẠ LONG</div>
+                    <div class="text-white-50 d-none d-sm-block" style="font-size:.78rem;letter-spacing:.5px;">Halong University</div>
                 </div>
             </a>
 
-            <div class="d-none d-md-flex align-items-center gap-4">
+            <!-- Right side: Nav links (desktop) + User dropdown (always) -->
+            <div class="d-flex align-items-center gap-3 gap-md-4 ms-auto ps-2">
+                <!-- Nav links -->
+                <a href="/tsdhhl26/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                    <i class="bi bi-house-door-fill" aria-hidden="true"></i> <span class="d-none d-md-inline">Trang chủ</span>
+                </a>
+                <a href="/tsdhhl26/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                    <i class="bi bi-search" aria-hidden="true"></i> <span class="d-none d-md-inline">Tra cứu</span>
+                </a>
                 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
-                    <a href="/tsdhhl26/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <i class="bi bi-speedometer2"></i> Bảng điều khiển
-                    </a>
-                <?php else: ?>
-                    <a href="/tsdhhl26/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <i class="bi bi-house-door-fill"></i> Trang chủ
-                    </a>
-                    <a href="/tsdhhl26/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" style="opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <i class="bi bi-search"></i> Tra cứu
+                    <a href="/tsdhhl26/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                        <i class="bi bi-speedometer2" aria-hidden="true"></i> <span class="d-none d-md-inline">Bảng điều khiển</span>
                     </a>
                 <?php endif; ?>
-                
+
+                <!-- User dropdown / Auth buttons -->
                 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
                     <div class="dropdown">
-                        <a href="#" class="text-white text-decoration-none fw-medium dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.9;">
-                            <i class="bi bi-shield-lock-fill text-warning"></i>
-                            <span>Xin chào, <span class="fw-bold text-warning">Quản trị viên</span></span>
-                        </a>
+                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-2 btn border-0 bg-transparent p-1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-shield-lock-fill text-warning" aria-hidden="true"></i>
+                            <span class="d-none d-sm-inline">Xin chào, <span class="fw-bold text-warning">Quản trị viên</span></span>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
                             <li>
                                 <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/tsdhhl26/admin/index.php">
@@ -72,10 +74,15 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 <?php elseif (isset($_SESSION['user_id'])): ?>
                     <div class="dropdown">
-                        <a href="#" class="text-white text-decoration-none fw-medium dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.9;">
-                            <span>Xin chào, <span class="fw-bold text-warning"><?php echo htmlspecialchars($header_user_name); ?></span></span>
-                        </a>
+                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-2 btn border-0 bg-transparent p-1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle fs-5 d-md-none" aria-hidden="true"></i>
+                            <span class="d-none d-md-inline">Xin chào, <span class="fw-bold text-warning"><?php echo htmlspecialchars($header_user_name); ?></span></span>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
+                            <li class="dropdown-item-text text-muted small d-md-none fw-semibold px-3 py-2">
+                                <?php echo htmlspecialchars($header_user_name); ?>
+                            </li>
+                            <li class="d-md-none"><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/tsdhhl26/candidate/profile.php">
                                     <i class="bi bi-person text-secondary"></i> Thông tin cá nhân
@@ -90,11 +97,11 @@ if (isset($_SESSION['user_id'])) {
                         </ul>
                     </div>
                 <?php else: ?>
-                    <a href="/tsdhhl26/auth/login.php" class="text-white text-decoration-none fw-bold" style="transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    <a href="/tsdhhl26/auth/login.php" class="text-white text-decoration-none fw-bold header-nav-link small">
                         Đăng nhập
                     </a>
-                    <a href="/tsdhhl26/auth/register.php" class="btn fw-bold px-4 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; min-height: 40px; display: inline-flex; align-items: center; justify-content: center;">
-                        Đăng ký ngay
+                    <a href="/tsdhhl26/auth/register.php" class="btn fw-bold px-3 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; font-size:.85rem;">
+                        Đăng ký
                     </a>
                 <?php endif; ?>
             </div>

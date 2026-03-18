@@ -65,17 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <?php if($error): ?>
-            <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?></div>
+            <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small" role="alert" aria-live="polite"><?php echo $error; ?></div>
         <?php endif; ?>
 
         <form method="POST" action="">
             <div class="mb-3">
-                <label class="form-label fw-semibold">Tên đăng nhập</label>
-                <input type="text" name="username" class="form-control" required placeholder="Nhập tên đăng nhập...">
+                <label for="loginUsername" class="form-label fw-semibold">Tên đăng nhập</label>
+                <input type="text" name="username" id="loginUsername" class="form-control" required placeholder="Nhập tên đăng nhập…" autocomplete="username" spellcheck="false">
             </div>
             <div class="mb-4">
-                <label class="form-label fw-semibold">Mật khẩu</label>
-                <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                <label for="loginPassword" class="form-label fw-semibold">Mật khẩu</label>
+                <input type="password" name="password" id="loginPassword" class="form-control" required placeholder="Nhập mật khẩu…" autocomplete="current-password">
             </div>
             
             <div class="d-flex justify-content-end mb-3">

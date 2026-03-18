@@ -131,7 +131,7 @@ session_start();
             <div class="search-box d-flex">
                 <div class="position-relative flex-grow-1">
                     <i class="bi bi-person-vcard input-icon"></i>
-                    <input type="text" class="form-control" id="cccdInput" placeholder="Nhập số CCCD/CMND..." required pattern="[0-9]{9,12}" title="Nhập từ 9-12 chữ số">
+                    <input type="text" class="form-control" id="cccdInput" placeholder="Nhập số CCCD/CMND…" required pattern="[0-9]{9,12}" title="Nhập từ 9-12 chữ số" autocomplete="off" inputmode="numeric">
                 </div>
                 <button class="btn btn-search" type="submit" id="btnSearch">
                     <i class="bi bi-search me-1"></i> Tra cứu
@@ -142,15 +142,15 @@ session_start();
 </div>
 
 <!-- Results Area -->
-<div class="container" style="max-width: 720px;">
-    <div id="loadingIndicator" class="text-center py-4 d-none">
+<div class="container-xl">
+    <div id="loadingIndicator" class="text-center py-4 d-none" aria-live="polite">
         <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
-        <span class="ms-2 text-muted small">Đang tra cứu dữ liệu...</span>
+        <span class="ms-2 text-muted small">Đang tra cứu dữ liệu…</span>
     </div>
-    <div id="alertError" class="alert alert-danger border-0 shadow-sm d-none" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="errorMsg"></span>
+    <div id="alertError" class="alert alert-danger border-0 shadow-sm d-none" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i><span id="errorMsg"></span>
     </div>
-    <div id="resultsContainer"></div>
+    <div id="resultsContainer" aria-live="polite"></div>
 </div>
 
 <div class="pb-5"></div>
@@ -193,8 +193,64 @@ function showError(msg) {
 
 function showResults(items) {
     const c = document.getElementById('resultsContainer');
-    c.innerHTML = `<p class="text-muted small mb-3 text-center"><i class="bi bi-check-circle text-success me-1"></i>Tìm thấy <strong>${items.length}</strong> nguyện vọng</p>`;
+    let html = `<p class="text-muted small mb-3 text-center"><i class="bi bi-check-circle text-success me-1"></i>Tìm thấy <strong>${items.length}</strong> nguyện vọng</p>`;
 
+    // === Desktop: Table (inside card like dashboard) ===
+    html += `<div class="d-none d-md-block mb-3">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+            <h6 class="mb-0 fw-bold">Kết quả tra cứu</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Ngành xét tuyển</th>
+                        <th>Mã ngành</th>
+                        <th>Trình độ</th>
+                        <th>PT XT</th>
+                        <th>Điểm XT</th>
+                        <th>Trạng thái</th>
+                        <th>Nhập học</th>
+                        <th>Giấy báo</th>
+                    </tr>
+                </thead><tbody>`;
+
+    items.forEach((item, i) => {
+        const st = item['Trạng thái hồ sơ trên cổng bộ GD&ĐT'] || '';
+        let bc = 'bg-secondary text-white';
+        if (/trúng|hợp lệ/i.test(st)) bc = 'bg-success text-white';
+        else if (/trượt|từ chối/i.test(st)) bc = 'bg-danger text-white';
+        else if (st) bc = 'bg-warning text-dark';
+        const badgeHtml = st ? `<span class="badge ${bc}">${st}</span>` : '<span class="text-muted">—</span>';
+
+        const link = item['Link Giấy Báo Nhập Học'];
+        const dlHtml = (link && link.trim())
+            ? `<a href="${link}" target="_blank" class="btn btn-sm btn-success"><i class="bi bi-download"></i></a>`
+            : '<span class="text-muted">—</span>';
+
+        html += `<tr>
+            <td class="ps-3 text-center fw-bold">${i + 1}</td>
+            <td class="fw-semibold">${item['Họ và tên'] || ''}</td>
+            <td>${item['Ngày sinh'] || ''}</td>
+            <td class="fw-semibold text-brand">${item['Tên ngành'] || ''}</td>
+            <td>${item['Mã ngành'] || ''}</td>
+            <td>${item['Trình độ'] || ''}</td>
+            <td>${item['Mã PTXT'] || ''}</td>
+            <td class="text-center fw-bold text-danger">${item['Điểm xét tuyển'] || ''}</td>
+            <td>${badgeHtml}</td>
+            <td class="small">${item['Thời gian nhập học'] || '—'}</td>
+            <td class="text-center">${dlHtml}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div></div></div>`;
+
+    // === Mobile: Cards ===
+    html += `<div class="d-md-none">`;
     items.forEach((item, i) => {
         const st = item['Trạng thái hồ sơ trên cổng bộ GD&ĐT'] || '';
         let badgeHtml = '';
@@ -213,29 +269,40 @@ function showResults(items) {
             ? `<div class="download-bar"><a href="${link}" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i>Tải Giấy Báo Nhập Học</a></div>`
             : '';
 
-        c.insertAdjacentHTML('beforeend', `
+        html += `
         <div class="result-card mb-3">
             <div class="card-top">
                 <span class="nv-label"><i class="bi bi-mortarboard me-1"></i>${titleText}</span>
                 ${badgeHtml}
             </div>
-            <div class="info-grid">
-                <div class="info-cell"><div class="label">Họ và tên</div><div class="value">${item['Họ và tên'] || ''}</div></div>
-                <div class="info-cell"><div class="label">CCCD</div><div class="value">${item['CMND'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Ngày sinh</div><div class="value">${item['Ngày sinh'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Giới tính</div><div class="value">${item['Giới tính'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Ngành xét tuyển</div><div class="value major">${item['Tên ngành'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Mã ngành</div><div class="value">${item['Mã ngành'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Điểm xét tuyển</div><div class="value highlight">${item['Điểm xét tuyển'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Trình độ</div><div class="value">${item['Trình độ'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Phương thức XT</div><div class="value">${item['Mã PTXT'] || ''}</div></div>
-                <div class="info-cell"><div class="label">KV/ĐT ưu tiên</div><div class="value">${(item['KV ƯT'] || '') + (item['ĐT ƯT'] ? ' - ' + item['ĐT ƯT'] : '')}</div></div>
-                <div class="info-cell"><div class="label">Tổng điểm (chưa ƯT)</div><div class="value">${item['Tổng điểm chưa có ƯT (Thang 30)'] || ''}</div></div>
-                <div class="info-cell"><div class="label">Thời gian nhập học</div><div class="value">${item['Thời gian nhập học'] || ''}</div></div>
+            <div class="card-body-mobile p-3">
+                <div class="row g-2 small">
+                    <div class="col-5 text-muted fw-medium">Họ và tên</div>
+                    <div class="col-7 fw-semibold">${item['Họ và tên'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">Ngày sinh</div>
+                    <div class="col-7">${item['Ngày sinh'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">Giới tính</div>
+                    <div class="col-7">${item['Giới tính'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">Mã ngành</div>
+                    <div class="col-7">${item['Mã ngành'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">Điểm XT</div>
+                    <div class="col-7 fw-bold text-danger">${item['Điểm xét tuyển'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">PT xét tuyển</div>
+                    <div class="col-7">${item['Mã PTXT'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">KV/ĐT ưu tiên</div>
+                    <div class="col-7">${(item['KV ƯT'] || '') + (item['ĐT ƯT'] ? ' - ' + item['ĐT ƯT'] : '')}</div>
+                    <div class="col-5 text-muted fw-medium">Tổng điểm</div>
+                    <div class="col-7">${item['Tổng điểm chưa có ƯT (Thang 30)'] || ''}</div>
+                    <div class="col-5 text-muted fw-medium">Nhập học</div>
+                    <div class="col-7">${item['Thời gian nhập học'] || '—'}</div>
+                </div>
             </div>
             ${dlBar}
-        </div>`);
+        </div>`;
     });
+    html += `</div>`;
+
+    c.innerHTML = html;
 }
 </script>
 </body>

@@ -88,7 +88,8 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                     <p class="mb-0">Bạn chưa nộp hồ sơ xét tuyển nào.</p>
                                 </div>
                             <?php else: ?>
-                                <div class="table-responsive">
+                                <!-- Desktop: Table (hidden on mobile) -->
+                                <div class="table-responsive d-none d-md-block">
                                     <table class="table table-hover mb-0 align-middle">
                                         <thead class="table-light">
                                             <tr>
@@ -147,6 +148,61 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
+                                </div>
+
+                                <!-- Mobile: Card layout (synced with search page style) -->
+                                <div class="d-md-none">
+                                    <?php foreach ($applications as $i => $app): ?>
+                                    <?php
+                                        $isApproved = ($app['status'] === 'APPROVED');
+                                        $statusClass = 'bg-secondary'; $statusText = 'Chưa xác định';
+                                        if($app['status'] == 'PENDING') { $statusClass = 'bg-warning text-dark'; $statusText = '⏳ Chờ duyệt'; }
+                                        elseif($app['status'] == 'APPROVED') { $statusClass = 'bg-success'; $statusText = '✅ Đã duyệt'; }
+                                        elseif($app['status'] == 'REJECTED') { $statusClass = 'bg-danger'; $statusText = '❌ Từ chối'; }
+                                        $zalo = $app['majors']['zalo_link'] ?? '';
+                                        $majorName = htmlspecialchars($app['majors']['major_name'] ?? 'N/A');
+                                        $levelName = htmlspecialchars($app['majors']['education_levels']['name'] ?? '');
+                                        $titleText = $levelName ? "$majorName — $levelName" : $majorName;
+                                    ?>
+                                    <div class="result-card mb-3" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;background:#fff;">
+                                        <!-- Card header -->
+                                        <div style="background:#1A3A6E;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                                            <span style="color:#fff;font-weight:700;font-size:.9rem;"><i class="bi bi-mortarboard me-1"></i><?php echo $titleText; ?></span>
+                                            <span class="badge <?php echo $statusClass; ?>" style="font-size:.75rem;padding:5px 12px;border-radius:20px;"><?php echo $statusText; ?></span>
+                                        </div>
+                                        <!-- Card body -->
+                                        <div class="p-3">
+                                            <div class="row g-2 small">
+                                                <div class="col-5 text-muted fw-medium">Phương thức XT</div>
+                                                <div class="col-7"><?php echo htmlspecialchars($methodsMap[$app['admission_method_id']] ?? 'N/A'); ?></div>
+                                                <div class="col-5 text-muted fw-medium">Đợt xét tuyển</div>
+                                                <div class="col-7"><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></div>
+                                                <div class="col-5 text-muted fw-medium">Lệ phí</div>
+                                                <div class="col-7 fw-semibold"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top" style="<?php echo $isApproved ? 'opacity:.4;pointer-events:none;' : ''; ?>">
+                                                <small class="text-muted fw-medium">Nguyện vọng:</small>
+                                                <input type="number" class="form-control form-control-sm text-center priority-input" 
+                                                       value="<?php echo intval($app['priority'] ?? 1); ?>" min="1" max="10"
+                                                       data-app-id="<?php echo $app['id']; ?>"
+                                                       style="width:55px;font-weight:600;"
+                                                       <?php echo $isApproved ? 'disabled' : ''; ?>>
+                                                <button class="btn btn-sm btn-outline-success save-priority-btn" title="Lưu thứ tự"
+                                                        data-app-id="<?php echo $app['id']; ?>"
+                                                        <?php echo $isApproved ? 'disabled' : ''; ?>><i class="bi bi-check-lg"></i></button>
+                                            </div>
+                                        </div>
+                                        <!-- Zalo bar (like download bar on search page) -->
+                                        <?php if (!empty($zalo)): ?>
+                                        <div style="padding:12px 16px;background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-top:2px solid #0ea5e9;text-align:center;">
+                                            <a href="<?php echo htmlspecialchars($zalo); ?>" target="_blank" 
+                                               style="display:inline-block;padding:8px 24px;font-size:.88rem;font-weight:700;text-decoration:none;color:#fff;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:8px;transition:transform .2s,box-shadow .2s;">
+                                                <i class="bi bi-chat-dots-fill me-1"></i>Vào Nhóm Zalo Ngành
+                                            </a>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
                         </div>

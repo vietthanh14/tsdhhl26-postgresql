@@ -24,7 +24,7 @@ $educationLevelsSidebar = Cache::remember('education_levels', 3600, function() u
     <a href="/tsdhhl26/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
     
     <div class="mt-2" style="padding: 12px 24px; color: #f59e0b; font-weight: 600; border-left: 3px solid #f59e0b; display: flex; align-items: center; gap: 8px; font-size: inherit;">
-        <i class="bi bi-pencil-square"></i> Đăng Ký Xét Tuyển
+        <i class="bi bi-pencil-square" aria-hidden="true"></i> Đăng Ký Xét Tuyển
     </div>
     <?php
     $levelFileMap = [

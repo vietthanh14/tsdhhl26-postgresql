@@ -115,11 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php if($error): ?>
-        <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?></div>
+        <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small" role="alert" aria-live="polite"><?php echo $error; ?></div>
     <?php endif; ?>
     
     <?php if($success): ?>
-        <div class="alert alert-success py-3 rounded-1 border-0 bg-success text-white small"><?php echo $success; ?></div>
+        <div class="alert alert-success py-3 rounded-1 border-0 bg-success text-white small" role="alert" aria-live="polite"><?php echo $success; ?></div>
         <div class="text-center mt-4">
             <a href="/tsdhhl26/" class="btn btn-brand px-4 py-2">ĐẾN TRANG ĐĂNG NHẬP</a>
         </div>
@@ -129,48 +129,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h6 class="mb-3 mt-2">THÔNG TIN CÁ NHÂN</h6>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
-            <input type="text" name="full_name" class="form-control" required placeholder="Nguyễn Văn A" value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>">
+            <label for="regFullName" class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+            <input type="text" name="full_name" id="regFullName" class="form-control" required placeholder="Nguyễn Văn A" autocomplete="name" value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>">
         </div>
 
         <div class="row g-3 mb-3">
             <div class="col-sm-6">
-                <label class="form-label fw-semibold">Ngày sinh <span class="text-danger">*</span></label>
-                <input type="date" name="date_of_birth" class="form-control" required value="<?php echo htmlspecialchars($_POST['date_of_birth'] ?? ''); ?>">
+                <label for="regDob" class="form-label fw-semibold">Ngày sinh <span class="text-danger">*</span></label>
+                <input type="date" name="date_of_birth" id="regDob" class="form-control" required autocomplete="bday" value="<?php echo htmlspecialchars($_POST['date_of_birth'] ?? ''); ?>">
             </div>
             <div class="col-sm-6">
-                <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
-                <input type="tel" name="phone_number" class="form-control" required placeholder="0912345678" value="<?php echo htmlspecialchars($_POST['phone_number'] ?? ''); ?>">
+                <label for="regPhone" class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="tel" name="phone_number" id="regPhone" class="form-control" required placeholder="0912345678" autocomplete="tel" value="<?php echo htmlspecialchars($_POST['phone_number'] ?? ''); ?>">
             </div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Email liên lạc <span class="text-danger">*</span></label>
-            <input type="email" name="contact_email" class="form-control" required placeholder="example@gmail.com" value="<?php echo htmlspecialchars($_POST['contact_email'] ?? ''); ?>">
+            <label for="regEmail" class="form-label fw-semibold">Email liên lạc <span class="text-danger">*</span></label>
+            <input type="email" name="contact_email" id="regEmail" class="form-control" required placeholder="example@gmail.com" autocomplete="email" spellcheck="false" value="<?php echo htmlspecialchars($_POST['contact_email'] ?? ''); ?>">
         </div>
 
         <div class="mb-4">
-            <label class="form-label fw-semibold">Số căn cước công dân <span class="text-danger">*</span></label>
-            <input type="text" name="identity_card" class="form-control" required placeholder="012345678901" maxlength="12" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
+            <label for="regCccd" class="form-label fw-semibold">Số căn cước công dân <span class="text-danger">*</span></label>
+            <input type="text" name="identity_card" id="regCccd" class="form-control" required placeholder="012345678901" maxlength="12" autocomplete="off" inputmode="numeric" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
             <div class="form-text">Nhập số CCCD 12 chữ số</div>
         </div>
 
         <h6 class="mb-3 mt-2">THÔNG TIN TÀI KHOẢN</h6>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
-            <input type="text" name="username" class="form-control" required placeholder="nhapchuongtrinh" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+            <label for="regUsername" class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
+            <input type="text" name="username" id="regUsername" class="form-control" required placeholder="nhapchuongtrinh" autocomplete="username" spellcheck="false" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
             <div class="form-text">Viết liền không dấu. Ví dụ: nguyenvana2024</div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
-            <input type="password" name="password" class="form-control" required placeholder="Ít nhất 6 ký tự">
+            <label for="regPassword" class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" name="password" id="regPassword" class="form-control" required placeholder="Ít nhất 6 ký tự" autocomplete="new-password">
         </div>
 
         <div class="mb-4">
-            <label class="form-label fw-semibold">Nhập lại Mật khẩu <span class="text-danger">*</span></label>
-            <input type="password" name="password_confirm" class="form-control" required>
+            <label for="regPasswordConfirm" class="form-label fw-semibold">Nhập lại Mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" name="password_confirm" id="regPasswordConfirm" class="form-control" required placeholder="Nhập lại mật khẩu…" autocomplete="new-password">
         </div>
 
         <button type="submit" class="btn btn-brand w-100 py-2 mt-2">ĐĂNG KÝ TÀI KHOẢN</button>
