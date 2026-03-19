@@ -265,10 +265,10 @@ document.querySelectorAll('.save-priority-btn').forEach(btn => {
                     this.innerHTML = '<i class="bi bi-check-lg"></i>';
                 }, 1500);
             } else {
-                alert('Lỗi lưu: ' + (data.message || 'Không rõ'));
+                showNotifyModal('Lỗi lưu: ' + (data.message || 'Không rõ'), 'danger');
             }
         } catch(e) {
-            alert('Lỗi kết nối: ' + e.message);
+            showNotifyModal('Lỗi kết nối: ' + e.message, 'danger');
         } finally {
             this.disabled = false;
         }

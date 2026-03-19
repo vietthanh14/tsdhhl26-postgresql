@@ -46,11 +46,7 @@ if (isset($_SESSION['user_id'])) {
                 <a href="<?php echo BASE_URL; ?>/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
                     <i class="bi bi-search" aria-hidden="true"></i> <span class="d-none d-md-inline">Tra cứu</span>
                 </a>
-                <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/index.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
-                        <i class="bi bi-speedometer2" aria-hidden="true"></i> <span class="d-none d-md-inline">Bảng điều khiển</span>
-                    </a>
-                <?php endif; ?>
+
 
                 <!-- User dropdown / Auth buttons -->
                 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
@@ -60,12 +56,7 @@ if (isset($_SESSION['user_id'])) {
                             <span class="d-none d-sm-inline">Xin chào, <span class="fw-bold text-warning">Quản trị viên</span></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
-                            <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/admin/index.php">
-                                    <i class="bi bi-speedometer2 text-secondary"></i> Bảng điều khiển
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
+
                             <li>
                                 <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/admin/logout.php">
                                     <i class="bi bi-box-arrow-right"></i> Đăng xuất

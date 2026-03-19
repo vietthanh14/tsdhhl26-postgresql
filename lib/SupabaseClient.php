@@ -84,7 +84,7 @@ class SupabaseClient {
 
     // Database functions
     public function select($table, $query = '', $token = null) {
-        $endpoint = "/rest/v1/" . $table . ($query ? '?' . $query : '&select=*');
+        $endpoint = "/rest/v1/" . $table . ($query ? '?' . $query : '?select=*');
         return $this->request('GET', $endpoint, null, $token);
     }
 

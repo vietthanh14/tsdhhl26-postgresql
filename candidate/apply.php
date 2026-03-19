@@ -637,7 +637,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             goToStep(4);
 
         } catch(e) {
-            alert('Lỗi kiểm tra: ' + e.message);
+            showNotifyModal('Lỗi kiểm tra: ' + e.message, 'danger');
         } finally {
             btn.disabled = false;
             btn.innerText = 'Thanh toán bằng VietQR »';
@@ -709,7 +709,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const submitBtn = document.getElementById('submitAppBtn');
         
         if (fileInput.files.length === 0) { alert('Vui lòng chọn file ảnh biên lai!'); return; }
-        if (!GAS_URL) { alert('Hệ thống chưa cấu hình Link Upload Google Drive. Vui lòng báo quản trị.'); return; }
+        if (!GAS_URL) { showNotifyModal('Hệ thống chưa cấu hình Link Upload Google Drive. Vui lòng báo quản trị.', 'warning'); return; }
 
         const file = fileInput.files[0];
         const reader = new FileReader();

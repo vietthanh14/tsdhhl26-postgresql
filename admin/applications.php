@@ -217,7 +217,7 @@ unset($app);
 <!-- Modal Update Status Single -->
 <div class="modal fade" id="updateModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
+        <div class="modal-content border-0 shadow">
             <form method="POST" action="">
                 <div class="modal-header bg-brand text-white border-0">
                     <h5 class="modal-title fw-bold">Cập nhật Hồ sơ</h5>
@@ -247,21 +247,19 @@ unset($app);
 <!-- Modal Confirm Bulk Action -->
 <div class="modal fade" id="confirmBulkModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-warning text-dark border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Xác nhận thao tác</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-octagon me-2"></i> Xác nhận thao tác</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-center">
-                <div class="mb-3">
-                    <i class="bi bi-question-circle text-brand display-1 opacity-25"></i>
-                </div>
+                <i class="bi bi-exclamation-triangle text-danger mb-3 d-block" style="font-size: 3rem;"></i>
                 <p class="mb-0 fs-5">Bạn muốn áp dụng thao tác này cho <strong id="confirmCount" class="badge bg-danger">0</strong> hồ sơ đã chọn không?</p>
-                <p class="text-muted small mt-2">Dữ liệu sẽ được cập nhật đồng loạt trên hệ thống.</p>
+                <p class="text-muted small mt-2">Hành động này không thể hoàn tác.</p>
             </div>
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" class="btn btn-brand px-4" id="btnConfirmBulk">Đồng ý thực hiện</button>
+                <button type="button" class="btn btn-danger px-4" id="btnConfirmBulk">Đồng ý thực hiện</button>
             </div>
         </div>
     </div>

@@ -343,6 +343,29 @@ $profile = $profileResponse['data'][0];
         </div>
     </div>
 
+    <!-- Modal Confirm Delete -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-octagon me-2"></i> Xác nhận Xóa Tài Liệu
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <i class="bi bi-trash text-danger mb-3 d-block" style="font-size: 3rem;"></i>
+                    <p class="mb-0 fs-5">Bạn có chắc chắn muốn xóa bản sao tài liệu này?</p>
+                    <p class="text-muted small mt-2">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger px-4" id="btnConfirmDeleteDoc">Xóa tài liệu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ============================================================
@@ -634,11 +657,11 @@ $profile = $profileResponse['data'][0];
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    showNotifyModal('Lỗi: ' + data.message, 'danger');
                     confirmDeleteModal.hide();
                 }
             } catch (err) {
-                alert('Lỗi kết nối khi xóa tài liệu!');
+                showNotifyModal('Lỗi kết nối khi xóa tài liệu!', 'danger');
                 confirmDeleteModal.hide();
             } finally {
                 this.disabled = false;
@@ -651,30 +674,7 @@ $profile = $profileResponse['data'][0];
     </div>
     </div>
 
-    <!-- Modal Confirm Delete (Global) -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white border-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-octagon me-2"></i> Xác nhận Xóa Tài Liệu
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <i class="bi bi-trash text-danger mb-3 d-block" style="font-size: 3rem;"></i>
-                    <p class="mb-0 fs-5">Bạn có chắc chắn muốn xóa bản sao tài liệu này?</p>
-                    <p class="text-muted small mt-2">Hành động này không thể hoàn tác.</p>
-                </div>
-                <div class="modal-footer border-0 justify-content-center pb-4">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="button" class="btn btn-danger px-4" id="btnConfirmDeleteDoc">Xóa tài liệu</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 

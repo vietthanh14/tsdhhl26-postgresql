@@ -9,8 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    // Hardcoded Admin Credentials for Demo
-    if ($username === 'admin' && $password === 'admin123') {
+    // Đọc thông tin admin từ .env (không để lộ mật khẩu trong source code)
+    $adminUser = getenv('ADMIN_USERNAME');
+    $adminPass = getenv('ADMIN_PASSWORD');
+
+    if (!$adminUser || !$adminPass) {
+        $error = "Chưa cấu hình tài khoản admin trong file .env";
+    } elseif ($username === $adminUser && $password === $adminPass) {
         // Xóa session thí sinh nếu có (tránh lẫn lộn vai trò)
         unset($_SESSION['user_id'], $_SESSION['access_token'], $_SESSION['email']);
         $_SESSION['admin_logged_in'] = true;

@@ -56,3 +56,41 @@ require_once __DIR__ . '/../config/supabase.php';
         </div>
     </div>
 </footer>
+
+<!-- Modal Thông Báo Dùng Chung (gọi bằng showNotifyModal) -->
+<div class="modal fade" id="globalNotifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0" id="globalNotifyHeader">
+                <h5 class="modal-title fw-bold" id="globalNotifyTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="mb-3 d-block" id="globalNotifyIcon" style="font-size: 3rem;"></i>
+                <p class="mb-0 fs-6" id="globalNotifyMsg"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn px-4" id="globalNotifyBtn" data-bs-dismiss="modal">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showNotifyModal(message, type) {
+    type = type || 'danger';
+    const config = {
+        danger:  { bg: 'bg-danger text-white',  icon: 'bi bi-x-circle text-danger',           title: 'Đã xảy ra lỗi',     btn: 'btn-danger'  },
+        warning: { bg: 'bg-warning text-dark',   icon: 'bi bi-exclamation-triangle text-warning', title: 'Cảnh báo',           btn: 'btn-warning' },
+        success: { bg: 'bg-success text-white',  icon: 'bi bi-check-circle text-success',       title: 'Thành công',         btn: 'btn-success' },
+        info:    { bg: 'bg-primary text-white',  icon: 'bi bi-info-circle text-primary',        title: 'Thông báo',          btn: 'btn-primary' }
+    };
+    const c = config[type] || config.danger;
+    document.getElementById('globalNotifyHeader').className = 'modal-header border-0 ' + c.bg;
+    document.getElementById('globalNotifyTitle').innerHTML = '<i class="' + c.icon.split(' ').slice(0,2).join(' ') + ' me-2"></i> ' + c.title;
+    document.getElementById('globalNotifyIcon').className = c.icon + ' mb-3 d-block';
+    document.getElementById('globalNotifyMsg').textContent = message;
+    document.getElementById('globalNotifyBtn').className = 'btn px-4 ' + c.btn;
+    new bootstrap.Modal(document.getElementById('globalNotifyModal')).show();
+}
+</script>

@@ -2,6 +2,7 @@
 // candidate/delete_document.php
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -22,8 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $supabaseAdmin = new SupabaseClient('service');
     
-    // Xóa record (Sử dụng service role và filter matching ID + user_id)
-    $res = $supabaseAdmin->delete('user_documents', 'id=eq.' . urlencode($doc_id) . '&user_id', $user_id);
+    // Bước 1: Kiểm tra tài liệu có thuộc user đang đăng nhập không
+    $checkRes = $supabaseAdmin->select('user_documents', "id=eq.{$doc_id}&user_id=eq.{$user_id}&select=id");
+    if ($checkRes['code'] != 200 || empty($checkRes['data'])) {
+        echo json_encode(['success' => false, 'message' => 'Tài liệu không tồn tại hoặc không thuộc quyền sở hữu của bạn.']);
+        exit;
+    }
+
+    // Bước 2: Xóa record theo ID
+    $res = $supabaseAdmin->delete('user_documents', 'id', $doc_id);
     
     if (in_array($res['code'], [200, 204])) {
         echo json_encode(['success' => true]);

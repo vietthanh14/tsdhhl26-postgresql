@@ -131,7 +131,7 @@ $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
 <!-- Modal Edit User -->
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form method="POST" class="modal-content border-0 shadow-lg">
+        <form method="POST" class="modal-content border-0 shadow">
             <div class="modal-header bg-brand text-white border-0">
                 <h5 class="modal-title fw-bold">Chỉnh sửa Thông tin Thí sinh</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
