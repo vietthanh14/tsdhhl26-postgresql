@@ -31,7 +31,6 @@ body {
     text-decoration: none;
     padding: 12px 24px;
     display: block;
-    border-left: 3px solid transparent;
     font-weight: 500;
     transition: all 0.2s;
 }
@@ -39,7 +38,6 @@ body {
 .sidebar a.active {
     background-color: rgba(255, 255, 255, 0.05);
     color: #fff;
-    border-left-color: #3b82f6;
 }
 
 /* ── Content Area ── */

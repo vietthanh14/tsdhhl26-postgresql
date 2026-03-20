@@ -118,9 +118,9 @@ select.form-select { cursor: pointer; }
 /* ── Centralized Sidebar & Layout (Admin & Candidate) ── */
 .sidebar { 
     background-color: var(--sidebar-bg, #1A3A6E); 
-    height: calc(100vh - 71px); /* Header is typically ~70px */
+    height: calc(100vh - 61px); /* Header is typically ~61px */
     position: sticky; 
-    top: 71px; /* Below the header */
+    top: 61px; /* Below the header */
     left: 0; 
     width: 16.666667%; /* col-md-2 equivalent */
     z-index: 900; /* Less than header, more than content */

@@ -1,76 +1,127 @@
 <?php
 require_once __DIR__ . '/../../config/supabase.php';
 
-// candidate/includes/sidebar.php
 $currentPage = basename($_SERVER['PHP_SELF']);
 $currentLevelId = $_GET['level_id'] ?? null;
 
 // Lấy danh sách Hệ Đào tạo từ cache (TTL 1 giờ)
 require_once __DIR__ . '/../../lib/Cache.php';
-$educationLevelsSidebar = Cache::remember('education_levels', 3600, function() use ($supabase) {
+$educationLevelsSidebar = Cache::remember('education_levels', 3600, function() {
+    global $supabase;
+    if (!isset($supabase)) {
+        require_once __DIR__ . '/../../lib/SupabaseClient.php';
+        $supabase = new SupabaseClient('anon');
+    }
     $res = $supabase->select('education_levels', 'order=id.asc');
     return ($res['code'] == 200) ? $res['data'] : [];
 });
+
+// Map education_level ID → wrapper file (dùng ID thay vì tên → không bị ảnh hưởng khi đổi tên hệ)
+$levelFileMap = [
+    1 => 'apply_university.php',  // Đại học chính quy
+    2 => 'apply_college.php',     // Cao đẳng chính quy
+    3 => 'apply_master.php',      // Thạc sĩ
+    4 => 'apply_vocational.php',  // Trung cấp
+    5 => 'apply_degree2.php',     // Văn bằng 2
+];
 ?>
-<!-- Mobile Overlay -->
-<div class="sidebar-mobile-overlay" id="sidebarOverlay"></div>
+<!-- Nút Toggle Sidebar (Mobile) -->
+<button class="btn btn-brand d-md-none position-fixed top-0 start-0 m-3 z-3 shadow-sm rounded-circle sidebar-toggle-btn" 
+        type="button" data-bs-toggle="offcanvas" data-bs-target="#candidateSidebarMobile" aria-controls="candidateSidebarMobile"
+        style="width: 45px; height: 45px; line-height: 40px; padding: 0;">
+    <i class="bi bi-list fs-4"></i>
+</button>
 
-<div class="col-md-2 sidebar sidebar-offcanvas d-none d-md-block" id="mainSidebar">
-    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
-        <h5 class="text-white mb-0 text-center w-100">HALOU PORTAL</h5>
-        <button class="btn btn-sm text-white d-md-none p-0" id="closeSidebarBtn">
-            <i class="bi bi-x-lg fs-4"></i>
-        </button>
+<!-- Desktop Sidebar -->
+<div class="col-md-2 sidebar d-none d-md-block px-0 shadow">
+    <div class="sidebar-header text-center py-4 border-bottom border-light border-opacity-10 mb-3">
+        <h5 class="text-white fw-bold mb-0">HALOU PORTAL</h5>
+        <small class="text-light text-opacity-75">Dành cho Thí sinh</small>
     </div>
-
-    <a href="<?php echo BASE_URL; ?>/candidate/index.php" class="<?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">Bảng điều khiển</a>
     
-    <div class="mt-2" style="padding: 12px 24px; color: #f59e0b; font-weight: 600; border-left: 3px solid #f59e0b; display: flex; align-items: center; gap: 8px; font-size: inherit;">
-        <i class="bi bi-pencil-square" aria-hidden="true"></i> Đăng Ký Xét Tuyển
-    </div>
-    <?php
-    $levelFileMap = [
-        'đại học chính quy' => 'apply_university.php',
-        'cao đẳng chính quy' => 'apply_college.php',
-        'thạc sĩ' => 'apply_master.php',
-        'trung cấp' => 'apply_vocational.php',
-        'văn bằng 2, vừa làm vừa học' => 'apply_degree2.php',
-    ];
-    foreach ($educationLevelsSidebar as $lvl):
-        $lvlKey  = mb_strtolower(trim($lvl['name']));
-        $lvlFile = $levelFileMap[$lvlKey] ?? ('apply.php?level_id=' . $lvl['id']);
-        $lvlBase = explode('?', $lvlFile)[0];
-        $isActive = ($currentPage === $lvlBase) || ($currentPage === 'apply.php' && $currentLevelId == $lvl['id']);
-    ?>
-        <a href="<?php echo BASE_URL; ?>/candidate/<?php echo $lvlFile; ?>"
-           class="<?php echo $isActive ? 'active' : ''; ?>"
-           style="padding-left: 32px; font-size: 0.92rem; font-weight: 600;">
-            <i class="bi bi-arrow-right-circle<?php echo $isActive ? '-fill' : ''; ?> me-1 text-warning"></i>
-            Hệ <?php echo htmlspecialchars($lvl['name']); ?>
+    <div class="sidebar-menu d-flex flex-column gap-1 px-2">
+        <a href="<?php echo BASE_URL; ?>/candidate/index.php" class="rounded-3 <?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">
+            <i class="bi bi-speedometer2 me-2"></i> Bảng điều khiển
         </a>
-    <?php endforeach; ?>
-    
-    <div class="mb-4"></div>
+        <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="rounded-3 <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">
+            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+        </a>
+        
+        <!-- Cấu hình - Collapsible -->
+        <a href="#applySubmenu" class="rounded-3 d-flex justify-content-between align-items-center <?php echo (strpos($currentPage, 'apply') !== false) ? 'active' : ''; ?>" 
+           data-bs-toggle="collapse" aria-expanded="<?php echo (strpos($currentPage, 'apply') !== false) ? 'true' : 'false'; ?>">
+            <span><i class="bi bi-pencil-square me-2"></i> Đăng Ký Xét Tuyển</span>
+            <i class="bi bi-chevron-down small"></i>
+        </a>
+        <div class="collapse <?php echo (strpos($currentPage, 'apply') !== false) || true ? 'show' : ''; ?>" id="applySubmenu">
+            <div class="d-flex flex-column gap-1 ps-3">
+                <?php foreach ($educationLevelsSidebar as $lvl):
+                    $lvlFile = $levelFileMap[$lvl['id']] ?? ('apply.php?level_id=' . $lvl['id']);
+                    $lvlBase = explode('?', $lvlFile)[0];
+                    $isActive = ($currentPage === $lvlBase) || ($currentPage === 'apply.php' && $currentLevelId == $lvl['id']);
+                ?>
+                    <a href="<?php echo BASE_URL; ?>/candidate/<?php echo $lvlFile; ?>"
+                       class="rounded-3 small <?php echo $isActive ? 'active' : ''; ?>">
+                        <i class="bi bi-arrow-right-circle<?php echo $isActive ? '-fill' : ''; ?> me-2 text-warning"></i>
+                        Hệ <?php echo htmlspecialchars($lvl['name']); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="candidateSidebarMobile" aria-labelledby="candidateSidebarMobileLabel">
+    <div class="offcanvas-header border-bottom border-light border-opacity-10 py-3">
+        <h5 class="offcanvas-title text-white fw-bold" id="candidateSidebarMobileLabel">HALOU PORTAL</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-3 gap-1 sidebar-menu">
+        <a href="<?php echo BASE_URL; ?>/candidate/index.php" class="rounded-3 <?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">
+            <i class="bi bi-speedometer2 me-2"></i> Bảng điều khiển
+        </a>
+        <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="rounded-3 <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">
+            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+        </a>
+
+        <!-- Cấu hình - Collapsible (Mobile) -->
+        <a href="#applySubmenuMobile" class="rounded-3 d-flex justify-content-between align-items-center <?php echo (strpos($currentPage, 'apply') !== false) ? 'active' : ''; ?>"
+           data-bs-toggle="collapse" aria-expanded="<?php echo (strpos($currentPage, 'apply') !== false) ? 'true' : 'false'; ?>">
+            <span><i class="bi bi-pencil-square me-2"></i> Đăng Ký Xét Tuyển</span>
+            <i class="bi bi-chevron-down small"></i>
+        </a>
+        <div class="collapse <?php echo (strpos($currentPage, 'apply') !== false) || true ? 'show' : ''; ?>" id="applySubmenuMobile">
+            <div class="d-flex flex-column gap-1 ps-3">
+                <?php foreach ($educationLevelsSidebar as $lvl):
+                    $lvlFile = $levelFileMap[$lvl['id']] ?? ('apply.php?level_id=' . $lvl['id']);
+                    $lvlBase = explode('?', $lvlFile)[0];
+                    $isActive = ($currentPage === $lvlBase) || ($currentPage === 'apply.php' && $currentLevelId == $lvl['id']);
+                ?>
+                    <a href="<?php echo BASE_URL; ?>/candidate/<?php echo $lvlFile; ?>"
+                       class="rounded-3 small <?php echo $isActive ? 'active' : ''; ?>">
+                        <i class="bi bi-arrow-right-circle<?php echo $isActive ? '-fill' : ''; ?> me-2 text-warning"></i>
+                        Hệ <?php echo htmlspecialchars($lvl['name']); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Off-canvas sidebar logic
+    // Link the general header hamburger icon to this offcanvas, since the header might already have one lacking mapping
     document.addEventListener('DOMContentLoaded', () => {
         const toggleBtn = document.getElementById('sidebarToggleBtn');
-        const closeBtn = document.getElementById('closeSidebarBtn');
-        const sidebar = document.getElementById('mainSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        if(toggleBtn && sidebar && overlay) {
-            const toggleMenu = () => {
-                sidebar.classList.toggle('open');
-                overlay.classList.toggle('show');
-                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
-            };
-
-            toggleBtn.addEventListener('click', toggleMenu);
-            if(closeBtn) closeBtn.addEventListener('click', toggleMenu);
-            overlay.addEventListener('click', toggleMenu);
+        if (toggleBtn) {
+            // Remove old onclick/event listeners safely
+            const newToggleBtn = toggleBtn.cloneNode(true);
+            toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+            
+            // Map it to Bootstrap offcanvas
+            newToggleBtn.setAttribute('data-bs-toggle', 'offcanvas');
+            newToggleBtn.setAttribute('data-bs-target', '#candidateSidebarMobile');
+            newToggleBtn.setAttribute('aria-controls', 'candidateSidebarMobile');
         }
     });
 </script>
