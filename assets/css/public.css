@@ -146,6 +146,18 @@ select.form-select { cursor: pointer; }
     min-height: calc(100vh - 71px); /* Adjust based on header/footer */
 }
 
+/* Mobile Offcanvas — dark theme to match desktop sidebar */
+.offcanvas.sidebar-mobile {
+    background-color: var(--sidebar-bg, #1A3A6E) !important;
+    color: #cbd5e1 !important;
+}
+.offcanvas.sidebar-mobile .offcanvas-header {
+    background-color: rgba(0,0,0,0.15);
+}
+.offcanvas.sidebar-mobile .sidebar-menu a {
+    color: #cbd5e1;
+}
+
 /* Mobile Off-Canvas Sidebar Styling */
 @media (max-width: 767.98px) {
     .sidebar { display: none !important; }

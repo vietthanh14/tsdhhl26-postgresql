@@ -72,7 +72,8 @@ $levelFileMap = [
 </div>
 
 <!-- Mobile Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="candidateSidebarMobile" aria-labelledby="candidateSidebarMobileLabel">
+<div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="candidateSidebarMobile" aria-labelledby="candidateSidebarMobileLabel"
+     data-bs-theme="dark" style="background-color: #1A3A6E; color: #cbd5e1;">
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-3">
         <h5 class="offcanvas-title text-white fw-bold" id="candidateSidebarMobileLabel">HALOU PORTAL</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>

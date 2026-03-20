@@ -64,7 +64,8 @@ $is_config_page = in_array($current_page, $config_pages);
 </div>
 
 <!-- Mobile Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="adminSidebarMobile" aria-labelledby="adminSidebarMobileLabel">
+<div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="adminSidebarMobile" aria-labelledby="adminSidebarMobileLabel"
+     data-bs-theme="dark" style="background-color: #1A3A6E; color: #cbd5e1;">
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-3">
         <h5 class="offcanvas-title text-white fw-bold" id="adminSidebarMobileLabel">ADMIN PORTAL</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -111,3 +112,17 @@ $is_config_page = in_array($current_page, $config_pages);
         </a>
     </div>
 </div>
+
+<!-- Kết nối nút Hamburger trong header chung với Offcanvas Admin -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        if (toggleBtn) {
+            const newToggleBtn = toggleBtn.cloneNode(true);
+            toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+            newToggleBtn.setAttribute('data-bs-toggle', 'offcanvas');
+            newToggleBtn.setAttribute('data-bs-target', '#adminSidebarMobile');
+            newToggleBtn.setAttribute('aria-controls', 'adminSidebarMobile');
+        }
+    });
+</script>

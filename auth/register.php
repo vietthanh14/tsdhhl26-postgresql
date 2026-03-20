@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-4">
             <label for="regCccd" class="form-label fw-semibold">Số căn cước công dân <span class="text-danger">*</span></label>
-            <input type="text" name="identity_card" id="regCccd" class="form-control" required placeholder="012345678901" maxlength="12" autocomplete="off" inputmode="numeric" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
+            <input type="text" name="identity_card" id="regCccd" class="form-control" required placeholder="001234567890" maxlength="12" autocomplete="off" inputmode="numeric" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
             <div class="form-text">Nhập số CCCD 12 chữ số</div>
         </div>
 
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
             <label for="regUsername" class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
-            <input type="text" name="username" id="regUsername" class="form-control" required placeholder="nhapchuongtrinh" autocomplete="username" spellcheck="false" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+            <input type="text" name="username" id="regUsername" class="form-control" required placeholder="nguyenvana2024" autocomplete="username" spellcheck="false" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
             <div class="form-text">Viết liền không dấu. Ví dụ: nguyenvana2024</div>
         </div>
 

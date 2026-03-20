@@ -93,12 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="mb-3">
             <label class="form-label fw-semibold">Tên đăng nhập lưu trữ <span class="text-danger">*</span></label>
-            <input type="text" name="username" class="form-control" required placeholder="nhapchuongtrinh" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+            <input type="text" name="username" class="form-control" required placeholder="nguyenvana2024" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
         </div>
         
         <div class="mb-4">
             <label class="form-label fw-semibold">Số CMND / Thẻ Căn Cước <span class="text-danger">*</span></label>
-            <input type="text" name="identity_card" class="form-control" required placeholder="012...912" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
+            <input type="text" name="identity_card" class="form-control" required placeholder="001234567890" value="<?php echo htmlspecialchars($_POST['identity_card'] ?? ''); ?>">
         </div>
         
         <h6 class="mb-3 mt-4 pt-4 border-top">MẬT KHẨU MỚI</h6>
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="mb-4">
             <label class="form-label fw-semibold">Nhập lại Mật khẩu <span class="text-danger">*</span></label>
-            <input type="password" name="confirm_password" class="form-control" required>
+            <input type="password" name="confirm_password" class="form-control" required placeholder="Nhập lại mật khẩu mới">
         </div>
 
         <button type="submit" class="btn btn-brand w-100 py-2 mt-2">XÁC NHẬN CẤP LẠI</button>

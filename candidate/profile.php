@@ -178,7 +178,7 @@ $profile = $profileResponse['data'][0];
                                         <div class="col-md-6 mt-3 mt-md-0">
                                             <label class="form-label text-muted fw-bold">Email nhận thông báo </label>
                                             <input type="email" name="contact_email" class="form-control"
-                                                placeholder="vidu@gmail.com"
+                                                placeholder="nguyenvana@gmail.com"
                                                 value="<?php echo htmlspecialchars($profile['contact_email'] ?? ''); ?>">
                                         </div>
                                     </div>
