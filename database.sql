@@ -33,6 +33,24 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     province VARCHAR(100),
     ward VARCHAR(100),
     address_detail TEXT,
+    school_name VARCHAR(255),
+    school_province VARCHAR(100),
+    school_ward VARCHAR(100),
+    school_address_detail TEXT,
+    priority_area VARCHAR(50),
+    academic_performance VARCHAR(20),
+    conduct VARCHAR(20),
+    graduation_year INTEGER,
+    priority_object VARCHAR(10),
+    prev_degree_level VARCHAR(20),
+    prev_major VARCHAR(255),
+    prev_admission_date DATE,
+    prev_graduation_date DATE,
+    prev_graduation_rank VARCHAR(50),
+    prev_diploma_school VARCHAR(255),
+    prev_diploma_date DATE,
+    current_position VARCHAR(255),
+    current_workplace TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -74,6 +92,7 @@ CREATE TABLE IF NOT EXISTS public.admission_methods (
     id SERIAL PRIMARY KEY,
     method_name VARCHAR(255) NOT NULL,
     description TEXT,
+    application_fee NUMERIC(15, 2) DEFAULT 0.00,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -268,6 +287,27 @@ ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ward VARCHAR(100);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS address_detail TEXT;
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS ethnicity VARCHAR(50);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS school_name VARCHAR(255);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS school_province VARCHAR(100);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS school_ward VARCHAR(100);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS school_address_detail TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS priority_area VARCHAR(50);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS academic_performance VARCHAR(20);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS conduct VARCHAR(20);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS graduation_year INTEGER;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS priority_object VARCHAR(10);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_degree_level VARCHAR(20);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_major VARCHAR(255);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_admission_date DATE;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_graduation_date DATE;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_graduation_rank VARCHAR(50);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_diploma_school VARCHAR(255);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS prev_diploma_date DATE;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS current_position VARCHAR(255);
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS current_workplace TEXT;
+
+-- Chuyển lệ phí từ ngành sang phương thức xét tuyển (v24.3.2026)
+ALTER TABLE public.admission_methods ADD COLUMN IF NOT EXISTS application_fee NUMERIC(15,2) DEFAULT 0.00;
 
 -- Reset sequences (fix lỗi trùng ID sau insert thủ công)
 SELECT setval(pg_get_serial_sequence('education_levels', 'id'), (SELECT COALESCE(MAX(id), 0) FROM education_levels));

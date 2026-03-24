@@ -29,6 +29,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ward_code = trim($_POST['ward_code'] ?? '');
     $ward_name = trim($_POST['ward_name'] ?? '');
     $address_detail = trim($_POST['address_detail'] ?? '');
+    $school_name = trim($_POST['school_name'] ?? '');
+    $school_province_name = trim($_POST['school_province_name'] ?? '');
+    $school_ward_name = trim($_POST['school_ward_name'] ?? '');
+    $school_address_detail = trim($_POST['school_address_detail'] ?? '');
+    $priority_area = trim($_POST['priority_area'] ?? '');
+    $academic_performance = trim($_POST['academic_performance'] ?? '');
+    $conduct = trim($_POST['conduct'] ?? '');
+    $graduation_year = trim($_POST['graduation_year'] ?? '');
+    $priority_object = trim($_POST['priority_object'] ?? '');
+    $prev_degree_level = trim($_POST['prev_degree_level'] ?? '');
+    $prev_major = trim($_POST['prev_major'] ?? '');
+    $prev_admission_date = trim($_POST['prev_admission_date'] ?? '');
+    $prev_graduation_date = trim($_POST['prev_graduation_date'] ?? '');
+    $prev_graduation_rank = trim($_POST['prev_graduation_rank'] ?? '');
+    $prev_diploma_school = trim($_POST['prev_diploma_school'] ?? '');
+    $prev_diploma_date = trim($_POST['prev_diploma_date'] ?? '');
+    $current_position = trim($_POST['current_position'] ?? '');
+    $current_workplace = trim($_POST['current_workplace'] ?? '');
 
     if (empty($full_name)) {
         $_SESSION['profile_error'] = "Họ tên không được để trống.";
@@ -44,6 +62,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'province' => $province_name ?: null,
             'ward' => $ward_name ?: null,
             'address_detail' => $address_detail ?: null,
+            'school_name' => $school_name ?: null,
+            'school_province' => $school_province_name ?: null,
+            'school_ward' => $school_ward_name ?: null,
+            'school_address_detail' => $school_address_detail ?: null,
+            'priority_area' => $priority_area ?: null,
+            'academic_performance' => $academic_performance ?: null,
+            'conduct' => $conduct ?: null,
+            'graduation_year' => $graduation_year ? (int)$graduation_year : null,
+            'priority_object' => $priority_object ?: null,
+            'prev_degree_level' => $prev_degree_level ?: null,
+            'prev_major' => $prev_major ?: null,
+            'prev_admission_date' => $prev_admission_date ?: null,
+            'prev_graduation_date' => $prev_graduation_date ?: null,
+            'prev_graduation_rank' => $prev_graduation_rank ?: null,
+            'prev_diploma_school' => $prev_diploma_school ?: null,
+            'prev_diploma_date' => $prev_diploma_date ?: null,
+            'current_position' => $current_position ?: null,
+            'current_workplace' => $current_workplace ?: null,
             'updated_at' => date('Y-m-d H:i:sP'),
         ];
 
@@ -144,9 +180,7 @@ $profile = $profileResponse['data'][0];
                 <div class="row">
                     <div class="col-md-8">
                         <div class="card">
-                            <div class="card-header py-3">
-                                <h6 class="mb-0 fw-bold">Hồ sơ định danh</h6>
-                            </div>
+
                             <div class="card-body">
                                 <?php if ($message): ?>
                                     <div class="alert alert-success"><?php echo $message; ?></div><?php endif; ?>
@@ -154,6 +188,10 @@ $profile = $profileResponse['data'][0];
                                     <div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
 
                                 <form method="POST" action="">
+
+                                    <!-- ====== Section 1: Thông tin định danh ====== -->
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-person-vcard me-2"></i>Thông tin định danh</h6>
+
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label text-muted fw-bold">Họ và Tên đầy đủ <span
@@ -174,19 +212,6 @@ $profile = $profileResponse['data'][0];
                                                     class="text-danger">*</span></label>
                                             <input type="text" name="identity_card" class="form-control" required
                                                 value="<?php echo htmlspecialchars($profile['identity_card'] ?? ''); ?>">
-                                        </div>
-                                        <div class="col-md-6 mt-3 mt-md-0">
-                                            <label class="form-label text-muted fw-bold">Email nhận thông báo </label>
-                                            <input type="email" name="contact_email" class="form-control"
-                                                placeholder="nguyenvana@gmail.com"
-                                                value="<?php echo htmlspecialchars($profile['contact_email'] ?? ''); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label text-muted fw-bold">Số điện thoại liên hệ</label>
-                                            <input type="tel" name="phone_number" class="form-control"
-                                                value="<?php echo htmlspecialchars($profile['phone_number'] ?? ''); ?>">
                                         </div>
                                         <div class="col-md-6 mt-3 mt-md-0">
                                             <label class="form-label text-muted fw-bold">Ngày sinh</label>
@@ -211,7 +236,24 @@ $profile = $profileResponse['data'][0];
                                                 value="<?php echo htmlspecialchars($profile['ethnicity'] ?? ''); ?>">
                                         </div>
                                     </div>
-                                    <!-- Địa danh 2 cấp (Searchable Combobox) -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Email nhận thông báo</label>
+                                            <input type="email" name="contact_email" class="form-control"
+                                                placeholder="nguyenvana@gmail.com"
+                                                value="<?php echo htmlspecialchars($profile['contact_email'] ?? ''); ?>">
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Số điện thoại liên hệ</label>
+                                            <input type="tel" name="phone_number" class="form-control"
+                                                value="<?php echo htmlspecialchars($profile['phone_number'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== Section 2: Địa chỉ thường trú ====== -->
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-house-door me-2"></i>Địa chỉ thường trú</h6>
+
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label text-muted fw-bold">Tỉnh / Thành phố</label>
@@ -248,12 +290,214 @@ $profile = $profileResponse['data'][0];
                                             <input type="hidden" name="ward_code" id="wardCode">
                                         </div>
                                     </div>
-                                    <div class="mb-4">
-                                        <label class="form-label text-muted fw-bold">Địa chỉ chi tiết (số nhà, thôn,
-                                            đường...)</label>
-                                        <input type="text" name="address_detail" id="addressDetail" class="form-control"
-                                            placeholder="Ví dụ: Số 12, Đường Lê Lợi"
-                                            value="<?php echo htmlspecialchars($profile['address_detail'] ?? ''); ?>">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Địa chỉ chi tiết (số nhà, thôn,
+                                                đường...)</label>
+                                            <input type="text" name="address_detail" id="addressDetail" class="form-control"
+                                                placeholder="Ví dụ: Số 12, Đường Lê Lợi"
+                                                value="<?php echo htmlspecialchars($profile['address_detail'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== Section 3: Trường THPT ====== -->
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-mortarboard me-2"></i>Trường THPT</h6>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Tên trường THPT</label>
+                                            <input type="text" name="school_name" class="form-control"
+                                                placeholder="Ví dụ: THPT Nguyễn Huệ"
+                                                value="<?php echo htmlspecialchars($profile['school_name'] ?? ''); ?>">
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Năm tốt nghiệp THPT</label>
+                                            <input type="number" name="graduation_year" class="form-control"
+                                                placeholder="Ví dụ: 2026"
+                                                value="<?php echo htmlspecialchars($profile['graduation_year'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Tỉnh / Thành phố (Trường THPT)</label>
+                                            <div class="combo-wrapper" id="schoolProvinceWrapper">
+                                                <span class="combo-clear" id="schoolProvinceClear" title="Xóa">&times;</span>
+                                                <input type="text" class="combo-input" id="schoolProvinceInput"
+                                                    placeholder="-- Chọn Tỉnh/Thành phố --" readonly>
+                                                <div class="combo-dropdown" id="schoolProvinceDropdown">
+                                                    <div class="combo-search">
+                                                        <input type="text" id="schoolProvinceSearch"
+                                                            placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off">
+                                                    </div>
+                                                    <div id="schoolProvinceList"></div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="school_province_name" id="schoolProvinceName">
+                                            <input type="hidden" name="school_province_code" id="schoolProvinceCode">
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Phường / Xã (Trường THPT)</label>
+                                            <div class="combo-wrapper" id="schoolWardWrapper">
+                                                <span class="combo-clear" id="schoolWardClear" title="Xóa">&times;</span>
+                                                <input type="text" class="combo-input" id="schoolWardInput"
+                                                    placeholder="-- Chọn Phường/Xã --" readonly disabled>
+                                                <div class="combo-dropdown" id="schoolWardDropdown">
+                                                    <div class="combo-search">
+                                                        <input type="text" id="schoolWardSearch"
+                                                            placeholder="🔍 Tìm phường/xã..." autocomplete="off">
+                                                    </div>
+                                                    <div id="schoolWardList"></div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="school_ward_name" id="schoolWardName">
+                                            <input type="hidden" name="school_ward_code" id="schoolWardCode">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Địa chỉ chi tiết (Trường THPT)</label>
+                                            <input type="text" name="school_address_detail" id="schoolAddressDetail" class="form-control"
+                                                placeholder="Ví dụ: Số 5, Đường Trần Phú"
+                                                value="<?php echo htmlspecialchars($profile['school_address_detail'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Học lực lớp 12</label>
+                                            <select name="academic_performance" class="form-select">
+                                                <option value="">-- Chọn học lực --</option>
+                                                <option value="Giỏi" <?php echo ($profile['academic_performance'] ?? '') === 'Giỏi' ? 'selected' : ''; ?>>Giỏi</option>
+                                                <option value="Khá" <?php echo ($profile['academic_performance'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá</option>
+                                                <option value="Trung bình" <?php echo ($profile['academic_performance'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình</option>
+                                                <option value="Yếu" <?php echo ($profile['academic_performance'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Hạnh kiểm lớp 12</label>
+                                            <select name="conduct" class="form-select">
+                                                <option value="">-- Chọn hạnh kiểm --</option>
+                                                <option value="Tốt" <?php echo ($profile['conduct'] ?? '') === 'Tốt' ? 'selected' : ''; ?>>Tốt</option>
+                                                <option value="Khá" <?php echo ($profile['conduct'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá</option>
+                                                <option value="Trung bình" <?php echo ($profile['conduct'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình</option>
+                                                <option value="Yếu" <?php echo ($profile['conduct'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== Section 4: Ưu tiên ====== -->
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-star me-2"></i>Ưu tiên</h6>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Khu vực ưu tiên</label>
+                                            <select name="priority_area" class="form-select">
+                                                <option value="">-- Chọn khu vực --</option>
+                                                <option value="KV1" <?php echo ($profile['priority_area'] ?? '') === 'KV1' ? 'selected' : ''; ?>>KV1</option>
+                                                <option value="KV2" <?php echo ($profile['priority_area'] ?? '') === 'KV2' ? 'selected' : ''; ?>>KV2</option>
+                                                <option value="KV2-NT" <?php echo ($profile['priority_area'] ?? '') === 'KV2-NT' ? 'selected' : ''; ?>>KV2-NT</option>
+                                                <option value="KV3" <?php echo ($profile['priority_area'] ?? '') === 'KV3' ? 'selected' : ''; ?>>KV3</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Đối tượng ưu tiên</label>
+                                            <select name="priority_object" class="form-select">
+                                                <option value="">-- Không có --</option>
+                                                <option value="01" <?php echo ($profile['priority_object'] ?? '') === '01' ? 'selected' : ''; ?>>01 - Dân tộc thiểu số (KV1)</option>
+                                                <option value="02" <?php echo ($profile['priority_object'] ?? '') === '02' ? 'selected' : ''; ?>>02 - CN sản xuất ưu tú</option>
+                                                <option value="03" <?php echo ($profile['priority_object'] ?? '') === '03' ? 'selected' : ''; ?>>03 - Thương binh, Quân/CA tại ngũ</option>
+                                                <option value="04" <?php echo ($profile['priority_object'] ?? '') === '04' ? 'selected' : ''; ?>>04 - Con liệt sĩ, Con TB/BB (≥81%)</option>
+                                                <option value="05" <?php echo ($profile['priority_object'] ?? '') === '05' ? 'selected' : ''; ?>>05 - TNXP, Quân/CA xuất ngũ</option>
+                                                <option value="06" <?php echo ($profile['priority_object'] ?? '') === '06' ? 'selected' : ''; ?>>06 - DTTS ngoài KV1, Con TB/BB (<81%)</option>
+                                                <option value="07" <?php echo ($profile['priority_object'] ?? '') === '07' ? 'selected' : ''; ?>>07 - Người KT nặng, LĐ/Nhà giáo/YT XS</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== Section 5: Đã tốt nghiệp ====== -->
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-award me-2"></i>Đã tốt nghiệp (nếu có)</h6>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Trình độ đã tốt nghiệp</label>
+                                            <select name="prev_degree_level" class="form-select">
+                                                <option value="">-- Chưa có --</option>
+                                                <option value="Trung cấp" <?php echo ($profile['prev_degree_level'] ?? '') === 'Trung cấp' ? 'selected' : ''; ?>>Trung cấp</option>
+                                                <option value="Cao đẳng" <?php echo ($profile['prev_degree_level'] ?? '') === 'Cao đẳng' ? 'selected' : ''; ?>>Cao đẳng</option>
+                                                <option value="Đại học" <?php echo ($profile['prev_degree_level'] ?? '') === 'Đại học' ? 'selected' : ''; ?>>Đại học</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Ngành đã tốt nghiệp</label>
+                                            <input type="text" name="prev_major" class="form-control"
+                                                placeholder="Ví dụ: Kế toán"
+                                                value="<?php echo htmlspecialchars($profile['prev_major'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Ngày trúng tuyển</label>
+                                            <input type="date" name="prev_admission_date" class="form-control"
+                                                value="<?php echo htmlspecialchars($profile['prev_admission_date'] ?? ''); ?>">
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Ngày tốt nghiệp</label>
+                                            <input type="date" name="prev_graduation_date" class="form-control"
+                                                value="<?php echo htmlspecialchars($profile['prev_graduation_date'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Xếp loại tốt nghiệp</label>
+                                            <select name="prev_graduation_rank" class="form-select">
+                                                <option value="">-- Chọn xếp loại --</option>
+                                                <option value="Xuất sắc" <?php echo ($profile['prev_graduation_rank'] ?? '') === 'Xuất sắc' ? 'selected' : ''; ?>>Xuất sắc</option>
+                                                <option value="Giỏi" <?php echo ($profile['prev_graduation_rank'] ?? '') === 'Giỏi' ? 'selected' : ''; ?>>Giỏi</option>
+                                                <option value="Khá" <?php echo ($profile['prev_graduation_rank'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá</option>
+                                                <option value="Trung bình khá" <?php echo ($profile['prev_graduation_rank'] ?? '') === 'Trung bình khá' ? 'selected' : ''; ?>>Trung bình khá</option>
+                                                <option value="Trung bình" <?php echo ($profile['prev_graduation_rank'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Bằng tốt nghiệp do trường cấp</label>
+                                            <input type="text" name="prev_diploma_school" class="form-control"
+                                                placeholder="Ví dụ: Trường CĐ Sư phạm Huế"
+                                                value="<?php echo htmlspecialchars($profile['prev_diploma_school'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Cấp ngày</label>
+                                            <input type="date" name="prev_diploma_date" class="form-control"
+                                                value="<?php echo htmlspecialchars($profile['prev_diploma_date'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== Section 6: Công tác hiện tại ====== -->
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-briefcase me-2"></i>Công tác hiện tại (nếu có)</h6>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted fw-bold">Chức vụ công tác hiện nay</label>
+                                            <input type="text" name="current_position" class="form-control"
+                                                placeholder="Ví dụ: Nhân viên kế toán"
+                                                value="<?php echo htmlspecialchars($profile['current_position'] ?? ''); ?>">
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="form-label text-muted fw-bold">Tên và địa chỉ cơ quan đang công tác</label>
+                                            <input type="text" name="current_workplace" class="form-control"
+                                                placeholder="Ví dụ: Công ty TNHH ABC - 123 Lê Lợi, Huế"
+                                                value="<?php echo htmlspecialchars($profile['current_workplace'] ?? ''); ?>">
+                                        </div>
                                     </div>
 
                                     <button type="submit" class="btn btn-brand px-4 py-2 fw-semibold">LƯU THAY
@@ -371,36 +615,14 @@ $profile = $profileResponse['data'][0];
         // ============================================================
         // Địa danh 2 cấp: Tỉnh/TP → Phường/Xã
         // ============================================================
+        // ============================================================
+        // Reusable Combobox Factory + Address Section Builder
+        // ============================================================
         (function () {
             const API_BASE = '<?php echo BASE_URL; ?>/api/dia_danh.php';
-            const savedProvince = <?php echo json_encode($profile['province'] ?? ''); ?>;
-            const savedWard = <?php echo json_encode($profile['ward'] ?? ''); ?>;
-            const savedAddressDetail = <?php echo json_encode($profile['address_detail'] ?? ''); ?>;
-
-            let allProvinces = [];
-            let allWards = [];
-            let selectedProvinceCode = '';
-
-            // ---- Elements ----
-            const provinceInput = document.getElementById('provinceInput');
-            const provinceDropdown = document.getElementById('provinceDropdown');
-            const provinceSearch = document.getElementById('provinceSearch');
-            const provinceList = document.getElementById('provinceList');
-            const provinceName = document.getElementById('provinceName');
-            const provinceClear = document.getElementById('provinceClear');
-
-            const wardInput = document.getElementById('wardInput');
-            const wardDropdown = document.getElementById('wardDropdown');
-            const wardSearch = document.getElementById('wardSearch');
-            const wardList = document.getElementById('wardList');
-            const wardName = document.getElementById('wardName');
-            const wardClear = document.getElementById('wardClear');
-
-            const addressDetail = document.getElementById('addressDetail');
 
             // ---- Combobox factory ----
-            function makeCombo({ triggerEl, dropdown, searchEl, listEl, onSelect, onClear }) {
-                // Mở dropdown khi click vào input
+            function makeCombo({ triggerEl, dropdown, searchEl, listEl, clearEl, onClear }) {
                 triggerEl.addEventListener('click', () => {
                     if (triggerEl.disabled) return;
                     const isOpen = dropdown.classList.contains('open');
@@ -412,147 +634,131 @@ $profile = $profileResponse['data'][0];
                         setTimeout(() => searchEl.focus(), 50);
                     }
                 });
-
-                // Lọc danh sách khi gõ
                 searchEl.addEventListener('input', () => {
                     const q = searchEl.value.toLowerCase().trim();
                     listEl.querySelectorAll('.combo-option').forEach(opt => {
-                        const match = opt.textContent.toLowerCase().includes(q);
-                        opt.style.display = match ? '' : 'none';
+                        opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
                     });
                     const visible = [...listEl.querySelectorAll('.combo-option')].filter(o => o.style.display !== 'none');
-                    // Hàng không kết quả
                     let noRes = listEl.querySelector('.no-result');
                     if (!visible.length) {
                         if (!noRes) { noRes = document.createElement('div'); noRes.className = 'combo-option no-result'; noRes.textContent = 'Không tìm thấy kết quả'; listEl.appendChild(noRes); }
                     } else { if (noRes) noRes.remove(); }
                 });
-
-                // Nút xóa
-                onClear && document.getElementById(triggerEl.id.replace('Input', 'Clear')).addEventListener('click', () => {
-                    onClear();
-                });
-
-                return { onSelect };
+                if (clearEl && onClear) clearEl.addEventListener('click', onClear);
             }
 
             function closeAll() {
                 document.querySelectorAll('.combo-dropdown.open').forEach(d => d.classList.remove('open'));
             }
-
-            // Đóng khi click ra ngoài
             document.addEventListener('click', e => {
                 if (!e.target.closest('.combo-wrapper')) closeAll();
             });
 
-            // ---- Render options ----
-            function renderProvinces(provinces) {
-                provinceList.innerHTML = '';
-                provinces.forEach(p => {
+            function renderOptions(listEl, items, onSelect) {
+                listEl.innerHTML = '';
+                items.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'combo-option';
-                    div.textContent = p.name;
-                    div.dataset.code = p.code;
-                    div.addEventListener('click', () => {
-                        selectProvince(p);
-                        closeAll();
-                    });
-                    provinceList.appendChild(div);
+                    div.textContent = item.name;
+                    div.dataset.code = item.code;
+                    div.addEventListener('click', () => { onSelect(item); closeAll(); });
+                    listEl.appendChild(div);
                 });
             }
 
-            function renderWards(wards) {
-                wardList.innerHTML = '';
-                wards.forEach(w => {
-                    const div = document.createElement('div');
-                    div.className = 'combo-option';
-                    div.textContent = w.name;
-                    div.dataset.code = w.code;
-                    div.addEventListener('click', () => {
-                        selectWard(w);
-                        closeAll();
-                    });
-                    wardList.appendChild(div);
-                });
-            }
+            // ============================================================
+            // Section builder for province/ward combos
+            // ============================================================
+            function initAddressSection(cfg) {
+                const pInput = document.getElementById(cfg.provinceInputId);
+                const pDropdown = document.getElementById(cfg.provinceDropdownId);
+                const pSearch = document.getElementById(cfg.provinceSearchId);
+                const pList = document.getElementById(cfg.provinceListId);
+                const pName = document.getElementById(cfg.provinceNameId);
+                const pClear = document.getElementById(cfg.provinceClearId);
 
-            // ---- Select actions ----
-            function selectProvince(p, skipWardReset) {
-                selectedProvinceCode = p.code;
-                provinceInput.value = p.name;
-                provinceName.value = p.name;
-                provinceClear.style.display = 'block';
+                const wInput = document.getElementById(cfg.wardInputId);
+                const wDropdown = document.getElementById(cfg.wardDropdownId);
+                const wSearch = document.getElementById(cfg.wardSearchId);
+                const wList = document.getElementById(cfg.wardListId);
+                const wName = document.getElementById(cfg.wardNameId);
+                const wClear = document.getElementById(cfg.wardClearId);
 
-                if (!skipWardReset) {
-                    clearWard();
-                    wardInput.disabled = false;
+                const addrDetail = cfg.addressDetailId ? document.getElementById(cfg.addressDetailId) : null;
+
+                function clearWard() { wInput.value = ''; wName.value = ''; wClear.style.display = 'none'; }
+                function clearProvince() { pInput.value = ''; pName.value = ''; pClear.style.display = 'none'; clearWard(); wInput.disabled = true; }
+
+                function selectProvince(p, skipWardReset) {
+                    pInput.value = p.name; pName.value = p.name; pClear.style.display = 'block';
+                    if (!skipWardReset) { clearWard(); wInput.disabled = false; }
+                    fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(p.code)}`)
+                        .then(r => r.json())
+                        .then(wards => renderOptions(wList, wards, selectWard));
                 }
+                function selectWard(w) { wInput.value = w.name; wName.value = w.name; wClear.style.display = 'block'; }
 
-                fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(p.code)}`)
+                makeCombo({ triggerEl: pInput, dropdown: pDropdown, searchEl: pSearch, listEl: pList, clearEl: pClear, onClear: clearProvince });
+                makeCombo({ triggerEl: wInput, dropdown: wDropdown, searchEl: wSearch, listEl: wList, clearEl: wClear, onClear: clearWard });
+
+                // Load provinces + restore
+                fetch(API_BASE + '?action=provinces')
                     .then(r => r.json())
-                    .then(wards => {
-                        allWards = wards;
-                        renderWards(wards);
-                    });
-            }
-
-            function selectWard(w) {
-                wardInput.value = w.name;
-                wardName.value = w.name;
-                wardClear.style.display = 'block';
-            }
-
-            function clearProvince() {
-                selectedProvinceCode = '';
-                provinceInput.value = '';
-                provinceName.value = '';
-                provinceClear.style.display = 'none';
-                clearWard();
-                wardInput.disabled = true;
-            }
-
-            function clearWard() {
-                wardInput.value = '';
-                wardName.value = '';
-                wardClear.style.display = 'none';
-            }
-
-            // ---- Init ----
-            makeCombo({ triggerEl: provinceInput, dropdown: provinceDropdown, searchEl: provinceSearch, listEl: provinceList, onClear: clearProvince });
-            makeCombo({ triggerEl: wardInput, dropdown: wardDropdown, searchEl: wardSearch, listEl: wardList, onClear: clearWard });
-
-            provinceClear.addEventListener('click', clearProvince);
-            wardClear.addEventListener('click', clearWard);
-
-            // Khởi động: tải tỉnh
-            fetch(API_BASE + '?action=provinces')
-                .then(r => r.json())
-                .then(provinces => {
-                    allProvinces = provinces;
-                    renderProvinces(provinces);
-
-                    // Restore
-                    if (savedAddressDetail && addressDetail) addressDetail.value = savedAddressDetail;
-                    if (savedProvince) {
-                        const match = provinces.find(p => p.name === savedProvince);
-                        if (match) {
-                            selectProvince(match, true); // load wards
-                            // Sau khi load wards xong mới set ward
-                            fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(match.code)}`)
-                                .then(r => r.json())
-                                .then(wards => {
-                                    allWards = wards;
-                                    renderWards(wards);
-                                    wardInput.disabled = false;
-                                    if (savedWard) {
-                                        const mw = wards.find(w => w.name === savedWard);
-                                        if (mw) selectWard(mw);
-                                    }
-                                });
+                    .then(provinces => {
+                        renderOptions(pList, provinces, p => selectProvince(p));
+                        if (addrDetail && cfg.savedAddressDetail) addrDetail.value = cfg.savedAddressDetail;
+                        if (cfg.savedProvince) {
+                            const match = provinces.find(p => p.name === cfg.savedProvince);
+                            if (match) {
+                                selectProvince(match, true);
+                                fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(match.code)}`)
+                                    .then(r => r.json())
+                                    .then(wards => {
+                                        renderOptions(wList, wards, selectWard);
+                                        wInput.disabled = false;
+                                        if (cfg.savedWard) {
+                                            const mw = wards.find(w => w.name === cfg.savedWard);
+                                            if (mw) selectWard(mw);
+                                        }
+                                    });
+                            }
                         }
-                    }
-                })
-                .catch(() => console.warn('Không thể tải dữ liệu địa danh.'));
+                    })
+                    .catch(() => console.warn('Không thể tải dữ liệu địa danh.'));
+            }
+
+            // ============================================================
+            // 1. Địa chỉ cá nhân
+            // ============================================================
+            initAddressSection({
+                provinceInputId: 'provinceInput', provinceDropdownId: 'provinceDropdown',
+                provinceSearchId: 'provinceSearch', provinceListId: 'provinceList',
+                provinceNameId: 'provinceName', provinceClearId: 'provinceClear',
+                wardInputId: 'wardInput', wardDropdownId: 'wardDropdown',
+                wardSearchId: 'wardSearch', wardListId: 'wardList',
+                wardNameId: 'wardName', wardClearId: 'wardClear',
+                addressDetailId: 'addressDetail',
+                savedProvince: <?php echo json_encode($profile['province'] ?? ''); ?>,
+                savedWard: <?php echo json_encode($profile['ward'] ?? ''); ?>,
+                savedAddressDetail: <?php echo json_encode($profile['address_detail'] ?? ''); ?>
+            });
+
+            // ============================================================
+            // 2. Địa chỉ trường THPT
+            // ============================================================
+            initAddressSection({
+                provinceInputId: 'schoolProvinceInput', provinceDropdownId: 'schoolProvinceDropdown',
+                provinceSearchId: 'schoolProvinceSearch', provinceListId: 'schoolProvinceList',
+                provinceNameId: 'schoolProvinceName', provinceClearId: 'schoolProvinceClear',
+                wardInputId: 'schoolWardInput', wardDropdownId: 'schoolWardDropdown',
+                wardSearchId: 'schoolWardSearch', wardListId: 'schoolWardList',
+                wardNameId: 'schoolWardName', wardClearId: 'schoolWardClear',
+                addressDetailId: 'schoolAddressDetail',
+                savedProvince: <?php echo json_encode($profile['school_province'] ?? ''); ?>,
+                savedWard: <?php echo json_encode($profile['school_ward'] ?? ''); ?>,
+                savedAddressDetail: <?php echo json_encode($profile['school_address_detail'] ?? ''); ?>
+            });
         })();
 
         // ============================================================
@@ -565,9 +771,9 @@ $profile = $profileResponse['data'][0];
             const statusDiv = document.getElementById('uploadStatus');
             const progress = document.getElementById('uploadProgress');
 
-            if (!docTypeId) { alert('Vui lòng chọn loại tài liệu!'); return; }
-            if (fileInput.files.length === 0) { alert('Vui lòng chọn file!'); return; }
-            if (!GAS_URL) { alert('Chưa cấu hình Google Apps Script URL trong .env!'); return; }
+            if (!docTypeId) { showNotifyModal('Vui lòng chọn loại tài liệu!', 'warning'); return; }
+            if (fileInput.files.length === 0) { showNotifyModal('Vui lòng chọn file!', 'warning'); return; }
+            if (!GAS_URL) { showNotifyModal('Chưa cấu hình Google Apps Script URL trong .env!', 'danger'); return; }
 
             const file = fileInput.files[0];
             const reader = new FileReader();

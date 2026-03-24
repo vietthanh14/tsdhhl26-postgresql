@@ -39,8 +39,7 @@ $pageTitle = 'Cấu hình Danh mục Tài liệu';
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-    <h5 class="fw-bold m-0">Danh mục Tài liệu</h5>
+<div class="d-flex flex-wrap justify-content-end align-items-center mb-3 gap-2">
     <div class="d-flex gap-2 align-items-center">
         <div class="input-group input-group-sm" style="width: 250px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>

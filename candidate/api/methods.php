@@ -19,7 +19,7 @@ if (!$period_id || !$major_id || !ctype_digit($period_id) || !ctype_digit($major
     exit;
 }
 
-$supabase = new SupabaseClient('anon');
+$supabase = new SupabaseClient('service');
 
 // Lấy method_ids áp dụng cho đợt+ngành này
 $pmmRes = $supabase->select(
@@ -35,6 +35,6 @@ if ($pmmRes['code'] !== 200 || empty($pmmRes['data'])) {
 $methodIds = array_column($pmmRes['data'], 'method_id');
 $idsStr    = implode(',', $methodIds);
 
-$methodsRes = $supabase->select('admission_methods', "id=in.({$idsStr})&select=id,method_name&order=id.asc");
+$methodsRes = $supabase->select('admission_methods', "id=in.({$idsStr})&select=id,method_name,application_fee&order=id.asc");
 
 echo json_encode(($methodsRes['code'] === 200) ? $methodsRes['data'] : []);

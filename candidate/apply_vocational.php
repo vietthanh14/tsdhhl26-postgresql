@@ -3,13 +3,23 @@
 // ID hệ Trung Cấp trong bảng education_levels (id=4)
 $forced_level_id = 4;
 
-// Bước 2 — Trung cấp hiển thị: Họ tên, CCCD, Ngày sinh, SĐT, Email
+// Bước 2 — Trung cấp hiển thị trường 1–11 (Định danh + Địa chỉ)
 $step2_fields = [
-    ['label' => 'Họ và tên',      'key' => 'full_name'],
-    ['label' => 'Số CMND/CCCD',   'key' => 'identity_card'],
-    ['label' => 'Ngày sinh',       'key' => 'date_of_birth'],
-    ['label' => 'Số điện thoại',  'key' => 'phone_number'],
-    ['label' => 'Email liên lạc', 'key' => 'contact_email'],
+    ['label' => 'Họ và tên',           'key' => 'full_name'],
+    ['label' => 'Số CMND/CCCD',        'key' => 'identity_card'],
+    ['label' => 'Ngày sinh',            'key' => 'date_of_birth'],
+    ['label' => 'Giới tính',            'key' => 'gender'],
+    ['label' => 'Dân tộc',              'key' => 'ethnicity'],
+    ['label' => 'Email liên lạc',       'key' => 'contact_email'],
+    ['label' => 'Số điện thoại',        'key' => 'phone_number'],
+    ['label' => 'Tỉnh/Thành phố',      'key' => 'province'],
+    ['label' => 'Phường/Xã',            'key' => 'ward'],
+    ['label' => 'Địa chỉ chi tiết',     'key' => 'address_detail'],
+    ['label' => 'Tên trường THPT/THCS', 'key' => 'school_name'],
+    ['label' => 'Tỉnh/TP trường học',   'key' => 'school_province'],
+    ['label' => 'Phường/Xã trường học',  'key' => 'school_ward'],
+    ['label' => 'Khu vực ưu tiên',      'key' => 'priority_area'],
+    ['label' => 'Đối tượng ưu tiên',    'key' => 'priority_object'],
 ];
 $step1_info = '
 <div class="d-flex align-items-start gap-2">

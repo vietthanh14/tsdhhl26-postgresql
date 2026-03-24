@@ -39,10 +39,10 @@ $is_config_page = in_array($current_page, $config_pages);
                     <i class="bi bi-mortarboard me-2"></i> Hệ Đào Tạo
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_majors.php" class="rounded-3 small <?php echo ($current_page == 'manage_majors.php') ? 'active' : ''; ?>">
-                    <i class="bi bi-book me-2"></i> Ngành Học & Lệ Phí
+                    <i class="bi bi-book me-2"></i> Ngành Học
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_methods.php" class="rounded-3 small <?php echo ($current_page == 'manage_methods.php') ? 'active' : ''; ?>">
-                    <i class="bi bi-list-check me-2"></i> Phương thức XT
+                    <i class="bi bi-list-check me-2"></i> Phương thức & Lệ phí
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_doc_types.php" class="rounded-3 small <?php echo ($current_page == 'manage_doc_types.php') ? 'active' : ''; ?>">
                     <i class="bi bi-folder me-2"></i> Danh mục Tài liệu
@@ -90,10 +90,10 @@ $is_config_page = in_array($current_page, $config_pages);
                     <i class="bi bi-mortarboard me-2"></i> Hệ Đào Tạo
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_majors.php" class="rounded-3 small <?php echo ($current_page == 'manage_majors.php') ? 'active' : ''; ?>">
-                    <i class="bi bi-book me-2"></i> Ngành Học & Lệ Phí
+                    <i class="bi bi-book me-2"></i> Ngành Học
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_methods.php" class="rounded-3 small <?php echo ($current_page == 'manage_methods.php') ? 'active' : ''; ?>">
-                    <i class="bi bi-list-check me-2"></i> Phương thức XT
+                    <i class="bi bi-list-check me-2"></i> Phương thức & Lệ phí
                 </a>
                 <a href="<?php echo BASE_URL; ?>/admin/manage_doc_types.php" class="rounded-3 small <?php echo ($current_page == 'manage_doc_types.php') ? 'active' : ''; ?>">
                     <i class="bi bi-folder me-2"></i> Danh mục Tài liệu

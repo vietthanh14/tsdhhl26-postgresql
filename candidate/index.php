@@ -230,7 +230,7 @@ document.querySelectorAll('.save-priority-btn').forEach(btn => {
         const appId = this.dataset.appId;
         const input = document.querySelector(`.priority-input[data-app-id="${appId}"]`);
         const priority = parseInt(input.value);
-        if (isNaN(priority) || priority < 1) { alert('Thứ tự nguyện vọng phải là số >= 1'); return; }
+        if (isNaN(priority) || priority < 1) { showNotifyModal('Thứ tự nguyện vọng phải là số >= 1', 'warning'); return; }
 
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
