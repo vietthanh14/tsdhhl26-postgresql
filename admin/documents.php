@@ -63,6 +63,9 @@ unset($doc);
         <div class="main-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold mb-0 text-brand">Quản lý Tài liệu Ứng viên</h3>
+                <button type="button" class="btn btn-success shadow-sm" id="btnExportDocs">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Tải xuống Excel (CSV)
+                </button>
             </div>
 
             <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
@@ -137,6 +140,41 @@ unset($doc);
             "drawCallback": function() {
                 $('.dataTables_paginate > .pagination').addClass('pagination-sm mt-3');
             }
+        });
+
+        // Xử lý Tải xuống bằng File vật lý từ Server
+        $('#btnExportDocs').on('click', function(e) {
+            e.preventDefault();
+            var btn = $(this);
+            var originalHtml = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm"></span> Đang tải...').prop('disabled', true);
+            
+            var cacheBuster = new Date().getTime();
+            
+            $.ajax({
+                url: 'api_export_docs_csv.php?t=' + cacheBuster,
+                method: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if(res.status === 'success' && res.file_url) {
+                        var link = document.createElement('a');
+                        link.href = res.file_url;
+                        link.download = res.filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        alert("Lỗi xuất file: " + (res.message || 'Unknown'));
+                    }
+                },
+                error: function(err) {
+                    alert("Có lỗi xảy ra khi tạo file xuất. Vui lòng thử lại.");
+                    console.error(err);
+                },
+                complete: function() {
+                    btn.html(originalHtml).prop('disabled', false);
+                }
+            });
         });
     });
 </script>

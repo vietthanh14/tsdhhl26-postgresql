@@ -13,7 +13,7 @@ try {
     $supabaseAdmin = new SupabaseClient('service');
     
     // 1. Lấy dữ liệu từ Supabase 
-    $query = 'select=*,admission_periods(name),majors(major_name),admission_methods(method_name)&order=submitted_at.desc';
+    $query = 'select=*,admission_periods(name),majors(major_name,education_levels(name)),admission_methods(method_name,application_fee)&order=submitted_at.desc';
     $appsRes = $supabaseAdmin->select('applications', $query);
     if ($appsRes['code'] != 200) {
         throw new Exception("Lỗi khi lấy dữ liệu applications từ Supabase: " . json_encode($appsRes['data'] ?? []));
@@ -21,93 +21,151 @@ try {
     $applications = $appsRes['data'];
 
     // Lấy Profile để map thông tin user
-    $usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number,contact_email');
+    $usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number,contact_email,date_of_birth,gender,ethnicity,province,ward,address_detail,school_name,school_province,priority_area,priority_object,graduation_year,academic_performance,conduct');
     $userProfilesMap = [];
     if ($usersRes['code'] == 200 && is_array($usersRes['data'])) {
         foreach ($usersRes['data'] as $u) {
             $userProfilesMap[$u['id']] = $u;
         }
     }
-
-    // 2. Thiết lập header để ép trình duyệt tải xuống file CSV
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="Danh_sach_tuyen_sinh_' . date('Y-m-d_H-i-s') . '.csv"');
     
-    // Mở luồng Output trực tiếp (Không lưu vào mảng trung gian hay RAM)
-    $output = fopen('php://output', 'w');
+    $filename = 'Danh_sach_Hoso_' . date('Y_m_d_His') . '.csv';
+    $exportDir = __DIR__ . '/../uploads/exports';
+    if (!is_dir($exportDir)) {
+        mkdir($exportDir, 0777, true);
+    }
+    
+    // Quét thư mục để xoá bớt file csv cũ, tránh rác server
+    $files = glob($exportDir . '/*.csv');
+    $now   = time();
+    foreach ($files as $file) {
+        if (is_file($file)) {
+            // Xóa file cũ hơn 1 ngày
+            if ($now - filemtime($file) >= 24 * 60 * 60) {
+                unlink($file);
+            }
+        }
+    }
 
-    // Thêm BOM (Byte Order Mark) để MS Excel hiển thị đúng Tiếng Việt UTF-8
-    fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+    $filepath = $exportDir . '/' . $filename;
+    
+    // Đường dẫn tương đối dùng trên JS (nằm ngang hàng với thư mục admin)
+    // Nếu ứng dụng chạy ở /tsdhhl26/ thì /tsdhhl26/uploads/exports/...
+    $fileUrl = '../uploads/exports/' . $filename; 
 
-    // Xuất dòng Tiêu đề
+    // Mở file vật lý để ghi
+    $output = fopen($filepath, 'w');
+    
+    // Ghi BOM để hỗ trợ Unicode tiếng Việt
+    fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+    // Tiêu đề cột
+    // Dùng dấu chấm phẩy (;) để Excel tiếng Việt tự động chia cột chuẩn xác
     fputcsv($output, [
         'STT', 
-        'Trạng thái hồ sơ trên cổng bộ GD&ĐT', 
+        'Trạng thái hồ sơ', 
         'Họ và tên', 
         'Ngày sinh', 
         'Giới tính',
-        'CMND', 
-        'KV ƯT',
-        'ĐT ƯT', 
-        'Tên tỉnh',
-        'Mã PTXT',
-        'Mã THM',
-        'Điểm ưu tiên giảm dần',
-        'Tổng điểm chưa có ƯT (Thang 30)',
-        'Điểm xét tuyển',
-        'Mã ngành',
-        'Mã hồ sơ',
+        'CMND/CCCD', 
+        'Dân tộc',
+        'Số điện thoại',
+        'Email',
+        'Địa chỉ',
+        'Tỉnh/TP',
+        'Quận/Huyện',
+        'Trường THPT',
+        'Tỉnh trường',
+        'Năm TN',
+        'Học lực',
+        'Hạnh kiểm',
+        'KV Ưu tiên',
+        'ĐT Ưu tiên', 
+        'Hệ đào tạo',
         'Tên ngành',
-        'Trình độ',
-        'Thời gian nhập học',
-        'Link Giấy Báo Nhập Học'
-    ]);
+        'Mã ngành',
+        'Phương thức XT',
+        'Mã PTXT',
+        'Nguyện vọng',
+        'Kỳ tuyển sinh',
+        'Lệ phí',
+        'Trạng thái thanh toán',
+        'Ghi chú admin',
+        'Mã hồ sơ (Hệ thống)',
+        'Ngày nộp'
+    ], ';');
 
-    // 3. Streaming dữ liệu: Đưa vào File từng dòng một (Cực kỳ tiết kiệm RAM)
+    // Streaming dữ liệu
     $stt = 1;
     foreach ($applications as $app) {
         $user = $userProfilesMap[$app['user_id']] ?? [];
         $majorName = $app['majors']['major_name'] ?? '';
-        $educationLevelStr = ''; // Sẽ cần join bảng education_levels nếu muốn chính xác (tạm để trống hoặc tuỳ chỉnh sau)
-        // Hiện tại DB thiếu giới tính, Tên tỉnh, Mã THM, điểm thi. Ta sẽ điền trống cho các trường chưa thu thập.
+        $levelName = $app['majors']['education_levels']['name'] ?? '';
+        $methodName = $app['admission_methods']['method_name'] ?? '';
+        $feeAmount = $app['admission_methods']['application_fee'] ?? $app['fee_amount'] ?? 0;
+        $periodName = $app['admission_periods']['name'] ?? '';
         
         $dob = !empty($user['date_of_birth']) ? date('d/m/Y', strtotime($user['date_of_birth'])) : '';
-        $cmnd = '="' . ($user['identity_card'] ?? '') . '"'; // Giữ số 0
-        $appIdStr = '="' . ($app['id'] ?? '') . '"'; // Tránh Excel format UUID thành lỗi
+        $genderText = ($user['gender'] ?? '') === 'male' ? 'Nam' : (($user['gender'] ?? '') === 'female' ? 'Nữ' : '');
+        
+        // Cố tình thêm nháy đơn (') để Excel hiểu là dạng TEXT, không tự cắt số 0 đầu
+        $cmnd = "'" . ($user['identity_card'] ?? '');
+        $appIdStr = "'" . ($app['id'] ?? '');
+        
+        $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
+        $paymentText = ($app['payment_status'] ?? '') == 'PAID' ? 'Đã TT' : 'Chưa TT';
 
         fputcsv($output, [
             $stt++,                                  // STT
-            $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt'), // Trạng thái
-            $user['full_name'] ?? '',                // Họ và tên
+            $statusText,                             // Trạng thái
+            $user['full_name'] ?? '',                // Họ tên
             $dob,                                    // Ngày sinh
-            '',                                      // Giới tính (Chưa có trong DB)
+            $genderText,                             // Giới tính
             $cmnd,                                   // CMND
-            '',                                      // KV ƯT
-            '',                                      // ĐT ƯT
-            '',                                      // Tên tỉnh (Chưa có trong DB)
-            $app['admission_method_id'] ?? '',       // Mã PTXT
-            '',                                      // Mã THM
-            '',                                      // Điểm ưu tiên giảm dần
-            '',                                      // Tổng điểm chưa có ƯT
-            '',                                      // Điểm xét tuyển
-            $app['major_id'] ?? '',                  // Mã ngành
-            $appIdStr,                               // Mã hồ sơ (Mã đơn UUID)
+            $user['ethnicity'] ?? '',                // Dân tộc
+            $user['phone_number'] ?? '',             // SĐT
+            $user['contact_email'] ?? '',            // Email
+            $user['address_detail'] ?? '',           // Địa chỉ
+            $user['province'] ?? '',                 // Tỉnh
+            $user['ward'] ?? '',                     // Quận/Huyện
+            $user['school_name'] ?? '',              // Trường THPT
+            $user['school_province'] ?? '',          // Tỉnh trường
+            $user['graduation_year'] ?? '',          // Năm TN
+            $user['academic_performance'] ?? '',     // Học lực
+            $user['conduct'] ?? '',                  // Hạnh kiểm
+            $user['priority_area'] ?? '',            // KV ưu tiên
+            $user['priority_object'] ?? '',          // ĐT ưu tiên
+            $levelName,                              // Hệ đào tạo
             $majorName,                              // Tên ngành
-            $educationLevelStr,                      // Trình độ
-            '',                                      // Thời gian nhập học
-            ''                                       // Link Giấy báo nhập học
-        ]);
+            $app['major_id'] ?? '',                  // Mã ngành
+            $methodName,                             // Phương thức XT
+            $app['admission_method_id'] ?? '',       // Mã PTXT
+            $app['priority'] ?? 1,                   // Nguyện vọng
+            $periodName,                             // Kỳ tuyển sinh
+            $feeAmount,                              // Lệ phí
+            $paymentText,                            // Thanh toán
+            $app['admin_notes'] ?? '',               // Ghi chú admin
+            $appIdStr,                               // Mã hồ sơ
+            date('d/m/Y H:i', strtotime($app['submitted_at'])) // Ngày nộp
+        ], ';');
     }
 
-    // Đóng luồng
     fclose($output);
+
+    // Dọn dẹp buffer nếu có và trả về JSON
+    if (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json; charset=utf-8');
+    
+    echo json_encode([
+        'status' => 'success',
+        'filename' => $filename,
+        'file_url' => $fileUrl
+    ]);
     exit;
 
 } catch (Exception $e) {
-    // Nếu có lỗi, trả ra màn hình thay vì tải file
-    header('Content-Type: text/html; charset=utf-8');
-    echo "<h1>Lỗi xuất dữ liệu</h1>";
-    echo "<p>" . htmlspecialchars($e->getMessage()) . "</p>";
-    error_log("CSV Export Error: " . $e->getMessage());
+    if (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     exit;
 }
