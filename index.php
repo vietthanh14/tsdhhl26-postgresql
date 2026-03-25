@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Nối Username với đuôi email ảo để login qua Supabase Auth
             $fake_email = $username . '@halou.system';
-            
+
             $supabase = new SupabaseClient('anon');
             $response = $supabase->signIn($fake_email, $password);
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['access_token'] = $response['data']['access_token'];
                 $_SESSION['user_id'] = $response['data']['user']['id'];
                 $_SESSION['email'] = $response['data']['user']['email'] ?? '';
-                
+
                 header('Location: ' . BASE_URL . '/candidate/index.php');
                 exit;
             } else {
@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,48 +54,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
 </head>
+
 <body>
 
-<?php include __DIR__ . '/includes/header.php'; ?>
+    <?php include __DIR__ . '/includes/header.php'; ?>
 
-<div class="page-wrapper">
-    <div class="auth-card">
-        <div class="text-center mb-4">
-            <h3 class="auth-title fw-bold">ĐĂNG NHẬP</h3>
-            <p class="text-muted small">Cổng thông tin tuyển sinh Đại học Hạ Long</p>
-        </div>
+    <div class="page-wrapper">
+        <div class="auth-card">
+            <div class="text-center mb-4">
+                <h3 class="auth-title fw-bold">ĐĂNG NHẬP</h3>
 
-        <?php if($error): ?>
-            <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?></div>
-        <?php endif; ?>
+            </div>
 
-        <form method="POST" action="">
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Tên đăng nhập</label>
-                <input type="text" name="username" class="form-control" required placeholder="Nhập tên đăng nhập">
+            <?php if ($error): ?>
+                <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên đăng nhập</label>
+                    <input type="text" name="username" class="form-control" required placeholder="Nhập tên đăng nhập">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="<?php echo BASE_URL; ?>/auth/forgot_password.php"
+                        class="text-decoration-none small text-brand fw-medium">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn btn-brand w-100 py-2">ĐĂNG NHẬP</button>
+            </form>
+
+            <div class="text-center mt-4 pt-3 border-top pb-1">
+                <span class="small text-muted">Chưa có tài khoản?</span>
+                <a href="<?php echo BASE_URL; ?>/auth/register.php"
+                    class="text-decoration-none fw-semibold text-brand small">Đăng ký mới</a>
             </div>
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Mật khẩu</label>
-                <input type="password" name="password" class="form-control" required placeholder="••••••••">
-            </div>
-            
-            <div class="d-flex justify-content-end mb-3">
-                <a href="<?php echo BASE_URL; ?>/auth/forgot_password.php" class="text-decoration-none small text-brand fw-medium">Quên mật khẩu?</a>
-            </div>
-            
-            <button type="submit" class="btn btn-brand w-100 py-2">ĐĂNG NHẬP</button>
-        </form>
-        
-        <div class="text-center mt-4 pt-3 border-top pb-1">
-            <span class="small text-muted">Chưa có tài khoản?</span> 
-            <a href="<?php echo BASE_URL; ?>/auth/register.php" class="text-decoration-none fw-semibold text-brand small">Đăng ký mới</a>
         </div>
     </div>
-</div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
 
+</html>

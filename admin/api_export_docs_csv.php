@@ -61,7 +61,6 @@ try {
         'Số điện thoại',
         'Email',
         'Loại tài liệu',
-        'Môn năng khiếu (Nếu có)',
         'Ngày tải lên',
         'Link tải tài liệu'
     ], ';');
@@ -72,10 +71,10 @@ try {
         $user = $userProfilesMap[$doc['user_id']] ?? [];
         $docTypeName = $doc['document_types']['type_name'] ?? 'Khác';
         
-        $cmnd = "'" . ($user['identity_card'] ?? '');
+        // Thay vì nháy đơn, dùng dạng ="chuỗi" để Excel hiểu là Text mà không bị hiện nháy đơn và không mất số 0
+        $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
         $dateUploaded = !empty($doc['uploaded_at']) ? date('d/m/Y H:i', strtotime($doc['uploaded_at'])) : '';
         $docUrl = $doc['drive_file_url'] ?? '';
-        $subject = $doc['subject_name'] ?? '';
 
         fputcsv($output, [
             $stt++,
@@ -84,7 +83,6 @@ try {
             $user['phone_number'] ?? '',
             $user['contact_email'] ?? '',
             $docTypeName,
-            $subject,
             $dateUploaded,
             $docUrl
         ], ';');

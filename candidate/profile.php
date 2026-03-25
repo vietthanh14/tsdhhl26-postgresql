@@ -359,15 +359,6 @@ $profile = $profileResponse['data'][0];
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
-                                            <label class="form-label text-muted fw-bold">Địa chỉ chi tiết (Trường THPT)</label>
-                                            <input type="text" name="school_address_detail" id="schoolAddressDetail" class="form-control"
-                                                placeholder="Ví dụ: Số 5, Đường Trần Phú"
-                                                value="<?php echo htmlspecialchars($profile['school_address_detail'] ?? ''); ?>">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
                                             <label class="form-label text-muted fw-bold">Học lực lớp 12</label>
                                             <select name="academic_performance" class="form-select">
                                                 <option value="">-- Chọn học lực --</option>

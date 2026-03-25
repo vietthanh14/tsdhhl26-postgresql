@@ -108,9 +108,9 @@ try {
         $dob = !empty($user['date_of_birth']) ? date('d/m/Y', strtotime($user['date_of_birth'])) : '';
         $genderText = ($user['gender'] ?? '') === 'male' ? 'Nam' : (($user['gender'] ?? '') === 'female' ? 'Nữ' : '');
         
-        // Cố tình thêm nháy đơn (') để Excel hiểu là dạng TEXT, không tự cắt số 0 đầu
-        $cmnd = "'" . ($user['identity_card'] ?? '');
-        $appIdStr = "'" . ($app['id'] ?? '');
+        // Thay vì nháy đơn, dùng dạng ="chuỗi" để Excel hiểu là Text mà không bị hiện nháy đơn và không mất số 0
+        $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
+        $appIdStr = '="' . ($app['id'] ?? '') . '"';
         
         $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
         $paymentText = ($app['payment_status'] ?? '') == 'PAID' ? 'Đã TT' : 'Chưa TT';

@@ -71,7 +71,7 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                 <div class="col-12 mb-4">
                     <div class="alert alert-warning border-start border-warning border-4">
                         <h5 class="alert-heading">⚠️ Thông báo quan trọng!</h5>
-                        <p class="mb-0">Hồ sơ cá nhân của bạn chưa đầy đủ (Số điện thoại, địa chỉ...). Vui lòng <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="alert-link">cập nhật thông tin</a> trước khi đăng ký xét tuyển.</p>
+                        <p class="mb-0">Vui lòng kiểm tra, <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="alert-link">cập nhật thông tin</a> , đăng tải minh chứng đầy đủ trước khi đăng ký xét tuyển.</p>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -226,16 +226,8 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                         </div>
                     </div>
                 </div>
-                
-                <!-- Helper card -->
-                <div class="col-md-6 mt-3">
-                    <div class="card h-100">
-                        <div class="card-body border-start border-info border-4">
-                            <h6 class="text-info fw-bold">HƯỚNG DẪN</h6>
-                            <p class="text-muted small mb-0">Hồ sơ sẽ chỉ được đưa vào trạng thái duyệt khi bạn đã nộp đầy đủ các tài liệu yêu cầu tại mục <b>Tài liệu của tôi</b> và hoàn tất đóng lệ phí xét tuyển.</p>
-                        </div>
-                    </div>
-                </div>
+
+
             </div>
         </div>
     </div>

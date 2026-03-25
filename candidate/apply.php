@@ -431,7 +431,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <option value="">-- Chọn Hệ đào tạo --</option>
                                                 <?php foreach ($levels as $l): ?>
                                                     <option value="<?php echo $l['id']; ?>" <?php echo ($selected_level_id == $l['id']) ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($l['name']); ?></option>
+                                                        <?php echo htmlspecialchars($l['name']); ?>
+                                                    </option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
@@ -473,16 +474,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                         <div class="alert alert-warning small py-2 mb-4">
                                             <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                                            Nếu thông tin chưa chính xác, hệ thống có thể từ chối hồ sơ. Vui lòng <a
+                                            Nếu thông tin chưa chính xác, vui lòng <a
                                                 href="<?php echo BASE_URL; ?>/candidate/profile.php"
                                                 class="fw-bold text-decoration-none" target="_blank">cập nhật tại đây</a>
                                             trước khi nộp.
                                         </div>
                                         <div class="d-flex justify-content-between">
                                             <button type="button" class="btn btn-secondary px-4 py-2 text-white fw-semibold"
-                                                onclick="goToStep(1)">&laquo; Xác chọn lại Đợt</button>
+                                                onclick="goToStep(1)">&laquo; Quay lại</button>
                                             <button type="button" class="btn btn-brand px-4 py-2 fw-semibold"
-                                                onclick="goToStep(3)">Chính xác, Tiếp tục &raquo;</button>
+                                                onclick="goToStep(3)">Tiếp tục &raquo;</button>
                                         </div>
                                     </div>
 
@@ -520,8 +521,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="priority" id="priorityInput"
                                                 min="1" max="10" value="1" required>
-                                            <div class="form-text text-muted">Nhập số thứ tự ưu tiên (Nguyện vọng 1 là ưu
-                                                tiên cao nhất). Có thể chỉnh sửa lại sau trong Bảng điều khiển.</div>
+                                            <div class="form-text text-muted">Nhập số thứ tự ưu tiên.Có thể chỉnh sửa lại
+                                                sau trong Bảng điều khiển.</div>
                                         </div>
 
                                         <div id="dupCheckMsg" class="d-none alert alert-danger py-2 mb-3"></div>
@@ -529,7 +530,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <button type="button" class="btn btn-secondary px-4 py-2 text-white fw-semibold"
                                                 onclick="goToStep(2)">&laquo; Rà soát lại Profile</button>
                                             <button type="button" class="btn btn-brand px-4 py-2 fw-semibold"
-                                                id="goToPaymentBtn" onclick="checkDupThenPay()">Thanh toán bằng VietQR
+                                                id="goToPaymentBtn" onclick="checkDupThenPay()">Tiếp tục
                                                 &raquo;</button>
                                         </div>
                                     </div>
@@ -953,7 +954,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 showNotifyModal('Lỗi kiểm tra: ' + e.message, 'danger');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Thanh toán bằng VietQR »';
+                btn.innerText = 'Tiếp tục »';
             }
         }
 
