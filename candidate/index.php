@@ -33,7 +33,7 @@ $applications = ($appsResponse['code'] == 200) ? $appsResponse['data'] : [];
 // Lấy danh sách phương thức xét tuyển (từ cache, TTL 1 giờ)
 require_once __DIR__ . '/../lib/Cache.php';
 $methodsData = Cache::remember('admission_methods', 3600, function() use ($supabase) {
-    $res = $supabase->select('admission_methods', 'select=id,method_name&order=id.asc');
+    $res = $supabase->select('admission_methods', 'select=id,method_name,application_fee&order=id.asc');
     return ($res['code'] == 200) ? $res['data'] : [];
 });
 $methodsMap = [];
@@ -90,7 +90,7 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                             <?php else: ?>
                                 <!-- Desktop: Table (hidden on mobile) -->
                                 <div class="table-responsive d-none d-md-block">
-                                    <table class="table table-hover mb-0 align-middle">
+                                    <table class="table table-hover mb-0 align-middle small">
                                         <thead class="table-light">
                                             <tr>
                                                 <th class="ps-3" style="width:90px; white-space:nowrap;">NV</th>
@@ -100,6 +100,7 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                                 <th>Đợt xét tuyển</th>
                                                 <th>Lệ phí</th>
                                                 <th>Trạng thái</th>
+                                                <th>Ghi chú</th>
                                                 <th>Nhóm Zalo</th>
                                             </tr>
                                         </thead>
@@ -133,6 +134,15 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                                         elseif($app['status'] == 'REJECTED') { $statusClass = 'bg-danger'; $statusText = '❌ Từ chối'; }
                                                     ?>
                                                     <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                                                </td>
+                                                <td class="small" style="max-width:160px;">
+                                                    <?php if (!empty($app['admin_notes'])): ?>
+                                                        <div class="text-muted fst-italic" style="font-size:.78rem;white-space:pre-wrap;word-break:break-word;">
+                                                            <?php echo htmlspecialchars($app['admin_notes']); ?>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <span class="text-muted" style="font-size:.75rem;">—</span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
                                                     <?php $zalo = $app['majors']['zalo_link'] ?? ''; ?>
@@ -179,6 +189,14 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                                 <div class="col-7"><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></div>
                                                 <div class="col-5 text-muted fw-medium">Lệ phí</div>
                                                 <div class="col-7 fw-semibold"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>
+                                                <?php if (!empty($app['admin_notes'])): ?>
+                                                    <div class="col-12 mt-2">
+                                                        <div class="rounded p-2" style="background:#f1f5f9;font-size:.78rem;">
+                                                            <i class="bi bi-chat-left-text text-brand me-1"></i>
+                                                            <span class="text-muted fst-italic"><?php echo htmlspecialchars($app['admin_notes']); ?></span>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                             <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top" style="<?php echo $isApproved ? 'opacity:.4;pointer-events:none;' : ''; ?>">
                                                 <small class="text-muted fw-medium">Nguyện vọng:</small>

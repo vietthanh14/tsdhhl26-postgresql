@@ -104,7 +104,7 @@ unset($doc);
                                     </td>
                                     <td class="text-end">
                                         <?php if (!empty($doc['drive_file_url'])): ?>
-                                            <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand rounded-pill px-3">
+                                            <a href="<?php echo htmlspecialchars($doc['drive_file_url']); ?>" target="_blank" class="btn btn-sm btn-outline-brand">
                                                 <i class="bi bi-box-arrow-up-right"></i> Xem
                                             </a>
                                         <?php else: ?>

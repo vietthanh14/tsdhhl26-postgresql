@@ -18,6 +18,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem); /* 13px → 15px */
 }
 .page-wrapper {
     flex: 1;
@@ -63,7 +64,7 @@ body {
 .btn-brand:hover, .btn-brand:focus { background-color: var(--brand-hover); color: #fff; }
 .form-control { border-radius: 4px; border: 1px solid #cbd5e1; padding: .6rem .75rem; }
 .form-control:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(26,58,110,.15); }
-.form-label { font-size: clamp(0.875rem, 1vw + 0.5rem, 1rem); color: #475569; margin-bottom: .3rem; }
+.form-label { font-size: clamp(0.8rem, 0.75rem + 0.2vw, 0.9rem); color: #475569; margin-bottom: .3rem; }
 .text-brand { color: var(--brand) !important; }
 .bg-brand { background-color: var(--brand) !important; }
 .border-brand { border-color: var(--brand) !important; border-width: 1px; border-style: solid; }
@@ -200,13 +201,12 @@ select.form-select { cursor: pointer; }
     }
 
     /* ── Mobile Compact: Typography ── */
-    body { font-size: 14px; }
     h1, .h1 { font-size: 1.4rem; }
     h2, .h2 { font-size: 1.2rem; }
     h3, .h3 { font-size: 1.1rem; }
     h4, .h4 { font-size: 1rem; }
     h5, .h5, h6, .h6 { font-size: .9rem; }
-    p, li, td, th { font-size: .875rem; }
+    p, li, td, th { font-size: .84rem; }
 
     /* ── Mobile Compact: Spacing ── */
     .page-wrapper { padding: 20px 10px; }

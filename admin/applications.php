@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $app_id = $_POST['app_id'];
         $data = [
             'status' => $_POST['status'],
+            'admin_notes' => trim($_POST['admin_notes'] ?? ''),
             'updated_at' => date('Y-m-d H:i:sP')
         ];
         $res = $supabaseAdmin->update('applications', 'id', $app_id, $data);
@@ -67,7 +68,7 @@ $periodsRes = $supabaseAdmin->select('admission_periods', 'order=id.desc');
 $periods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
 
 // Lay danh sach ho so
-$query = 'select=*,admission_periods(name),majors(major_name),admission_methods(method_name)&order=submitted_at.desc';
+$query = 'select=*,admission_periods(name),majors(major_name),admission_methods(method_name,application_fee)&order=submitted_at.desc';
 $appsRes = $supabaseAdmin->select('applications', $query);
 $applications = ($appsRes['code'] == 200) ? $appsRes['data'] : [];
 
@@ -115,7 +116,7 @@ unset($app);
         <div class="main-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold m-0 text-brand">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
-                <a href="api_export_csv.php" class="btn btn-success rounded-pill fw-bold shadow-sm" id="btnExportDocs">
+                <a href="api_export_csv.php" class="btn btn-sm btn-outline-success" id="btnExportDocs">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Tải xuống Excel (CSV)
                 </a>
             </div>
@@ -133,9 +134,9 @@ unset($app);
                             <span class="fw-bold text-brand me-2"><i class="bi bi-check2-all"></i> Đã chọn <span id="selectedCount" class="badge bg-brand">0</span> hồ sơ:</span>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" onclick="submitBulk('mark_pending')"><i class="bi bi-hourglass-split"></i> Chờ duyệt</button>
-                            <button type="button" class="btn btn-brand btn-sm px-3 rounded-pill" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt</button>
-                            <button type="button" class="btn btn-danger btn-sm px-3 rounded-pill" onclick="submitBulk('mark_rejected')"><i class="bi bi-x-circle"></i> Từ chối</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="submitBulk('mark_pending')"><i class="bi bi-hourglass-split"></i> Chờ duyệt</button>
+                            <button type="button" class="btn btn-sm btn-outline-brand" onclick="submitBulk('mark_approved')"><i class="bi bi-check-circle"></i> Phê duyệt</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="submitBulk('mark_rejected')"><i class="bi bi-x-circle"></i> Từ chối</button>
                         </div>
                     </div>
                 </div>
@@ -152,6 +153,7 @@ unset($app);
                                         <th>Ngành đăng ký</th>
                                         <th>Biên lai</th>
                                         <th>Hồ sơ</th>
+                                        <th>Ghi chú</th>
                                         <th class="text-end">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -185,11 +187,14 @@ unset($app);
                                             </div>
                                         </td>
                                         <td>
+                                            <?php 
+                                                $feeDisplay = $method['application_fee'] ?? $app['fee_amount'] ?? 0;
+                                            ?>
                                             <?php if (!empty($app['receipt_url'])): ?>
                                                 <a href="<?php echo htmlspecialchars($app['receipt_url']); ?>" target="_blank" class="btn btn-xs btn-outline-brand py-1 px-2 border-0 bg-light" style="font-size: 0.75rem;">
                                                     <i class="bi bi-image"></i> Biên lai
                                                 </a>
-                                                <div class="small fw-bold mt-1 text-center" style="font-size: 0.7rem;"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?>đ</div>
+                                                <div class="small fw-bold mt-1 text-center" style="font-size: 0.7rem;"><?php echo number_format($feeDisplay, 0, ',', '.'); ?>đ</div>
                                             <?php else: ?>
                                                 <span class="text-muted italic small">N/A</span>
                                             <?php endif; ?>
@@ -197,8 +202,17 @@ unset($app);
                                         <td>
                                             <span class="badge badge-status <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
                                         </td>
+                                        <td class="small" style="max-width:180px;">
+                                            <?php if (!empty($app['admin_notes'])): ?>
+                                                <div class="text-muted" style="font-size:.78rem;white-space:pre-wrap;word-break:break-word;">
+                                                    <?php echo htmlspecialchars($app['admin_notes']); ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted" style="font-size:.75rem;">—</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-end">
-                                            <button type="button" class="btn btn-sm btn-brand rounded-pill px-3" onclick="openUpdateModal('<?php echo $app['id']; ?>', '<?php echo $app['status']; ?>')">
+                                            <button type="button" class="btn btn-sm btn-outline-brand" onclick="openUpdateModal('<?php echo $app['id']; ?>', '<?php echo $app['status']; ?>', '<?php echo htmlspecialchars($app['admin_notes'] ?? '', ENT_QUOTES); ?>')">
                                                 <i class="bi bi-check2-square"></i> Duyệt
                                             </button>
                                         </td>
@@ -227,13 +241,17 @@ unset($app);
                     <input type="hidden" name="action" value="update_status">
                     <input type="hidden" name="app_id" id="modal_app_id">
                     
-                    <div class="">
+                    <div class="mb-3">
                         <label class="form-label fw-bold small text-muted text-uppercase mb-2">Trạng thái Hồ sơ</label>
                         <select class="form-select border-0 bg-light" name="status" id="modal_status">
                             <option value="PENDING">Chờ duyệt</option>
                             <option value="APPROVED">Hợp lệ (Trúng tuyển)</option>
                             <option value="REJECTED">Từ chối (Tài liệu không hợp lệ)</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Ghi chú của Quản trị viên</label>
+                        <textarea class="form-control border-0 bg-light" name="admin_notes" id="modal_notes" rows="3" placeholder="Nhập ghi chú (nếu có)..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
@@ -329,9 +347,10 @@ unset($app);
     });
 
     const updateModal = new bootstrap.Modal(document.getElementById('updateModal'));
-    function openUpdateModal(appId, currentStatus) {
+    function openUpdateModal(appId, currentStatus, notes) {
         document.getElementById('modal_app_id').value = appId;
         document.getElementById('modal_status').value = currentStatus;
+        document.getElementById('modal_notes').value = notes || '';
         updateModal.show();
     }
 </script>

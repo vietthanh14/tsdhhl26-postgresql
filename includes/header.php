@@ -40,7 +40,7 @@ if (isset($_SESSION['user_id'])) {
             <!-- Right side: Nav links (desktop) + User dropdown (always) -->
             <div class="d-flex align-items-center gap-3 gap-md-4 ms-auto ps-2">
                 <!-- Nav links -->
-                <a href="<?php echo BASE_URL; ?>/" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
+                <a href="<?php echo BASE_URL; ?>/<?php echo (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) ? 'admin/index.php' : ''; ?>" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
                     <i class="bi bi-house-door-fill" aria-hidden="true"></i> <span class="d-none d-md-inline">Trang chủ</span>
                 </a>
                 <a href="<?php echo BASE_URL; ?>/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">

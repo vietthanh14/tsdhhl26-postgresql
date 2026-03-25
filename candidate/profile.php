@@ -2,6 +2,7 @@
 // candidate/profile.php
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/Cache.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . '/auth/login.php');
@@ -520,11 +521,12 @@ $profile = $profileResponse['data'][0];
                                     <select id="docTypeSelect" class="form-select form-select-sm">
                                         <option value="">-- Chọn danh mục --</option>
                                         <?php
-                                        $docTypesRes = $supabaseAdmin->select('document_types', 'select=*');
-                                        if ($docTypesRes['code'] == 200) {
-                                            foreach ($docTypesRes['data'] as $type) {
-                                                echo "<option value='{$type['id']}'>{$type['type_name']}</option>";
-                                            }
+                                        $docTypes = Cache::remember('document_types', 3600, function() use ($supabaseAdmin) {
+                                            $res = $supabaseAdmin->select('document_types', 'select=*&order=id.asc');
+                                            return ($res['code'] == 200) ? $res['data'] : [];
+                                        });
+                                        foreach ($docTypes as $type) {
+                                            echo "<option value='{$type['id']}'>{$type['type_name']}</option>";
                                         }
                                         ?>
                                     </select>
@@ -558,7 +560,7 @@ $profile = $profileResponse['data'][0];
                                     foreach ($userDocsRes['data'] as $doc) {
                                         // Tìm tên loại tài liệu
                                         $typeName = "Tài liệu #{$doc['document_type_id']}";
-                                        foreach ($docTypesRes['data'] as $dt) {
+                                        foreach ($docTypes as $dt) {
                                             if ($dt['id'] == $doc['document_type_id']) {
                                                 $typeName = $dt['type_name'];
                                                 break;
