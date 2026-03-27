@@ -44,6 +44,7 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/logo.png">
     <title>Trang Của Bạn - Tuyển sinh Đại học Hạ Long</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -70,8 +71,13 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                 <?php if(empty($profile['phone_number']) || empty($profile['address'])): ?>
                 <div class="col-12 mb-4">
                     <div class="alert alert-warning border-start border-warning border-4">
-                        <h5 class="alert-heading">⚠️ Thông báo quan trọng!</h5>
-                        <p class="mb-0">Vui lòng kiểm tra, <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="alert-link">cập nhật thông tin</a> , đăng tải minh chứng đầy đủ trước khi đăng ký xét tuyển.</p>
+                        <h5 class="alert-heading">⚠️ Thông báo! Vui lòng kiểm tra, đọc trước các nội dung sau:</h5>
+                        <p class="mb-0">- <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="alert-link">Cập nhật thông tin</a> , đăng tải minh chứng đầy đủ trước khi đăng ký xét tuyển.</p>
+                        <p class="mb-0">- <a href="https://uhl.edu.vn/TuyensinhHeDaihoc_8699.htm" class="alert-link">Thông tin tuyển sinh</a> trình độ đại học chính quy năm 2026.</p>
+                        <p class="mb-0">- <a href="https://uhl.edu.vn/QuydoidiemChungchiNgoainguHSG_5722.htm" class="alert-link">Quy đổi điểm chứng chỉ ngoại ngữ quốc tế </a> đối với phương thức
+
+xét tuyển kết hợp (Mã phương thức: 409).</p>
+                        <p class="mb-0">- <a href="https://uhl.edu.vn/CACTINHDIEMXETTUYENTUYENSINHNAM_11210.htm" class="alert-link">Cách tính điểm</a> xét tuyển sinh năm 2026.</p>
                     </div>
                 </div>
                 <?php endif; ?>

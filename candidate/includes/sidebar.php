@@ -35,7 +35,7 @@ $levelFileMap = [
 <!-- Desktop Sidebar -->
 <div class="col-md-2 sidebar d-none d-md-block px-0 shadow">
     <div class="sidebar-header text-center py-4 border-bottom border-light border-opacity-10 mb-3">
-        <h5 class="text-white fw-bold mb-0">HALOU PORTAL</h5>
+        <h5 class="text-white fw-bold mb-0">CỔNG ĐĂNG KÝ</h5>
         <small class="text-light text-opacity-75">Dành cho Thí sinh</small>
     </div>
     
@@ -75,7 +75,7 @@ $levelFileMap = [
 <div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="candidateSidebarMobile" aria-labelledby="candidateSidebarMobileLabel"
      data-bs-theme="dark" style="background-color: #1A3A6E; color: #cbd5e1;">
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-3">
-        <h5 class="offcanvas-title text-white fw-bold" id="candidateSidebarMobileLabel">HALOU PORTAL</h5>
+        <h5 class="offcanvas-title text-white fw-bold" id="candidateSidebarMobileLabel">CỔNG ĐĂNG KÝ</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column p-3 gap-1 sidebar-menu">

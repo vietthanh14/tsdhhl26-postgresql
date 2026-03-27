@@ -88,6 +88,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/logo.png">
     <title>Quản lý Thí sinh - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -373,20 +374,21 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                         <label class="form-label fw-bold small text-muted">Học lực lớp 12</label>
                         <select name="academic_performance" id="edit_academic_performance" class="form-select">
                             <option value="">-- Chọn --</option>
-                            <option value="Giỏi">Giỏi</option>
-                            <option value="Khá">Khá</option>
-                            <option value="Trung bình">Trung bình</option>
-                            <option value="Yếu">Yếu</option>
+                            <option value="Xuất sắc">Xuất sắc(Tốt)</option>
+                            <option value="Giỏi">Giỏi(Tốt)</option>
+                            <option value="Khá">Khá(Khá)</option>
+                            <option value="Trung bình">Trung bình(Đạt)</option>
+                            <option value="Yếu">Yếu(Chưa đạt)</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold small text-muted">Hạnh kiểm lớp 12</label>
                         <select name="conduct" id="edit_conduct" class="form-select">
                             <option value="">-- Chọn --</option>
-                            <option value="Tốt">Tốt</option>
-                            <option value="Khá">Khá</option>
-                            <option value="Trung bình">Trung bình</option>
-                            <option value="Yếu">Yếu</option>
+                            <option value="Tốt">Tốt(Tốt)</option>
+                            <option value="Khá">Khá(Khá)</option>
+                            <option value="Trung bình">Trung bình(Đạt)</option>
+                            <option value="Yếu">Yếu(Chưa đạt)</option>
                         </select>
                     </div>
                 </div>

@@ -125,6 +125,7 @@ $profile = $profileResponse['data'][0];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/logo.png">
     <title>Thông tin cá nhân - Tuyển sinh</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -362,20 +363,21 @@ $profile = $profileResponse['data'][0];
                                             <label class="form-label text-muted fw-bold">Học lực lớp 12</label>
                                             <select name="academic_performance" class="form-select">
                                                 <option value="">-- Chọn học lực --</option>
-                                                <option value="Giỏi" <?php echo ($profile['academic_performance'] ?? '') === 'Giỏi' ? 'selected' : ''; ?>>Giỏi</option>
-                                                <option value="Khá" <?php echo ($profile['academic_performance'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá</option>
-                                                <option value="Trung bình" <?php echo ($profile['academic_performance'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình</option>
-                                                <option value="Yếu" <?php echo ($profile['academic_performance'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu</option>
+                                                <option value="Xuất sắc" <?php echo ($profile['academic_performance'] ?? '') === 'Xuất sắc' ? 'selected' : ''; ?>>Xuất sắc(Tốt)</option>
+                                                <option value="Giỏi" <?php echo ($profile['academic_performance'] ?? '') === 'Giỏi' ? 'selected' : ''; ?>>Giỏi(Tốt)</option>
+                                                <option value="Khá" <?php echo ($profile['academic_performance'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá(Khá)</option>
+                                                <option value="Trung bình" <?php echo ($profile['academic_performance'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình(Đạt)</option>
+                                                <option value="Yếu" <?php echo ($profile['academic_performance'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu(Chưa đạt)</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mt-3 mt-md-0">
                                             <label class="form-label text-muted fw-bold">Hạnh kiểm lớp 12</label>
                                             <select name="conduct" class="form-select">
                                                 <option value="">-- Chọn hạnh kiểm --</option>
-                                                <option value="Tốt" <?php echo ($profile['conduct'] ?? '') === 'Tốt' ? 'selected' : ''; ?>>Tốt</option>
-                                                <option value="Khá" <?php echo ($profile['conduct'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá</option>
-                                                <option value="Trung bình" <?php echo ($profile['conduct'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình</option>
-                                                <option value="Yếu" <?php echo ($profile['conduct'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu</option>
+                                                <option value="Tốt" <?php echo ($profile['conduct'] ?? '') === 'Tốt' ? 'selected' : ''; ?>>Tốt(Tốt)</option>
+                                                <option value="Khá" <?php echo ($profile['conduct'] ?? '') === 'Khá' ? 'selected' : ''; ?>>Khá(Khá)</option>
+                                                <option value="Trung bình" <?php echo ($profile['conduct'] ?? '') === 'Trung bình' ? 'selected' : ''; ?>>Trung bình(Đạt)</option>
+                                                <option value="Yếu" <?php echo ($profile['conduct'] ?? '') === 'Yếu' ? 'selected' : ''; ?>>Yếu(Chưa đạt)</option>
                                             </select>
                                         </div>
                                     </div>
