@@ -20,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             'school_name' => !empty($_POST['school_name']) ? trim($_POST['school_name']) : null,
             'school_province' => !empty($_POST['school_province']) ? trim($_POST['school_province']) : null,
             'school_ward' => !empty($_POST['school_ward']) ? trim($_POST['school_ward']) : null,
-            'school_address_detail' => !empty($_POST['school_address_detail']) ? trim($_POST['school_address_detail']) : null,
             'priority_area' => !empty($_POST['priority_area']) ? trim($_POST['priority_area']) : null,
             'academic_performance' => !empty($_POST['academic_performance']) ? trim($_POST['academic_performance']) : null,
             'conduct' => !empty($_POST['conduct']) ? trim($_POST['conduct']) : null,
@@ -219,7 +218,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
         const u = usersData[idx];
         const addressParts = [u.address_detail, u.ward, u.province].filter(Boolean);
         const fullAddress = addressParts.length ? addressParts.join(', ') : null;
-        const schoolAddress = [u.school_address_detail, u.school_ward, u.school_province].filter(Boolean).join(', ') || null;
+        const schoolAddress = [u.school_ward, u.school_province].filter(Boolean).join(', ') || null;
 
         let html = '';
 
@@ -255,7 +254,6 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
         html += `<div class="col-md-4"><div class="detail-label">Tên trường</div>${dv(u.school_name)}</div>`;
         html += `<div class="col-md-4"><div class="detail-label">Tỉnh (Trường)</div>${dv(u.school_province)}</div>`;
         html += `<div class="col-md-4"><div class="detail-label">Phường/Xã (Trường)</div>${dv(u.school_ward)}</div>`;
-        html += `<div class="col-md-4"><div class="detail-label">Địa chỉ (Trường)</div>${dv(u.school_address_detail)}</div>`;
         html += `<div class="col-md-4"><div class="detail-label">Năm TN THPT</div>${dv(u.graduation_year)}</div>`;
         html += `<div class="col-md-4"><div class="detail-label">Học lực lớp 12</div>${dv(u.academic_performance)}</div>`;
         html += `<div class="col-md-4"><div class="detail-label">Hạnh kiểm lớp 12</div>${dv(u.conduct)}</div>`;
@@ -314,7 +312,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
             'full_name', 'identity_card', 'date_of_birth', 'gender', 'ethnicity',
             'contact_email', 'phone_number',
             'address_detail',
-            'school_name', 'school_address_detail',
+            'school_name',
             'graduation_year', 'academic_performance', 'conduct',
             'priority_area', 'priority_object',
             'prev_degree_level', 'prev_major', 'prev_graduation_rank',

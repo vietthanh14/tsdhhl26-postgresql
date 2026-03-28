@@ -33,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $school_name = trim($_POST['school_name'] ?? '');
     $school_province_name = trim($_POST['school_province_name'] ?? '');
     $school_ward_name = trim($_POST['school_ward_name'] ?? '');
-    $school_address_detail = trim($_POST['school_address_detail'] ?? '');
     $priority_area = trim($_POST['priority_area'] ?? '');
     $academic_performance = trim($_POST['academic_performance'] ?? '');
     $conduct = trim($_POST['conduct'] ?? '');
@@ -66,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'school_name' => $school_name ?: null,
             'school_province' => $school_province_name ?: null,
             'school_ward' => $school_ward_name ?: null,
-            'school_address_detail' => $school_address_detail ?: null,
             'priority_area' => $priority_area ?: null,
             'academic_performance' => $academic_performance ?: null,
             'conduct' => $conduct ?: null,
@@ -471,7 +469,6 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <div class="mt-5 d-flex gap-2 justify-content-end bg-light p-3 rounded-3 border">
-                                        <button type="reset" class="btn btn-light fw-semibold">Hủy</button>
                                         <button type="submit" class="btn btn-brand px-4 py-2 fw-semibold"><i class="bi bi-save me-2"></i>LƯU THAY ĐỔI</button>
                                     </div>
                                 </form>
@@ -483,8 +480,13 @@ $profile = $profileResponse['data'][0];
                         <!-- Upload Section -->
                         <div class="card border-0 shadow-sm mb-4" style="border-radius:12px; background:linear-gradient(to bottom, #ffffff, #f8fafc);">
                             <div class="card-body p-4">
-                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-cloud-arrow-up me-2 text-brand"></i>Tải lên tài liệu</h6>
-                                <p class="text-muted small mb-4">Các định dạng hỗ trợ: PDF, JPG, PNG.</p>
+                                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-cloud-arrow-up me-2 text-brand"></i>Tải lên tài liệu</h6>
+                                <div class="text-muted small mb-4" style="line-height: 1.6;">
+                                    - Các định dạng hỗ trợ: PDF, JPG, PNG.<br>
+                                    - Dung lượng mỗi file không quá 30MB; <br>
+                                    - Tải lần lượt từng file theo thứ tự.<br>
+                                    - Đảm bảo ảnh chụp/scan rõ ràng, đầy đủ thông tin.
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold small text-muted text-uppercase mb-2">1. Loại tài liệu</label>
@@ -615,10 +617,8 @@ $profile = $profileResponse['data'][0];
                 wardInputId: 'schoolWardInput', wardDropdownId: 'schoolWardDropdown',
                 wardSearchId: 'schoolWardSearch', wardListId: 'schoolWardList',
                 wardHiddenId: 'schoolWardName', wardClearId: 'schoolWardClear',
-                addressDetailId: 'schoolAddressDetail',
                 savedProvince: <?php echo json_encode($profile['school_province'] ?? ''); ?>,
-                savedWard: <?php echo json_encode($profile['school_ward'] ?? ''); ?>,
-                savedAddressDetail: <?php echo json_encode($profile['school_address_detail'] ?? ''); ?>
+                savedWard: <?php echo json_encode($profile['school_ward'] ?? ''); ?>
             });
         })();
 
@@ -639,7 +639,6 @@ $profile = $profileResponse['data'][0];
                 progressEl: document.getElementById('uploadProgress'),
                 triggerBtn: this,
                 onSuccess: function(webViewLink) {
-                    document.getElementById('uploadStatus').innerText = 'Lưu thông tin vào hệ thống...';
                     fetch('api/save_document.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -649,7 +648,7 @@ $profile = $profileResponse['data'][0];
                     .then(result => {
                         if (result.success) {
                             document.getElementById('uploadStatus').className = 'small mt-2 text-center text-success';
-                            document.getElementById('uploadStatus').innerText = 'Tải lên thành công!';
+                            document.getElementById('uploadStatus').innerText = 'Đã tải xong!';
                             setTimeout(() => location.reload(), 1500);
                         } else { showNotifyModal('Lỗi: ' + (result.message || 'Lỗi database'), 'danger'); }
                     })

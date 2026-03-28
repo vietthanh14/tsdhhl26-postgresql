@@ -20,7 +20,6 @@ $step2_fields = [
     ['label' => 'Năm TN THPT',          'key' => 'graduation_year'],
     ['label' => 'Tỉnh/TP trường THPT',  'key' => 'school_province'],
     ['label' => 'Phường/Xã trường THPT','key' => 'school_ward'],
-    ['label' => 'Địa chỉ trường THPT',  'key' => 'school_address_detail'],
     ['label' => 'Học lực lớp 12',       'key' => 'academic_performance'],
     ['label' => 'Hạnh kiểm lớp 12',    'key' => 'conduct'],
     ['label' => 'Khu vực ưu tiên',      'key' => 'priority_area'],

@@ -22,41 +22,41 @@ if (isset($_SESSION['user_id'])) {
 <header class="site-header">
     <div class="container-fluid px-3 px-md-4">
         <div class="d-flex align-items-center justify-content-between py-2">
-            <!-- Hamburger Menu (Mobile Only) -->
-            <button class="btn text-white d-md-none p-1" id="sidebarToggleBtn" aria-label="Mở menu" style="border: none; background: transparent;">
-                <i class="bi bi-list fs-3" aria-hidden="true"></i>
-            </button>
+            <!-- Left side items: Hamburger + Branding -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Hamburger Menu (Mobile Only) -->
+                <button class="btn text-white d-md-none p-0 border-0" id="sidebarToggleBtn" aria-label="Mở menu" style="background: transparent;">
+                    <i class="bi bi-list fs-1" style="line-height: 1;"></i>
+                </button>
 
-            <!-- Logo + Tên trường -->
-            <a href="<?php echo BASE_URL; ?>/" class="header-brand d-flex align-items-center gap-2 gap-md-3 text-decoration-none flex-grow-1 flex-md-grow-0">
-                <img src="<?php echo BASE_URL; ?>/assets/logo.png" alt="Logo ĐH Hạ Long" width="42" height="42" class="d-none d-sm-block"
-                     onerror="this.style.display='none'">
-                <div>
-                    <div class="fw-bold text-white" style="font-size:clamp(.8rem,2vw,1rem);letter-spacing:.3px;">TRƯỜNG ĐẠI HỌC HẠ LONG</div>
-                    <div class="text-white-50 d-none d-sm-block" style="font-size:.78rem;letter-spacing:.5px;">Halong University</div>
-                </div>
-            </a>
+                <!-- Logo + Tên trường -->
+                <a href="<?php echo BASE_URL; ?>/" class="header-brand d-flex align-items-center gap-2 text-decoration-none">
+                    <img src="<?php echo BASE_URL; ?>/assets/logo.png" alt="Logo ĐH Hạ Long" width="40" height="40" class="d-none d-sm-block" onerror="this.style.display='none'">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="fw-bold text-white mb-0" style="font-size:clamp(0.9rem,2.5vw,1.1rem); letter-spacing:0.5px; line-height:1.2;">TRƯỜNG ĐẠI HỌC HẠ LONG</div>
+                        <div class="text-white-50 d-none d-sm-block" style="font-size:0.75rem; letter-spacing:0.5px; line-height:1.2;">Halong University</div>
+                    </div>
+                </a>
+            </div>
 
-            <!-- Right side: Nav links (desktop) + User dropdown (always) -->
-            <div class="d-flex align-items-center gap-3 gap-md-4 ms-auto ps-2">
+            <!-- Right side: Nav links + User dropdown -->
+            <div class="d-flex align-items-center gap-3 gap-md-4">
                 <!-- Nav links -->
-                <a href="<?php echo BASE_URL; ?>/<?php echo (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) ? 'admin/index.php' : ''; ?>" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
-                    <i class="bi bi-house-door-fill" aria-hidden="true"></i> <span class="d-none d-md-inline">Trang chủ</span>
+                <a href="<?php echo BASE_URL; ?>/<?php echo (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) ? 'admin/index.php' : ''; ?>" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link" aria-label="Trang chủ">
+                    <i class="bi bi-house-door-fill fs-5" style="line-height:1;"></i> <span class="d-none d-md-inline">Trang chủ</span>
                 </a>
-                <a href="<?php echo BASE_URL; ?>/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link">
-                    <i class="bi bi-search" aria-hidden="true"></i> <span class="d-none d-md-inline">Tra cứu</span>
+                <a href="<?php echo BASE_URL; ?>/search.php" class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1 header-nav-link" aria-label="Tra cứu">
+                    <i class="bi bi-search fs-5" style="line-height:1;"></i> <span class="d-none d-md-inline">Tra cứu</span>
                 </a>
-
 
                 <!-- User dropdown / Auth buttons -->
                 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
                     <div class="dropdown">
-                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-2 btn border-0 bg-transparent p-1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-shield-lock-fill text-warning" aria-hidden="true"></i>
+                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-2 btn border-0 bg-transparent p-0 m-0" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-shield-lock-fill text-warning fs-5" style="line-height:1;"></i>
                             <span class="d-none d-sm-inline">Xin chào, <span class="fw-bold text-warning">Quản trị viên</span></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
-
                             <li>
                                 <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/admin/logout.php">
                                     <i class="bi bi-box-arrow-right"></i> Đăng xuất
@@ -66,11 +66,11 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 <?php elseif (isset($_SESSION['user_id'])): ?>
                     <div class="dropdown">
-                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-2 btn border-0 bg-transparent p-1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle fs-5 d-md-none" aria-hidden="true"></i>
-                            <span class="d-none d-md-inline">Xin chào, <span class="fw-bold text-warning"><?php echo htmlspecialchars($header_user_name); ?></span></span>
+                        <button type="button" class="text-white fw-medium dropdown-toggle d-flex align-items-center gap-1 btn border-0 bg-transparent p-0 m-0" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle fs-4" style="line-height:1;"></i>
+                            <span class="d-none d-md-inline ms-1">Xin chào, <span class="fw-bold text-warning"><?php echo htmlspecialchars($header_user_name); ?></span></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 8px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="border-radius: 8px;">
                             <li class="dropdown-item-text text-muted small d-md-none fw-semibold px-3 py-2">
                                 <?php echo htmlspecialchars($header_user_name); ?>
                             </li>
@@ -89,12 +89,10 @@ if (isset($_SESSION['user_id'])) {
                         </ul>
                     </div>
                 <?php else: ?>
-                    <a href="<?php echo BASE_URL; ?>/auth/login.php" class="text-white text-decoration-none fw-bold header-nav-link small">
-                        Đăng nhập
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>/auth/register.php" class="btn fw-bold px-3 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; font-size:.85rem;">
-                        Đăng ký
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="<?php echo BASE_URL; ?>/auth/login.php" class="text-white text-decoration-none fw-bold header-nav-link small">Đăng nhập</a>
+                        <a href="<?php echo BASE_URL; ?>/auth/register.php" class="btn fw-bold px-3 shadow-sm" style="background-color: #f59e0b; color: #fff; border: none; font-size:.85rem; padding: 0.4rem 0.8rem;">Đăng ký</a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

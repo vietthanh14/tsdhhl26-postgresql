@@ -25,12 +25,6 @@ $levelFileMap = [
     5 => 'apply_degree2.php',     // Văn bằng 2
 ];
 ?>
-<!-- Nút Toggle Sidebar (Mobile) -->
-<button class="btn btn-brand d-md-none position-fixed top-0 start-0 m-3 z-3 shadow-sm rounded-circle sidebar-toggle-btn" 
-        type="button" data-bs-toggle="offcanvas" data-bs-target="#candidateSidebarMobile" aria-controls="candidateSidebarMobile"
-        style="width: 45px; height: 45px; line-height: 40px; padding: 0;">
-    <i class="bi bi-list fs-4"></i>
-</button>
 
 <!-- Desktop Sidebar -->
 <div class="col-md-2 sidebar d-none d-md-block px-0 shadow">

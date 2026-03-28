@@ -136,10 +136,7 @@
                         </div>
                         <input type="hidden" name="school_ward" id="edit_school_ward">
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Địa chỉ chi tiết (Trường)</label>
-                        <input type="text" name="school_address_detail" id="edit_school_address_detail" class="form-control">
-                    </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold small text-muted">Năm tốt nghiệp</label>
                         <input type="number" name="graduation_year" id="edit_graduation_year" class="form-control">

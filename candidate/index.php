@@ -67,35 +67,20 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
             </div>
 
             <div class="row">
-                <!-- Cảnh báo nếu chưa cập nhật hồ sơ -->
-                <?php if(empty($profile['phone_number']) || empty($profile['province'])): ?>
+                <!-- Thông báo quan trọng -->
                 <div class="col-12 mb-4">
-                    <div class="card border-0 shadow-sm" style="background: linear-gradient(to right, #fffbeb, #fef3c7); border-radius: 12px; border-left: 5px solid #f59e0b !important;">
-                        <div class="card-body p-4 d-flex align-items-start gap-3">
-                            <div class="flex-shrink-0 text-warning" style="font-size: 2rem; line-height: 1;">
-                                <i class="bi bi-bell-fill mb-2"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold text-dark mb-2">Vui lòng hoàn thiện hồ sơ của bạn!</h5>
-                                <p class="text-muted mb-3">Hệ thống yêu cầu cập nhật đẩy đủ thông tin và minh chứng trước khi đăng ký xét tuyển.</p>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="btn btn-warning fw-bold shadow-sm" style="border-radius: 8px;">Cập nhật thông tin ngay &raquo;</a>
-                                    <div class="dropdown">
-                                        <button class="btn btn-light fw-bold shadow-sm dropdown-toggle" style="border-radius: 8px;" type="button" data-bs-toggle="dropdown">
-                                            Xem hướng dẫn TS
-                                        </button>
-                                        <ul class="dropdown-menu shadow-sm border-0" style="border-radius: 10px;">
-                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/TuyensinhHeDaihoc_8699.htm" target="_blank">Thông tin tuyển sinh đại học 2026</a></li>
-                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/QuydoidiemChungchiNgoainguHSG_5722.htm" target="_blank">Quy đổi điểm ngoại ngữ</a></li>
-                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/CACTINHDIEMXETTUYENTUYENSINHNAM_11210.htm" target="_blank">Cách tính điểm xét tuyển</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="alert" style="background-color: #fff9e6; border: 2px solid #f6c23e; color: #5a5c69; border-radius: 4px; padding: 12px 16px;">
+                        <div class="fw-medium mb-1" style="color: #664d03;">
+                            <span class="me-1" style="color: #f6c23e;">⚠️</span> Thông báo quan trọng! Vui lòng kiểm tra, đọc trước các nội dung sau:
+                        </div>
+                        <div style="font-size: 14px; line-height: 1.6; color: #5a5c69;">
+                            - <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="text-dark fw-bold text-decoration-underline">Cập nhật thông tin</a> , đăng tải minh chứng đầy đủ trước khi đăng ký xét tuyển.<br>
+                            - <a href="https://uhl.edu.vn/TuyensinhHeDaihoc_8699.htm" target="_blank" class="text-dark fw-bold text-decoration-underline">Thông tin tuyển sinh</a> trình độ đại học chính quy năm 2026.<br>
+                            - <a href="https://uhl.edu.vn/QuydoidiemChungchiNgoainguHSG_5722.htm" target="_blank" class="text-dark fw-bold text-decoration-underline">Quy đổi điểm chứng chỉ ngoại ngữ quốc tế</a> đối với phương thức xét tuyển kết hợp (Mã phương thức: 409).<br>
+                            - <a href="https://uhl.edu.vn/CACTINHDIEMXETTUYENTUYENSINHNAM_11210.htm" target="_blank" class="text-dark fw-bold text-decoration-underline">Cách tính điểm</a> xét tuyển sinh năm 2026.
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
 
                 <!-- Danh sách hồ sơ đã nộp -->
                 <div class="col-12">
@@ -158,11 +143,11 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                                 </td>
                                                 <td class="small" style="max-width:160px;">
                                                     <?php if (!empty($app['admin_notes'])): ?>
-                                                        <div class="text-muted fst-italic" style="font-size:.78rem;white-space:pre-wrap;word-break:break-word;">
-                                                            <?php echo htmlspecialchars($app['admin_notes']); ?>
-                                                        </div>
+                                                        <span class="text-danger fw-medium" style="word-break:break-word;">
+                                                            <?php echo htmlspecialchars(trim($app['admin_notes'])); ?>
+                                                        </span>
                                                     <?php else: ?>
-                                                        <span class="text-muted" style="font-size:.75rem;">—</span>
+                                                        <span class="text-muted">—</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
@@ -219,9 +204,9 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
                                             </div>
                                             
                                             <?php if (!empty($app['admin_notes'])): ?>
-                                                <div class="rounded p-2 mb-3 border-start border-4 border-info bg-light small">
-                                                    <i class="bi bi-info-circle-fill text-info me-1"></i>
-                                                    <span class="text-muted fst-italic"><?php echo htmlspecialchars($app['admin_notes']); ?></span>
+                                                <div class="rounded p-2 mb-3 border-start border-4 border-danger bg-light small">
+                                                    <i class="bi bi-exclamation-circle-fill text-danger me-1"></i>
+                                                    <span class="text-dark fw-medium"><?php echo htmlspecialchars(trim($app['admin_notes'])); ?></span>
                                                 </div>
                                             <?php endif; ?>
 

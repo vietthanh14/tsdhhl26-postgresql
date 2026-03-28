@@ -959,7 +959,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 onSuccess: function(webViewLink) {
                     var statusEl = document.getElementById('uploadReceiptStatus');
                     statusEl.className = 'small mt-2 text-center text-success fw-bold p-2 bg-success bg-opacity-10 rounded border border-success';
-                    statusEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> Tải Biên lai thành công! Bạn có thể Nộp hồ sơ.';
+                    statusEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> Đã tải xong.';
                     document.getElementById('receiptUrlInput').value = webViewLink;
                     document.getElementById('submitAppBtn').disabled = false;
                 },

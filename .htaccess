@@ -1,0 +1,24 @@
+# ----------------------------------------------------------------------
+# BẬT GZIP COMPRESSION (TĂNG TỐC ĐỘ WEBSITE)
+# ----------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    # Bật nén mức tối đa (Level 9 - Cho JSON, API, Text)
+    DeflateCompressionLevel 9
+    
+    # Kích hoạt ép nén các định dạng phổ biến làm nặng web
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/truetype
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE image/x-icon
+</IfModule>

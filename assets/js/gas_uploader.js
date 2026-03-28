@@ -43,18 +43,26 @@ window.GasUploader = (function () {
         }
 
         const file = fileInput.files[0];
+        
+        // Kiểm tra dung lượng file (giới hạn 30MB)
+        const maxSize = 30 * 1024 * 1024; // 30MB
+        if (file.size > maxSize) {
+            alert('Dung lượng file vượt quá giới hạn 30MB. Vui lòng chọn file nhỏ hơn hoặc nén lại trước khi tải lên.');
+            if (onError) onError('File quá lớn (>30MB).');
+            return;
+        }
+
         const reader = new FileReader();
 
         if (statusEl) {
             statusEl.className = 'small mt-2 text-center text-brand';
-            statusEl.innerText = 'Đang mã hóa file...';
+            statusEl.innerText = 'Đang tải lên...';
         }
         if (progressEl) progressEl.classList.remove('d-none');
         if (triggerBtn) triggerBtn.disabled = true;
 
         reader.onload = async function () {
             const base64 = reader.result.split(',')[1];
-            if (statusEl) statusEl.innerText = 'Đang tải lên Google Drive...';
 
             const ext = getExtension(file.type);
             const cccd6 = (identitySuffix || '000000').replace(/\D/g, '').slice(-6);
@@ -70,7 +78,7 @@ window.GasUploader = (function () {
                 if (gasData.status === 'success') {
                     if (statusEl) {
                         statusEl.className = 'small mt-2 text-center text-success fw-bold';
-                        statusEl.innerText = 'Tải lên thành công!';
+                        statusEl.innerText = 'Đã tải xong';
                     }
                     if (onSuccess) onSuccess(gasData.webViewLink);
                 } else {
