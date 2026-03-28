@@ -1,14 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php'); exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-require_once __DIR__ . '/../lib/Cache.php';
-$supabaseAdmin = new SupabaseClient('service');
-$message = $_SESSION['msg'] ?? ''; $error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -49,26 +40,37 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 </div>
 
-<div class="bg-white p-4 rounded-3 shadow-sm border-0">
-<table class="table table-hover align-middle mb-0">
-    <thead class="table-light"><tr><th>ID</th><th>Tên Hệ Đào Tạo</th><th>Mô tả</th><th>Hành động</th></tr></thead>
-    <tbody id="levelsBody">
-        <?php foreach($levels as $l): ?>
-        <tr>
-            <td><?php echo $l['id']; ?></td>
-            <td class="fw-semibold"><?php echo htmlspecialchars($l['name']); ?></td>
-            <td><?php echo htmlspecialchars($l['description'] ?? ''); ?></td>
-            <td>
-                <button class="btn btn-sm btn-outline-warning" onclick="openEditLevelModal('<?php echo $l['id']; ?>', '<?php echo htmlspecialchars($l['name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($l['description'] ?? '', ENT_QUOTES); ?>')">Sửa</button>
-                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmDelete(this, 'Xóa hệ đào tạo này?');">
-                    <input type="hidden" name="action" value="delete_level"><input type="hidden" name="id" value="<?php echo $l['id']; ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
-                </form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Hệ Đào Tạo</th>
+                        <th>Mô tả</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="levelsBody">
+                    <?php foreach($levels as $l): ?>
+                    <tr>
+                        <td><span class="text-muted small">#<?php echo $l['id']; ?></span></td>
+                        <td class="fw-semibold text-brand"><?php echo htmlspecialchars($l['name']); ?></td>
+                        <td class="small text-muted"><?php echo htmlspecialchars($l['description'] ?? ''); ?></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditLevelModal('<?php echo $l['id']; ?>', '<?php echo htmlspecialchars($l['name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($l['description'] ?? '', ENT_QUOTES); ?>')" title="Sửa"><i class="bi bi-pencil"></i></button>
+                            <form method="POST" class="d-inline" onsubmit="event.preventDefault(); window.confirmDelete ? confirmDelete(this, 'Xóa hệ đào tạo này?') : (confirm('Xóa hệ đào tạo này?') && this.submit());">
+                                <input type="hidden" name="action" value="delete_level"><input type="hidden" name="id" value="<?php echo $l['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Thêm Hệ -->

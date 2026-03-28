@@ -1,14 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php'); exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-require_once __DIR__ . '/../lib/Cache.php';
-$supabaseAdmin = new SupabaseClient('service');
-$message = $_SESSION['msg'] ?? ''; $error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -77,30 +68,39 @@ include __DIR__ . '/includes/admin_header.php';
     <input type="hidden" name="method_ids" id="bulkMethodIdsHidden">
 </form>
 
-<div class="bg-white p-4 rounded-3 shadow-sm border-0">
-<table class="table table-hover align-middle mb-0">
-    <thead class="table-light"><tr>
-        <th style="width:40px;"><input class="form-check-input" type="checkbox" id="selectAllMethods" onchange="toggleSelectAll(this)"></th>
-        <th>ID</th><th>Tên Phương thức</th><th>Lệ phí (VNĐ)</th><th>Hành động</th>
-    </tr></thead>
-    <tbody id="methodsBody">
-        <?php foreach($methods as $mt): ?>
-        <tr>
-            <td><input class="form-check-input method-bulk-chk" type="checkbox" value="<?php echo $mt['id']; ?>" onchange="updateBulkToolbar()"></td>
-            <td><?php echo $mt['id']; ?></td>
-            <td class="fw-semibold"><?php echo htmlspecialchars($mt['method_name']); ?></td>
-            <td class="text-danger fw-semibold"><?php echo number_format($mt['application_fee'] ?? 0, 0, ',', '.'); ?> đ</td>
-            <td>
-                <button class="btn btn-sm btn-outline-warning" onclick="openEditMethodModal('<?php echo $mt['id']; ?>', '<?php echo htmlspecialchars($mt['method_name'], ENT_QUOTES); ?>', '<?php echo $mt['application_fee'] ?? 0; ?>')">Sửa</button>
-                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmDelete(this, 'Xóa phương thức này?');">
-                    <input type="hidden" name="action" value="delete_method"><input type="hidden" name="id" value="<?php echo $mt['id']; ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
-                </form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:40px;"><input class="form-check-input" type="checkbox" id="selectAllMethods" onchange="toggleSelectAll(this)"></th>
+                        <th>ID</th>
+                        <th>Tên Phương thức</th>
+                        <th>Lệ phí (VNĐ)</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="methodsBody">
+                    <?php foreach($methods as $mt): ?>
+                    <tr>
+                        <td><input class="form-check-input method-bulk-chk" type="checkbox" value="<?php echo $mt['id']; ?>" onchange="updateBulkToolbar()"></td>
+                        <td><span class="text-muted small">#<?php echo $mt['id']; ?></span></td>
+                        <td class="fw-semibold text-brand"><?php echo htmlspecialchars($mt['method_name']); ?></td>
+                        <td class="text-danger fw-semibold"><?php echo number_format($mt['application_fee'] ?? 0, 0, ',', '.'); ?> đ</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditMethodModal('<?php echo $mt['id']; ?>', '<?php echo htmlspecialchars($mt['method_name'], ENT_QUOTES); ?>', '<?php echo $mt['application_fee'] ?? 0; ?>')" title="Sửa"><i class="bi bi-pencil"></i></button>
+                            <form method="POST" class="d-inline" onsubmit="event.preventDefault(); window.confirmDelete ? confirmDelete(this, 'Xóa phương thức này?') : (confirm('Xóa phương thức này?') && this.submit());">
+                                <input type="hidden" name="action" value="delete_method"><input type="hidden" name="id" value="<?php echo $mt['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Thêm PT -->

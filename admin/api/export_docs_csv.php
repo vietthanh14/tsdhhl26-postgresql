@@ -1,13 +1,6 @@
 <?php
-// admin/api_export_docs_csv.php
-session_start();
-
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    echo "Unauthorized";
-    exit;
-}
-
-require_once __DIR__ . '/../lib/SupabaseClient.php';
+// admin/api/export_docs_csv.php — Xuất CSV danh sách tài liệu thí sinh
+require_once __DIR__ . '/_guard.php';
 
 try {
     $supabaseAdmin = new SupabaseClient('service');
@@ -29,52 +22,35 @@ try {
         }
     }
     
-    // Tạo cấu trúc thư mục và dọn dẹp
     $filename = 'Danh_sach_TaiLieu_' . date('Y_m_d_His') . '.csv';
-    $exportDir = __DIR__ . '/../uploads/exports';
+    $exportDir = __DIR__ . '/../../uploads/exports';
     if (!is_dir($exportDir)) {
         mkdir($exportDir, 0777, true);
     }
     
-    $files = glob($exportDir . '/*.csv');
-    $now   = time();
-    foreach ($files as $file) {
-        if (is_file($file)) {
-            if ($now - filemtime($file) >= 24 * 60 * 60) {
-                unlink($file);
-            }
+    // Xoá file csv cũ hơn 1 ngày
+    foreach (glob($exportDir . '/*.csv') as $file) {
+        if (is_file($file) && time() - filemtime($file) >= 86400) {
+            unlink($file);
         }
     }
 
     $filepath = $exportDir . '/' . $filename;
-    $fileUrl = '../uploads/exports/' . $filename; 
+    $fileUrl = '../../uploads/exports/' . $filename; 
 
-    // Mở file vật lý để ghi
     $output = fopen($filepath, 'w');
-    fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // Ghi BOM
+    fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
 
-    // Tiêu đề cột
     fputcsv($output, [
-        'STT', 
-        'Họ và tên thí sinh', 
-        'CMND/CCCD', 
-        'Số điện thoại',
-        'Email',
-        'Loại tài liệu',
-        'Ngày tải lên',
-        'Link tải tài liệu'
+        'STT', 'Họ và tên thí sinh', 'CMND/CCCD', 'Số điện thoại',
+        'Email', 'Loại tài liệu', 'Ngày tải lên', 'Link tải tài liệu'
     ], ';');
 
-    // Streaming dữ liệu
     $stt = 1;
     foreach ($documents as $doc) {
         $user = $userProfilesMap[$doc['user_id']] ?? [];
-        $docTypeName = $doc['document_types']['type_name'] ?? 'Khác';
-        
-        // Thay vì nháy đơn, dùng dạng ="chuỗi" để Excel hiểu là Text mà không bị hiện nháy đơn và không mất số 0
         $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
         $dateUploaded = !empty($doc['uploaded_at']) ? date('d/m/Y H:i', strtotime($doc['uploaded_at'])) : '';
-        $docUrl = $doc['drive_file_url'] ?? '';
 
         fputcsv($output, [
             $stt++,
@@ -82,9 +58,9 @@ try {
             $cmnd,
             $user['phone_number'] ?? '',
             $user['contact_email'] ?? '',
-            $docTypeName,
+            $doc['document_types']['type_name'] ?? 'Khác',
             $dateUploaded,
-            $docUrl
+            $doc['drive_file_url'] ?? ''
         ], ';');
     }
 
@@ -92,12 +68,7 @@ try {
 
     if (ob_get_level()) ob_end_clean();
     header('Content-Type: application/json; charset=utf-8');
-    
-    echo json_encode([
-        'status' => 'success',
-        'filename' => $filename,
-        'file_url' => $fileUrl
-    ]);
+    echo json_encode(['status' => 'success', 'filename' => $filename, 'file_url' => $fileUrl]);
     exit;
 
 } catch (Exception $e) {

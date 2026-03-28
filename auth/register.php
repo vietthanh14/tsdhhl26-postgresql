@@ -2,6 +2,7 @@
 // auth/register.php
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/includes/auth_layout.php';
 
 if (isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . '/candidate/index.php');
@@ -41,21 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Mật khẩu phải chứa ít nhất 6 ký tự.';
     } else {
         try {
-            // Kiểm tra trùng username trước khi tạo tài khoản Supabase
             $supabaseAdmin = new SupabaseClient('service');
             $chkUsername = $supabaseAdmin->select('user_profiles', "username=eq.{$username}&select=id");
             if ($chkUsername['code'] == 200 && !empty($chkUsername['data'])) {
                 $error = 'Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác.';
             } else {
-                // Nối Username thành email ảo để đăng ký qua hệ thống của Supabase
                 $fake_email = $username . '@halou.system';
-
                 $supabase = new SupabaseClient('anon');
                 $response = $supabase->signUp($fake_email, $password);
 
                 if ($response['code'] == 200 && isset($response['data']['user'])) {
                     $user_id = $response['data']['user']['id'];
-
                     $profileData = [
                         'id'            => $user_id,
                         'username'      => $username,
@@ -65,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'phone_number'  => $phone_number,
                         'identity_card' => $identity_card,
                     ];
-
                     $profileResponse = $supabaseAdmin->insert('user_profiles', $profileData);
 
                     if ($profileResponse['code'] == 201 || $profileResponse['code'] == 200) {
@@ -87,28 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$extraStyles = 'h6 { color: var(--brand); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; } .form-text { font-size: 0.8rem; color: #94a3b8; }';
+authPageStart('Đăng ký Tài khoản', $extraStyles);
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/logo.png">
-    <title>Đăng ký Tài khoản - Tuyển sinh Đại học Hạ Long</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
-    <style>
-        h6 { color: var(--brand); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-text { font-size: 0.8rem; color: #94a3b8; }
-    </style>
-</head>
-<body>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
-
-<div class="page-wrapper">
 <div class="auth-card">
     <div class="text-center mb-4 pb-2 border-bottom">
         <h3 class="auth-title fw-bold">MỞ HỒ SƠ</h3>
@@ -116,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php if($error): ?>
-        <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small" role="alert" aria-live="polite"><?php echo $error; ?></div>
+        <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small" role="alert" aria-live="polite"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
     
     <?php if($success): ?>
@@ -184,9 +163,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <?php endif; ?>
 </div>
-</div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php authPageEnd(); ?>

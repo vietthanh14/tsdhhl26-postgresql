@@ -201,125 +201,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Thêm Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css?v=1.2">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css?v=1.2">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/combo.css?v=1.2">
     <style>
-        /* Wizard-specific styles (apply.php only) */
-        .wizard-step {
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .wizard-step .d-flex.justify-content-between {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        @media (min-width: 768px) {
-            .wizard-step .d-flex.justify-content-between {
-                flex-direction: row;
-                gap: 0;
-            }
-        }
-
-        /* Combobox (major search) */
-        .combo-wrapper {
-            position: relative;
-        }
-
-        .combo-input {
-            cursor: pointer;
-            background: #fff !important;
-        }
-
-        .combo-dropdown {
-            display: none;
-            position: absolute;
-            z-index: 1050;
-            width: 100%;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            margin-top: 2px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
-            max-height: 300px;
-            overflow: hidden;
-        }
-
-        .combo-dropdown.show {
-            display: block;
-        }
-
-        .combo-search {
-            padding: 8px;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            background: #fff;
-        }
-
-        .combo-search input {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 6px 10px;
-            font-size: .88rem;
-        }
-
-        .combo-search input:focus {
-            outline: none;
-            border-color: var(--brand-color);
-            box-shadow: 0 0 0 2px rgba(26, 58, 110, .15);
-        }
-
-        .combo-list {
-            max-height: 230px;
-            overflow-y: auto;
-        }
-
-        .combo-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: .9rem;
-            border-bottom: 1px solid #f1f5f9;
-            transition: background .15s;
-        }
-
-        .combo-item:hover {
-            background: #e8f0fe;
-        }
-
-        .combo-item.selected {
-            background: var(--brand-color);
-            color: #fff;
-        }
-
-        .combo-clear {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: 1.1rem;
-            z-index: 2;
-            display: none;
-        }
-
-        .combo-clear:hover {
-            color: #ef4444;
-        }
+        .wizard-step { animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .wizard-step .d-flex.justify-content-between { flex-direction: column; gap: 10px; }
+        @media (min-width: 768px) { .wizard-step .d-flex.justify-content-between { flex-direction: row; gap: 0; } }
     </style>
 </head>
 
@@ -418,13 +307,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             <?php else: ?>
                                 <?php if ($error): ?>
-                                    <div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
+                                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm custom-alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <span><?php echo htmlspecialchars($error); ?></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                <?php endif; ?>
 
-                                <form method="POST" action="">
-                                    <!-- Bước 1 -->
-                                    <div class="wizard-step" id="step-1">
-                                        <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 1: CHỌN ĐỢT TUYỂN SINH
-                                        </h6>
+                                <!-- Component Stepper -->
+                                <div class="stepper-wrapper mb-5 px-3">
+                                    <div class="stepper-item active" id="stepper-1">
+                                        <div class="stepper-circle">1</div>
+                                        <div class="stepper-title">Chọn đợt</div>
+                                    </div>
+                                    <div class="stepper-item" id="stepper-2">
+                                        <div class="stepper-circle">2</div>
+                                        <div class="stepper-title">Rà soát</div>
+                                    </div>
+                                    <div class="stepper-item" id="stepper-3">
+                                        <div class="stepper-circle">3</div>
+                                        <div class="stepper-title">Nguyện vọng</div>
+                                    </div>
+                                    <div class="stepper-item" id="stepper-4">
+                                        <div class="stepper-circle">4</div>
+                                        <div class="stepper-title">Thanh toán</div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm" style="border-radius:12px;">
+                                    <div class="card-body p-4 p-md-5">
+                                        <form method="POST" action="">
+                                            <!-- Bước 1 -->
+                                            <div class="wizard-step" id="step-1">
+                                                <h5 class="text-brand fw-bold mb-4 text-center">Bước 1: Chọn Đợt Tuyển Sinh</h5>
                                         <div class="mb-3" <?php echo $selected_level_id ? 'style="display:none;"' : ''; ?>>
                                             <label class="form-label text-muted fw-bold">Hệ Đào tạo <span
                                                     class="text-danger">*</span></label>
@@ -453,10 +368,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </div>
 
-                                    <!-- Bước 2 -->
-                                    <div class="wizard-step d-none" id="step-2">
-                                        <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 2: RÀ SOÁT THÔNG TIN CÁ
-                                            NHÂN</h6>
+                                            <!-- Bước 2 -->
+                                            <div class="wizard-step d-none" id="step-2">
+                                                <h5 class="text-brand fw-bold mb-4 text-center">Bước 2: Rà soát Hồ Sơ</h5>
                                         <div class="row mb-3 bg-light p-3 rounded mx-0 border">
                                             <?php foreach ($step2_fields as $f): ?>
                                                 <div class="col-md-6 mb-3">
@@ -488,10 +402,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </div>
 
-                                    <!-- Bước 3 -->
-                                    <div class="wizard-step d-none" id="step-3">
-                                        <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 3: LỰA CHỌN NGUYỆN VỌNG
-                                        </h6>
+                                            <!-- Bước 3 -->
+                                            <div class="wizard-step d-none" id="step-3">
+                                                <h5 class="text-brand fw-bold mb-4 text-center">Bước 3: Lựa chọn Nguyện Vọng</h5>
                                         <div class="mb-3">
                                             <label class="form-label text-muted fw-bold">Ngành học đăng ký xét tuyển <span
                                                     class="text-danger">*</span></label>
@@ -536,10 +449,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </div>
 
-                                    <!-- Bước 4 -->
-                                    <div class="wizard-step d-none" id="step-4">
-                                        <h6 class="text-brand fw-bold mb-3 border-bottom pb-2">BƯỚC 4: THANH TOÁN LỆ PHÍ
-                                        </h6>
+                                            <!-- Bước 4 -->
+                                            <div class="wizard-step d-none" id="step-4">
+                                                <h5 class="text-brand fw-bold mb-4 text-center">Bước 4: Nộp Lệ phí & Minh chứng</h5>
 
                                         <!-- Tóm tắt đăng ký -->
                                         <div class="p-3 mb-3 rounded border"
@@ -573,60 +485,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 </div>
 
                                                 <!-- Thông tin TK -->
-                                                <div class="col-12 col-md-8 p-4 d-flex align-items-center"
-                                                    style="border-left:1px solid #e2e8f0;">
-                                                    <table class="table table-borderless mb-0 w-100"
-                                                        style="font-size:.9rem;">
-                                                        <tr>
-                                                            <td class="text-muted py-2 pe-3"
-                                                                style="width:130px; white-space:nowrap;">Chủ tài khoản</td>
-                                                            <td class="py-2">
-                                                                <span class="fw-bold text-dark"
-                                                                    style="font-size:.95rem;">NGUYỄN THỊ THU HIỀN</span><br>
-                                                                <span class="text-muted fst-italic"
-                                                                    style="font-size:.78rem;">Phòng Đào tạo — Trường Đại học
-                                                                    Hạ Long</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2" class="py-0">
-                                                                <hr class="my-0" style="opacity:.1;">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-muted py-2 pe-3">Số tài khoản</td>
-                                                            <td class="py-2">
-                                                                <span class="fw-bold text-dark"
-                                                                    style="font-family:'Courier New',monospace; font-size:1rem; letter-spacing:1.5px;">0500
-                                                                    1012 5318 17</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2" class="py-0">
-                                                                <hr class="my-0" style="opacity:.1;">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-muted py-2 pe-3">Ngân hàng</td>
-                                                            <td class="fw-bold text-dark py-2" style="font-size:.95rem;">MSB
-                                                                — Ngân hàng Thương mại Cổ phần Hàng Hải Việt Nam</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2" class="py-0">
-                                                                <hr class="my-0" style="opacity:.1;">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-muted py-2 pe-3" style="white-space:nowrap;">Nội
-                                                                dung chuyển khoản</td>
-                                                            <td class="py-2">
-                                                                <code
-                                                                    class="fw-bold text-dark bg-light px-2 py-1 rounded border"
-                                                                    style="font-size:.92rem;"
-                                                                    id="paymentContentText"></code>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
+                                                <style>
+                                                    .account-info-block { padding: 1rem; }
+                                                    @media (min-width: 768px) { 
+                                                        .account-info-block { border-left: 1px solid #e2e8f0; padding: 1.5rem !important; }
+                                                    }
+                                                    @media (max-width: 767.98px) { 
+                                                        .account-info-block { border-top: 1px solid #e2e8f0; }
+                                                    }
+                                                </style>
+                                                <div class="col-12 col-md-8 d-flex flex-column justify-content-center account-info-block">
+                                                    <div class="row border-bottom border-light border-opacity-50 pb-2 mb-2">
+                                                        <div class="col-4 text-muted small pe-1">Chủ TK</div>
+                                                        <div class="col-8">
+                                                            <div class="fw-bold text-dark" style="font-size:.9rem;">NGUYỄN THỊ THU HIỀN</div>
+                                                            <div class="text-muted fst-italic" style="font-size:.75rem;">Phòng Đào tạo — Đại học Hạ Long</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row border-bottom border-light border-opacity-50 pb-2 mb-2">
+                                                        <div class="col-4 text-muted small pe-1">Số TK</div>
+                                                        <div class="col-8">
+                                                            <span class="fw-bold text-dark" style="font-family:'Courier New',monospace; font-size:1rem; letter-spacing:1px;">0500 1012 5318 17</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row border-bottom border-light border-opacity-50 pb-2 mb-2">
+                                                        <div class="col-4 text-muted small pe-1">Ngân hàng</div>
+                                                        <div class="col-8 fw-bold text-dark" style="font-size:.85rem;">
+                                                            MSB — NHTMCP Hàng Hải VN
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-0">
+                                                        <div class="col-4 text-muted small pe-1 pt-1">Nội dung</div>
+                                                        <div class="col-8">
+                                                            <code class="fw-bold text-dark bg-light px-2 py-1 rounded border d-inline-block text-break" style="font-size:.85rem;" id="paymentContentText"></code>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -671,9 +564,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 id="submitAppBtn" disabled>
                                                 <i class="bi bi-check-circle me-1"></i>NỘP HỒ SƠ CHÍNH THỨC
                                             </button>
-                                        </div>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
-                                </form>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -696,6 +591,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     </div>
 
+    <script src="<?php echo BASE_URL; ?>/assets/js/gas_uploader.js"></script>
     <script>
         const GAS_URL = '<?php echo GAS_WEBAPP_URL; ?>';
         const USER_ID = '<?php echo $user_id; ?>';
@@ -883,8 +779,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 methodSelect.innerHTML = '<option value="" data-fee="0">-- Chọn phương thức xét tuyển --</option>';
                 const formatter = new Intl.NumberFormat('vi-VN');
                 data.forEach(m => {
-                    const opt = new Option(`${m.method_name} (${formatter.format(m.application_fee || 0)}đ)`, m.id);
+                    // Truncate name if too long to prevent Desktop dropdowns from overflowing
+                    let shortName = m.method_name;
+                    if (shortName.length > 55) {
+                        shortName = shortName.substring(0, 52) + '...';
+                    }
+                    const opt = new Option(`${shortName} (${formatter.format(m.application_fee || 0)}đ)`, m.id);
+                    opt.title = m.method_name; // Full name on hover
                     opt.dataset.fee = m.application_fee || 0;
+                    opt.dataset.fullname = m.method_name;
                     methodSelect.appendChild(opt);
                 });
                 updateFeePreview();
@@ -923,7 +826,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 // === Kiểm tra 1: Trùng Ngành + Phương thức trong Đợt ===
-                const r1 = await fetch('check_duplicate.php', {
+                const r1 = await fetch('api/check_duplicate.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ period_id: periodId, major_id: majorId, method_id: methodId })
@@ -936,7 +839,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 // === Kiểm tra 2: Trùng Thứ tự Nguyện vọng trong Đợt ===
-                const r2 = await fetch('check_priority_dup.php', {
+                const r2 = await fetch('api/check_priority_dup.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ period_id: periodId, priority: parseInt(priority) })
@@ -991,7 +894,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Populate tóm tắt hồ sơ
                 const majorText = selectedMajor ? selectedMajor.name : '';
-                const methodText = methodSel.options[methodSel.selectedIndex].text;
+                const methodOption = methodSel.options[methodSel.selectedIndex];
+                const methodText = methodOption.dataset.fullname ? methodOption.dataset.fullname : methodOption.text;
                 const priority = document.getElementById('priorityInput').value;
                 document.getElementById('summaryMajor').innerText = majorText;
                 document.getElementById('summaryMethod').innerText = methodText;
@@ -1002,76 +906,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('vietqrImage').src = qrUrl;
             }
 
-            // Hide all
+            // Update UI Stepper and Forms
             for (let i = 1; i <= 4; i++) {
+                // Forms
                 let el = document.getElementById('step-' + i);
                 if (el) el.classList.add('d-none');
+                
+                // Stepper states
+                let st = document.getElementById('stepper-' + i);
+                if (st) {
+                    st.classList.remove('active', 'completed');
+                    if (i < step) st.classList.add('completed');
+                    if (i === step) st.classList.add('active');
+                }
             }
             // Show target
             const target = document.getElementById('step-' + step);
-            if (target) target.classList.remove('d-none');
+            if (target) {
+                target.classList.remove('d-none');
+                
+                // Cuộn mượt mà lên vị trí stepper khi đổi bước
+                const stepper = document.querySelector('.stepper-wrapper');
+                if (stepper) {
+                    // Trừ hao thanh điều hướng header (nếu fixed)
+                    const headerOffset = 80;
+                    const elementPosition = stepper.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
         }
 
-        // Google Apps Script File Upload
-        document.getElementById('uploadReceiptBtn').addEventListener('click', async function () {
-            const fileInput = document.getElementById('receiptFileInput');
-            const statusDiv = document.getElementById('uploadReceiptStatus');
-            const progress = document.getElementById('uploadReceiptProgress');
-            const urlInput = document.getElementById('receiptUrlInput');
-            const submitBtn = document.getElementById('submitAppBtn');
+        // Upload biên lai qua GasUploader module
+        document.getElementById('uploadReceiptBtn').addEventListener('click', function () {
+            const periodIdVal = document.getElementById('periodSelect').value;
+            const majorIdVal = document.getElementById('majorIdHidden').value;
 
-            if (fileInput.files.length === 0) { showNotifyModal('Vui lòng chọn file ảnh biên lai!', 'warning'); return; }
-            if (!GAS_URL) { showNotifyModal('Hệ thống chưa cấu hình Link Upload Google Drive. Vui lòng báo quản trị.', 'warning'); return; }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            statusDiv.className = 'small mt-2 text-center text-brand fw-bold';
-            statusDiv.innerText = 'Đang đọc thẻ và tải ảnh lên hệ thống...';
-            progress.classList.remove('d-none');
-            this.disabled = true;
-
-            reader.onload = async function () {
-                const base64 = reader.result.split(',')[1];
-
-                // Tên file: BIENL_TS{periodId}M{majorId}_{cccdLast6}_{timestamp}.{ext}
-                // Đồng nhất với mã nội dung chuyển khoản → dễ đối soát trên Google Drive
-                const ext = file.type === 'image/png' ? 'png' : 'jpg';
-                const periodIdVal = document.getElementById('periodSelect').value;
-                const majorIdVal = document.getElementById('majorIdHidden').value;
-                const cccdRaw = "<?php echo addslashes($profileData['identity_card'] ?? '000000'); ?>";
-                const cccdSuffix = cccdRaw.replace(/\D/g, '').slice(-6);
-                const safeFileName = `BIENL_TS${periodIdVal}M${majorIdVal}_${cccdSuffix}_${Date.now()}.${ext}`;
-
-                try {
-                    const response = await fetch(GAS_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            base64: base64,
-                            fileName: safeFileName,
-                            mimeType: file.type
-                        })
-                    });
-
-
-                    const gasData = await response.json();
-
-                    if (gasData.status === 'success') {
-                        statusDiv.className = 'small mt-2 text-center text-success fw-bold p-2 bg-success bg-opacity-10 rounded border border-success';
-                        statusDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i> Tải Biên lai thành công! Ảnh đã được ghim vào hồ sơ. Bạn có thể Nộp hồ sơ.';
-                        urlInput.value = gasData.webViewLink; // Gắn URL ẩn vào form
-                        submitBtn.disabled = false; // Mở khóa nút Nộp Hồ sơ
-                    } else {
-                        throw new Error(gasData.message || 'Lưu Google Drive thất bại.');
-                    }
-                } catch (err) {
-                    statusDiv.className = 'small mt-2 text-center text-danger fw-bold';
-                    statusDiv.innerText = 'Lỗi Tải file: ' + err.message;
-                    document.getElementById('uploadReceiptBtn').disabled = false;
-                    progress.classList.add('d-none');
-                }
-            };
-            reader.readAsDataURL(file);
+            GasUploader.upload({
+                gasUrl: GAS_URL,
+                fileInput: document.getElementById('receiptFileInput'),
+                filePrefix: 'BIENL_TS' + periodIdVal + 'M' + majorIdVal,
+                identitySuffix: "<?php echo addslashes($profileData['identity_card'] ?? '000000'); ?>",
+                statusEl: document.getElementById('uploadReceiptStatus'),
+                progressEl: document.getElementById('uploadReceiptProgress'),
+                triggerBtn: this,
+                onSuccess: function(webViewLink) {
+                    var statusEl = document.getElementById('uploadReceiptStatus');
+                    statusEl.className = 'small mt-2 text-center text-success fw-bold p-2 bg-success bg-opacity-10 rounded border border-success';
+                    statusEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> Tải Biên lai thành công! Bạn có thể Nộp hồ sơ.';
+                    document.getElementById('receiptUrlInput').value = webViewLink;
+                    document.getElementById('submitAppBtn').disabled = false;
+                },
+                onError: function(msg) { showNotifyModal(msg, 'warning'); }
+            });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

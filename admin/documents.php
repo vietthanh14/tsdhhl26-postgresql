@@ -1,18 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-
-// admin/documents.php
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php');
-    exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-$supabaseAdmin = new SupabaseClient('service');
-
-$message = $_SESSION['msg'] ?? '';
-$error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 // Lay danh sach tai lieu
 $query = 'select=*,document_types(type_name)&order=uploaded_at.desc';
@@ -69,8 +56,7 @@ unset($doc);
                 </button>
             </div>
 
-            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
 
             <div class="card border-0 shadow-sm rounded-3 mb-4">
                 <div class="card-body p-4">
@@ -153,7 +139,7 @@ unset($doc);
             var cacheBuster = new Date().getTime();
             
             $.ajax({
-                url: 'api_export_docs_csv.php?t=' + cacheBuster,
+                url: 'api/export_docs_csv.php?t=' + cacheBuster,
                 method: 'GET',
                 dataType: 'json',
                 success: function(res) {

@@ -53,6 +53,9 @@ class SupabaseClient {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
 
+        // Tự động giải nén (Brotli/Gzip) từ Supabase để tiết kiệm Egress 
+        curl_setopt($ch, CURLOPT_ENCODING, '');
+
         // Tắt xác minh SSL khi đang ở môi trường Localhost (XAMPP có thể bị lỗi cert)
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -121,5 +124,37 @@ class SupabaseClient {
         $inList = implode(',', array_map('strval', $ids));
         $endpoint = "/rest/v1/{$table}?{$matchField}=in.({$inList})";
         return $this->request('PATCH', $endpoint, $data, $token);
+    }
+
+    /**
+     * Lấy đếm số lượng bản ghi (Count) bằng giao thức HEAD (Zero Egress Payload).
+     * Rất tiết kiệm băng thông khi chỉ cần đếm tổng số mà không tải mảng Data về.
+     */
+    public function count($table) {
+        $ch = curl_init($this->url . "/rest/v1/" . $table . "?select=id&limit=1");
+        $headers = [
+            'apikey: ' . $this->key,
+            'Prefer: count=exact',
+            'Authorization: Bearer ' . $this->key,
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true); // Chuyển thành HEAD request
+        curl_setopt($ch, CURLOPT_HEADER, true); // Yêu cầu trả cả headers để bóc tách
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headerStr = substr($response, 0, $headerSize);
+        curl_close($ch);
+        
+        // Cú pháp của PostgREST: Content-Range: 0-0/5123 (5123 là tổng số)
+        if ($httpCode >= 200 && $httpCode < 300) {
+            if (preg_match('/Content-Range:\s*\w*\s*\d+-\d+\/(\d+)/i', $headerStr, $matches)) {
+                return (int)$matches[1];
+            }
+        }
+        return 0; // Fallback
     }
 }

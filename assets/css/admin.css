@@ -1,0 +1,125 @@
+:root {
+    --admin-sidebar-bg: #1A3A6E;
+    --admin-sidebar-hover: rgba(255, 255, 255, 0.1);
+    --admin-sidebar-active: rgba(255, 255, 255, 0.2);
+    --admin-sidebar-text: #cbd5e1;
+    --admin-sidebar-text-active: #ffffff;
+    --admin-body-bg: #f8fafc;
+    --admin-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+body {
+    background-color: var(--admin-body-bg);
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: var(--admin-sidebar-bg);
+    min-height: calc(100vh - 56px); /* Assume header is 56px */
+    color: var(--admin-sidebar-text);
+}
+
+.sidebar-menu a {
+    color: var(--admin-sidebar-text);
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-menu a:hover {
+    background-color: var(--admin-sidebar-hover);
+    color: var(--admin-sidebar-text-active);
+}
+
+.sidebar-menu a.active {
+    background-color: var(--admin-sidebar-active);
+    color: var(--admin-sidebar-text-active);
+    font-weight: 500;
+}
+
+/* Modern Card Styling */
+.card {
+    border: none;
+    box-shadow: var(--admin-card-shadow);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+/* Table Responsive Adjustments */
+.table-responsive {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f1f5f9;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+/* Action Buttons inside Table */
+.table .btn-group {
+    background-color: #ffffff;
+    border-radius: 4px;
+}
+.table .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 0.375rem;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #94a3b8;
+    box-shadow: 0 0 0 0.25rem rgba(26, 58, 110, 0.1);
+}
+
+/* Adjust main content padding */
+.main-content {
+    padding: 1.5rem;
+    min-height: calc(100vh - 56px);
+}

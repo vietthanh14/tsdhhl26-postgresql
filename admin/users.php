@@ -1,18 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-
-// admin/users.php
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php');
-    exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-$supabaseAdmin = new SupabaseClient('service');
-
-$message = $_SESSION['msg'] ?? '';
-$error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 // Xu ly CAP NHAT TAI KHOAN
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -96,6 +83,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/combo.css">
     <style>
         .detail-label { font-size: .75rem; text-transform: uppercase; font-weight: 700; color: #6b7280; letter-spacing: .5px; margin-bottom: 2px; }
         .detail-value { font-size: .9rem; color: #1e293b; min-height: 1.4em; }
@@ -107,34 +95,6 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
         .btn-outline-brand { color: var(--brand, #1A3A6E); border-color: var(--brand, #1A3A6E); }
         .btn-outline-brand:hover { background-color: var(--brand, #1A3A6E); color: white; }
         .password-toggle { cursor: pointer; }
-        /* Combobox styles */
-        .combo-wrapper { position: relative; }
-        .combo-wrapper .combo-input {
-            border-radius: 6px; border: 1px solid #cbd5e1; min-height: 38px; width: 100%;
-            padding: .375rem .75rem; font-size: .875rem;
-            transition: border-color .15s ease, box-shadow .15s ease;
-            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right .75rem center;
-            padding-right: 2rem; cursor: pointer;
-        }
-        .combo-wrapper .combo-input:focus { outline: none; border-color: var(--brand, #1A3A6E); box-shadow: 0 0 0 2px rgba(26, 58, 110, .15); }
-        .combo-wrapper .combo-input:disabled { background-color: #f8fafc; cursor: not-allowed; color: #94a3b8; }
-        .combo-dropdown {
-            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .1); max-height: 230px; overflow-y: auto; z-index: 1060;
-        }
-        .combo-dropdown.open { display: block; }
-        .combo-dropdown .combo-search { position: sticky; top: 0; padding: 8px; background: #fff; border-bottom: 1px solid #e2e8f0; }
-        .combo-dropdown .combo-search input { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: .8rem; outline: none; }
-        .combo-dropdown .combo-search input:focus { border-color: var(--brand, #1A3A6E); }
-        .combo-option { padding: 8px 14px; cursor: pointer; font-size: .85rem; transition: background .1s; }
-        .combo-option:hover, .combo-option.active { background: #eff6ff; color: var(--brand, #1A3A6E); }
-        .combo-option.no-result { color: #94a3b8; cursor: default; font-style: italic; }
-        .combo-clear {
-            position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; color: #94a3b8; font-size: .85rem; display: none; line-height: 1; z-index: 1;
-        }
-        .combo-clear:hover { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -149,8 +109,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                 <h3 class="fw-bold mb-0 text-brand">Quản lý Thông tin Thí sinh</h3>
             </div>
 
-            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
 
             <div class="card border-0 shadow-sm rounded-3 mb-4">
                 <div class="card-body p-4">
@@ -209,9 +168,11 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                                         <span class="d-block small text-muted"><?php echo date('d/m/Y H:i', strtotime($u['created_at'])); ?></span>
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-brand" onclick="viewUser(<?php echo $idx; ?>)"><i class="bi bi-eye"></i> Xem</button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="editUser(<?php echo $idx; ?>)">Sửa</button>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="resetPassword('<?php echo $u['id']; ?>', '<?php echo htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES); ?>')"><i class="bi bi-key"></i> Cấp MK</button>
+                                        <div class="btn-group shadow-sm">
+                                            <button class="btn btn-sm btn-outline-brand" onclick="viewUser(<?php echo $idx; ?>)" title="Xem chi tiết"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-warning" onclick="editUser(<?php echo $idx; ?>)" title="Sửa hồ sơ"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="resetPassword('<?php echo $u['id']; ?>', '<?php echo htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES); ?>')" title="Cấp lại mật khẩu"><i class="bi bi-key"></i></button>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -224,314 +185,15 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
     </div>
 </div>
 
-<!-- Modal: View User Detail -->
-<div class="modal fade" id="viewUserModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-brand text-white border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-person-lines-fill me-2"></i>Chi tiết Thí sinh</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4" id="viewUserBody">
-                <!-- JS will populate -->
-            </div>
-            <div class="modal-footer border-0 p-3">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-brand px-4" id="btnViewToEdit"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa</button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php include __DIR__ . '/includes/user_modals.php'; ?>
 
-<!-- Modal: Edit User -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <form method="POST" class="modal-content border-0 shadow">
-            <div class="modal-header bg-brand text-white border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa Thông tin Thí sinh</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <input type="hidden" name="action" value="update_user">
-                <input type="hidden" name="user_id" id="edit_user_id">
 
-                <!-- Section 1: Thông tin định danh -->
-                <div class="section-title"><i class="bi bi-person-vcard me-2"></i>Thông tin định danh</div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Họ và Tên <span class="text-danger">*</span></label>
-                        <input type="text" name="full_name" id="edit_full_name" class="form-control" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">CMND/CCCD</label>
-                        <input type="text" name="identity_card" id="edit_identity_card" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Ngày sinh</label>
-                        <input type="date" name="date_of_birth" id="edit_date_of_birth" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Giới tính</label>
-                        <select name="gender" id="edit_gender" class="form-select">
-                            <option value="">-- Chọn --</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
-                            <option value="Khác">Khác</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Dân tộc</label>
-                        <input type="text" name="ethnicity" id="edit_ethnicity" class="form-control">
-                    </div>
-                </div>
-
-                <!-- Section 2: Liên hệ -->
-                <div class="section-title"><i class="bi bi-telephone me-2"></i>Thông tin liên hệ</div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Email liên hệ</label>
-                        <input type="email" name="contact_email" id="edit_contact_email" class="form-control">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Số điện thoại</label>
-                        <input type="text" name="phone_number" id="edit_phone_number" class="form-control">
-                    </div>
-                </div>
-
-                <!-- Section 3: Địa chỉ thường trú -->
-                <div class="section-title"><i class="bi bi-house-door me-2"></i>Địa chỉ thường trú</div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Tỉnh / Thành phố</label>
-                        <div class="combo-wrapper" id="editProvinceWrapper">
-                            <span class="combo-clear" id="editProvinceClear" title="Xóa">&times;</span>
-                            <input type="text" class="combo-input" id="editProvinceInput" placeholder="-- Chọn Tỉnh/TP --" readonly>
-                            <div class="combo-dropdown" id="editProvinceDropdown">
-                                <div class="combo-search"><input type="text" id="editProvinceSearch" placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off"></div>
-                                <div id="editProvinceList"></div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="province" id="edit_province">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Phường / Xã</label>
-                        <div class="combo-wrapper" id="editWardWrapper">
-                            <span class="combo-clear" id="editWardClear" title="Xóa">&times;</span>
-                            <input type="text" class="combo-input" id="editWardInput" placeholder="-- Chọn Phường/Xã --" readonly disabled>
-                            <div class="combo-dropdown" id="editWardDropdown">
-                                <div class="combo-search"><input type="text" id="editWardSearch" placeholder="🔍 Tìm phường/xã..." autocomplete="off"></div>
-                                <div id="editWardList"></div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="ward" id="edit_ward">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Địa chỉ chi tiết</label>
-                        <input type="text" name="address_detail" id="edit_address_detail" class="form-control">
-                    </div>
-                </div>
-
-                <!-- Section 4: Trường THPT -->
-                <div class="section-title"><i class="bi bi-mortarboard me-2"></i>Trường THPT</div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Tên trường THPT</label>
-                        <input type="text" name="school_name" id="edit_school_name" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Tỉnh (Trường)</label>
-                        <div class="combo-wrapper" id="editSchoolProvinceWrapper">
-                            <span class="combo-clear" id="editSchoolProvinceClear" title="Xóa">&times;</span>
-                            <input type="text" class="combo-input" id="editSchoolProvinceInput" placeholder="-- Chọn Tỉnh/TP --" readonly>
-                            <div class="combo-dropdown" id="editSchoolProvinceDropdown">
-                                <div class="combo-search"><input type="text" id="editSchoolProvinceSearch" placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off"></div>
-                                <div id="editSchoolProvinceList"></div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="school_province" id="edit_school_province">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Phường/Xã (Trường)</label>
-                        <div class="combo-wrapper" id="editSchoolWardWrapper">
-                            <span class="combo-clear" id="editSchoolWardClear" title="Xóa">&times;</span>
-                            <input type="text" class="combo-input" id="editSchoolWardInput" placeholder="-- Chọn Phường/Xã --" readonly disabled>
-                            <div class="combo-dropdown" id="editSchoolWardDropdown">
-                                <div class="combo-search"><input type="text" id="editSchoolWardSearch" placeholder="🔍 Tìm phường/xã..." autocomplete="off"></div>
-                                <div id="editSchoolWardList"></div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="school_ward" id="edit_school_ward">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Địa chỉ chi tiết (Trường)</label>
-                        <input type="text" name="school_address_detail" id="edit_school_address_detail" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Năm tốt nghiệp</label>
-                        <input type="number" name="graduation_year" id="edit_graduation_year" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Học lực lớp 12</label>
-                        <select name="academic_performance" id="edit_academic_performance" class="form-select">
-                            <option value="">-- Chọn --</option>
-                            <option value="Xuất sắc">Xuất sắc(Tốt)</option>
-                            <option value="Giỏi">Giỏi(Tốt)</option>
-                            <option value="Khá">Khá(Khá)</option>
-                            <option value="Trung bình">Trung bình(Đạt)</option>
-                            <option value="Yếu">Yếu(Chưa đạt)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Hạnh kiểm lớp 12</label>
-                        <select name="conduct" id="edit_conduct" class="form-select">
-                            <option value="">-- Chọn --</option>
-                            <option value="Tốt">Tốt(Tốt)</option>
-                            <option value="Khá">Khá(Khá)</option>
-                            <option value="Trung bình">Trung bình(Đạt)</option>
-                            <option value="Yếu">Yếu(Chưa đạt)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section 5: Ưu tiên -->
-                <div class="section-title"><i class="bi bi-star me-2"></i>Ưu tiên</div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Khu vực ưu tiên</label>
-                        <select name="priority_area" id="edit_priority_area" class="form-select">
-                            <option value="">-- Chọn --</option>
-                            <option value="KV1">KV1</option>
-                            <option value="KV2">KV2</option>
-                            <option value="KV2-NT">KV2-NT</option>
-                            <option value="KV3">KV3</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Đối tượng ưu tiên</label>
-                        <select name="priority_object" id="edit_priority_object" class="form-select">
-                            <option value="">-- Không có --</option>
-                            <option value="01">01 - Dân tộc thiểu số (KV1)</option>
-                            <option value="02">02 - CN sản xuất ưu tú</option>
-                            <option value="03">03 - Thương binh, Quân/CA</option>
-                            <option value="04">04 - Con liệt sĩ, Con TB/BB (≥81%)</option>
-                            <option value="05">05 - TNXP, Quân/CA xuất ngũ</option>
-                            <option value="06">06 - DTTS ngoài KV1</option>
-                            <option value="07">07 - Người KT nặng, LĐ/Nhà giáo/YT XS</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section 6: Đã tốt nghiệp -->
-                <div class="section-title"><i class="bi bi-award me-2"></i>Đã tốt nghiệp (nếu có)</div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Trình độ đã TN</label>
-                        <select name="prev_degree_level" id="edit_prev_degree_level" class="form-select">
-                            <option value="">-- Chưa có --</option>
-                            <option value="Trung cấp">Trung cấp</option>
-                            <option value="Cao đẳng">Cao đẳng</option>
-                            <option value="Đại học">Đại học</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Ngành đã TN</label>
-                        <input type="text" name="prev_major" id="edit_prev_major" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Xếp loại TN</label>
-                        <select name="prev_graduation_rank" id="edit_prev_graduation_rank" class="form-select">
-                            <option value="">-- Chọn --</option>
-                            <option value="Xuất sắc">Xuất sắc</option>
-                            <option value="Giỏi">Giỏi</option>
-                            <option value="Khá">Khá</option>
-                            <option value="Trung bình khá">Trung bình khá</option>
-                            <option value="Trung bình">Trung bình</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Ngày trúng tuyển</label>
-                        <input type="date" name="prev_admission_date" id="edit_prev_admission_date" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Ngày tốt nghiệp</label>
-                        <input type="date" name="prev_graduation_date" id="edit_prev_graduation_date" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Bằng TN do trường cấp</label>
-                        <input type="text" name="prev_diploma_school" id="edit_prev_diploma_school" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold small text-muted">Cấp ngày</label>
-                        <input type="date" name="prev_diploma_date" id="edit_prev_diploma_date" class="form-control">
-                    </div>
-                </div>
-
-                <!-- Section 7: Công tác hiện tại -->
-                <div class="section-title"><i class="bi bi-briefcase me-2"></i>Công tác hiện tại</div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Chức vụ</label>
-                        <input type="text" name="current_position" id="edit_current_position" class="form-control">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold small text-muted">Cơ quan công tác</label>
-                        <input type="text" name="current_workplace" id="edit_current_workplace" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-brand px-4"><i class="bi bi-check-lg me-1"></i>Lưu thay đổi</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal: Reset Password -->
-<div class="modal fade" id="resetPasswordModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning border-0">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-key me-2"></i>Cấp lại Mật khẩu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <input type="hidden" name="action" value="reset_password">
-                <input type="hidden" name="user_id" id="reset_user_id">
-
-                <div class="alert alert-info border-0 small">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Đặt mật khẩu mới cho thí sinh: <strong id="reset_user_name"></strong>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted">Mật khẩu mới <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <input type="password" name="new_password" id="new_password" class="form-control" required minlength="6" placeholder="Tối thiểu 6 ký tự">
-                        <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword()">
-                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mb-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="generatePassword()">
-                        <i class="bi bi-shuffle me-1"></i>Tạo mật khẩu ngẫu nhiên
-                    </button>
-                </div>
-            </div>
-            <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-warning px-4 fw-bold"><i class="bi bi-check-lg me-1"></i>Xác nhận đổi mật khẩu</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/address_combo.js"></script>
 <script>
     const usersData = <?php echo $usersJson; ?>;
     let currentViewIdx = null;
@@ -703,149 +365,32 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
         document.getElementById('togglePasswordIcon').classList.replace('bi-eye', 'bi-eye-slash');
     }
 
-    // ============================================================
-    // Combobox Address System (reused from profile.php pattern)
-    // ============================================================
-    (function() {
-        const API_BASE = '<?php echo BASE_URL; ?>/api/dia_danh.php';
-        let provincesCache = null;
+    // Address Combos — sử dụng module AddressCombo dùng chung
+    const API_BASE = '<?php echo BASE_URL; ?>/api/dia_danh.php';
+    AddressCombo.init(API_BASE, {
+        comboKey: 'editProvinceInput',
+        provinceInputId: 'editProvinceInput', provinceDropdownId: 'editProvinceDropdown',
+        provinceSearchId: 'editProvinceSearch', provinceListId: 'editProvinceList',
+        provinceHiddenId: 'edit_province', provinceClearId: 'editProvinceClear',
+        wardInputId: 'editWardInput', wardDropdownId: 'editWardDropdown',
+        wardSearchId: 'editWardSearch', wardListId: 'editWardList',
+        wardHiddenId: 'edit_ward', wardClearId: 'editWardClear'
+    });
+    AddressCombo.init(API_BASE, {
+        comboKey: 'editSchoolProvinceInput',
+        provinceInputId: 'editSchoolProvinceInput', provinceDropdownId: 'editSchoolProvinceDropdown',
+        provinceSearchId: 'editSchoolProvinceSearch', provinceListId: 'editSchoolProvinceList',
+        provinceHiddenId: 'edit_school_province', provinceClearId: 'editSchoolProvinceClear',
+        wardInputId: 'editSchoolWardInput', wardDropdownId: 'editSchoolWardDropdown',
+        wardSearchId: 'editSchoolWardSearch', wardListId: 'editSchoolWardList',
+        wardHiddenId: 'edit_school_ward', wardClearId: 'editSchoolWardClear'
+    });
 
-        function closeAllCombos() {
-            document.querySelectorAll('.combo-dropdown.open').forEach(d => d.classList.remove('open'));
-        }
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.combo-wrapper')) closeAllCombos();
-        });
-
-        function makeCombo({ triggerEl, dropdown, searchEl, listEl, clearEl, onClear }) {
-            triggerEl.addEventListener('click', () => {
-                if (triggerEl.disabled) return;
-                const isOpen = dropdown.classList.contains('open');
-                closeAllCombos();
-                if (!isOpen) {
-                    dropdown.classList.add('open');
-                    searchEl.value = '';
-                    searchEl.dispatchEvent(new Event('input'));
-                    setTimeout(() => searchEl.focus(), 50);
-                }
-            });
-            searchEl.addEventListener('input', () => {
-                const q = searchEl.value.toLowerCase().trim();
-                listEl.querySelectorAll('.combo-option').forEach(opt => {
-                    opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
-                });
-                const visible = [...listEl.querySelectorAll('.combo-option')].filter(o => o.style.display !== 'none');
-                let noRes = listEl.querySelector('.no-result');
-                if (!visible.length) {
-                    if (!noRes) { noRes = document.createElement('div'); noRes.className = 'combo-option no-result'; noRes.textContent = 'Không tìm thấy kết quả'; listEl.appendChild(noRes); }
-                } else { if (noRes) noRes.remove(); }
-            });
-            if (clearEl && onClear) clearEl.addEventListener('click', onClear);
-        }
-
-        function renderOptions(listEl, items, onSelect) {
-            listEl.innerHTML = '';
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'combo-option';
-                div.textContent = item.name;
-                div.dataset.code = item.code;
-                div.addEventListener('click', () => { onSelect(item); closeAllCombos(); });
-                listEl.appendChild(div);
-            });
-        }
-
-        function initAddressCombo(prefix) {
-            const pInput = document.getElementById(prefix + 'ProvinceInput');
-            const pDropdown = document.getElementById(prefix + 'ProvinceDropdown');
-            const pSearch = document.getElementById(prefix + 'ProvinceSearch');
-            const pList = document.getElementById(prefix + 'ProvinceList');
-            const pHidden = document.getElementById(prefix === 'edit' ? 'edit_province' : 'edit_school_province');
-            const pClear = document.getElementById(prefix + 'ProvinceClear');
-
-            const wInput = document.getElementById(prefix + 'WardInput');
-            const wDropdown = document.getElementById(prefix + 'WardDropdown');
-            const wSearch = document.getElementById(prefix + 'WardSearch');
-            const wList = document.getElementById(prefix + 'WardList');
-            const wHidden = document.getElementById(prefix === 'edit' ? 'edit_ward' : 'edit_school_ward');
-            const wClear = document.getElementById(prefix + 'WardClear');
-
-            function clearWard() { wInput.value = ''; wHidden.value = ''; wClear.style.display = 'none'; }
-            function clearProvince() { pInput.value = ''; pHidden.value = ''; pClear.style.display = 'none'; clearWard(); wInput.disabled = true; }
-
-            function selectProvince(p, skipWardReset) {
-                pInput.value = p.name; pHidden.value = p.name; pClear.style.display = 'block';
-                if (!skipWardReset) { clearWard(); wInput.disabled = false; }
-                fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(p.code)}`)
-                    .then(r => r.json())
-                    .then(wards => renderOptions(wList, wards, selectWard));
-            }
-            function selectWard(w) { wInput.value = w.name; wHidden.value = w.name; wClear.style.display = 'block'; }
-
-            makeCombo({ triggerEl: pInput, dropdown: pDropdown, searchEl: pSearch, listEl: pList, clearEl: pClear, onClear: clearProvince });
-            makeCombo({ triggerEl: wInput, dropdown: wDropdown, searchEl: wSearch, listEl: wList, clearEl: wClear, onClear: clearWard });
-
-            // Load provinces
-            const loadProvinces = () => {
-                if (provincesCache) {
-                    renderOptions(pList, provincesCache, p => selectProvince(p));
-                    return Promise.resolve(provincesCache);
-                }
-                return fetch(API_BASE + '?action=provinces')
-                    .then(r => r.json())
-                    .then(provinces => {
-                        provincesCache = provinces;
-                        renderOptions(pList, provinces, p => selectProvince(p));
-                        return provinces;
-                    });
-            };
-
-            // Store references for restoring
-            window['_combo_' + prefix] = { selectProvince, selectWard, loadProvinces, clearProvince };
-            loadProvinces();
-        }
-
-        // Restore saved values in combos
-        window.restoreAddressCombo = function(prefix, savedProvince, savedWard) {
-            const combo = window['_combo_' + prefix];
-            if (!combo) return;
-            combo.clearProvince();
-            if (!savedProvince) return;
-
-            combo.loadProvinces().then(provinces => {
-                const match = provinces.find(p => p.name === savedProvince);
-                if (match) {
-                    combo.selectProvince(match, true);
-                    if (savedWard) {
-                        fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(match.code)}`)
-                            .then(r => r.json())
-                            .then(wards => {
-                                const wList = document.getElementById(prefix + 'WardList');
-                                const renderOpts = (list, items, onSel) => {
-                                    list.innerHTML = '';
-                                    items.forEach(item => {
-                                        const div = document.createElement('div');
-                                        div.className = 'combo-option';
-                                        div.textContent = item.name;
-                                        div.dataset.code = item.code;
-                                        div.addEventListener('click', () => { onSel(item); closeAllCombos(); });
-                                        list.appendChild(div);
-                                    });
-                                };
-                                renderOpts(wList, wards, combo.selectWard);
-                                document.getElementById(prefix + 'WardInput').disabled = false;
-                                const mw = wards.find(w => w.name === savedWard);
-                                if (mw) combo.selectWard(mw);
-                            });
-                    }
-                }
-            });
-        };
-
-        // Initialize both address combos
-        initAddressCombo('edit');
-        initAddressCombo('editSchool');
-    })();
+    // Wrapper cho editUser restore
+    window.restoreAddressCombo = function(prefix, savedProvince, savedWard) {
+        const key = prefix === 'edit' ? 'editProvinceInput' : 'editSchoolProvinceInput';
+        AddressCombo.restore(key, savedProvince, savedWard, API_BASE);
+    };
 
     // DataTable
     $(document).ready(function() {

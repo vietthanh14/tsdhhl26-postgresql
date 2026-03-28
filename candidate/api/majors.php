@@ -1,15 +1,6 @@
 <?php
 // candidate/api/majors.php — Trả về danh sách ngành học theo đợt tuyển sinh
-session_start();
-header('Content-Type: application/json');
-
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Chưa đăng nhập']);
-    exit;
-}
-
-require_once __DIR__ . '/../../lib/SupabaseClient.php';
+require_once __DIR__ . '/_guard.php';
 
 $period_id = trim($_GET['period_id'] ?? '');
 if (!$period_id || !ctype_digit($period_id)) {
@@ -39,8 +30,8 @@ $majors = [];
 if ($majorsRes['code'] === 200) {
     foreach ($majorsRes['data'] as $m) {
         $majors[] = [
-            'id'      => $m['id'],
-            'name'    => '[' . ($m['education_levels']['name'] ?? 'N/A') . '] - ' . $m['major_name'] . ' (Mã: ' . ($m['major_code'] ?? 'N/A') . ')',
+            'id'   => $m['id'],
+            'name' => '[' . ($m['education_levels']['name'] ?? 'N/A') . '] - ' . $m['major_name'] . ' (Mã: ' . ($m['major_code'] ?? 'N/A') . ')',
         ];
     }
 }

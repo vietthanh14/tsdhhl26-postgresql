@@ -1,15 +1,6 @@
 <?php
 // candidate/api/methods.php — Trả về phương thức xét tuyển theo đợt + ngành
-session_start();
-header('Content-Type: application/json');
-
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Chưa đăng nhập']);
-    exit;
-}
-
-require_once __DIR__ . '/../../lib/SupabaseClient.php';
+require_once __DIR__ . '/_guard.php';
 
 $period_id = trim($_GET['period_id'] ?? '');
 $major_id  = trim($_GET['major_id']  ?? '');

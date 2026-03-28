@@ -1,21 +1,9 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/includes/admin_init.php';
 
-// admin/index.php
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php');
-    exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-$supabaseAdmin = new SupabaseClient('service');
-
-// Lấy thông kê (Ví dụ số hồ sơ)
-$appRes = $supabaseAdmin->select('applications', 'select=id', null);
-$totalApps = ($appRes['code'] == 200) ? count($appRes['data']) : 0;
-
-$userRes = $supabaseAdmin->select('user_profiles', 'select=id', null);
-$totalUsers = ($userRes['code'] == 200) ? count($userRes['data']) : 0;
+// Lấy thông kê sử dụng hàm đếm HEAD (Zero Egress)
+$totalApps = $supabaseAdmin->count('applications');
+$totalUsers = $supabaseAdmin->count('user_profiles');
 ?>
 <!DOCTYPE html>
 <html lang="vi">

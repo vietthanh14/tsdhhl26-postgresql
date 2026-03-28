@@ -130,38 +130,9 @@ $profile = $profileResponse['data'][0];
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css">
-    <style>
-        /* Searchable Combobox (profile.php only) */
-        .combo-wrapper { position: relative; }
-        .combo-wrapper .combo-input {
-            border-radius: 6px; border: 1px solid #cbd5e1; min-height: 44px; width: 100%;
-            padding: .375rem .75rem; font-size: 1rem;
-            transition: border-color .15s ease, box-shadow .15s ease;
-            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right .75rem center;
-            padding-right: 2rem; cursor: pointer;
-        }
-        .combo-wrapper .combo-input:focus { outline: none; border-color: var(--brand-color); box-shadow: 0 0 0 2px rgba(26, 58, 110, .15); }
-        .combo-wrapper .combo-input:disabled { background-color: #f8fafc; cursor: not-allowed; color: #94a3b8; }
-        .combo-dropdown {
-            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .1); max-height: 230px; overflow-y: auto; z-index: 1050;
-        }
-        .combo-dropdown.open { display: block; }
-        .combo-dropdown .combo-search { position: sticky; top: 0; padding: 8px; background: #fff; border-bottom: 1px solid #e2e8f0; }
-        .combo-dropdown .combo-search input { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: .875rem; outline: none; }
-        .combo-dropdown .combo-search input:focus { border-color: var(--brand-color); }
-        .combo-option { padding: 9px 14px; cursor: pointer; font-size: .9rem; transition: background .1s; }
-        .combo-option:hover, .combo-option.active { background: #eff6ff; color: var(--brand-color); }
-        .combo-option.no-result { color: #94a3b8; cursor: default; font-style: italic; }
-        .combo-clear {
-            position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; color: #94a3b8; font-size: .85rem; display: none; line-height: 1; z-index: 1;
-        }
-        .combo-clear:hover { color: #ef4444; }
-    </style>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css?v=1.2">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css?v=1.2">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/combo.css?v=1.2">
 </head>
 
 <body>
@@ -185,14 +156,24 @@ $profile = $profileResponse['data'][0];
 
                             <div class="card-body">
                                 <?php if ($message): ?>
-                                    <div class="alert alert-success"><?php echo $message; ?></div><?php endif; ?>
+                                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm custom-alert">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <span><?php echo htmlspecialchars($message); ?></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if ($error): ?>
-                                    <div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
+                                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm custom-alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <span><?php echo htmlspecialchars($error); ?></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                <?php endif; ?>
 
                                 <form method="POST" action="">
 
                                     <!-- ====== Section 1: Thông tin định danh ====== -->
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-person-vcard me-2"></i>Thông tin định danh</h6>
+                                    <h6 class="fw-bold mb-4 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-person-vcard me-2"></i>1. Thông tin định danh</h6>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -253,8 +234,7 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <!-- ====== Section 2: Địa chỉ thường trú ====== -->
-                                    <hr class="my-4">
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-house-door me-2"></i>Địa chỉ thường trú</h6>
+                                    <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-house-door me-2"></i>2. Địa chỉ thường trú</h6>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -303,8 +283,7 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <!-- ====== Section 3: Trường THPT ====== -->
-                                    <hr class="my-4">
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-mortarboard me-2"></i>Trường THPT</h6>
+                                    <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-mortarboard me-2"></i>3. Trường THPT</h6>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -383,8 +362,7 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <!-- ====== Section 4: Ưu tiên ====== -->
-                                    <hr class="my-4">
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-star me-2"></i>Ưu tiên</h6>
+                                    <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-star me-2"></i>4. Ưu tiên</h6>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -413,8 +391,7 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <!-- ====== Section 5: Đã tốt nghiệp ====== -->
-                                    <hr class="my-4">
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-award me-2"></i>Đã tốt nghiệp (nếu có)</h6>
+                                    <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-award me-2"></i>5. Đã tốt nghiệp (nếu có)</h6>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -476,8 +453,7 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <!-- ====== Section 6: Công tác hiện tại ====== -->
-                                    <hr class="my-4">
-                                    <h6 class="fw-bold mb-3 px-3 py-2 rounded" style="background-color: #1A3A6E; color: #fff;"><i class="bi bi-briefcase me-2"></i>Công tác hiện tại (nếu có)</h6>
+                                    <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-briefcase me-2"></i>6. Công tác hiện tại (nếu có)</h6>
 
                                     <div class="row mb-4">
                                         <div class="col-md-6">
@@ -494,8 +470,10 @@ $profile = $profileResponse['data'][0];
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn btn-brand px-4 py-2 fw-semibold">LƯU THAY
-                                        ĐỔI</button>
+                                    <div class="mt-5 d-flex gap-2 justify-content-end bg-light p-3 rounded-3 border">
+                                        <button type="reset" class="btn btn-light fw-semibold">Hủy</button>
+                                        <button type="submit" class="btn btn-brand px-4 py-2 fw-semibold"><i class="bi bi-save me-2"></i>LƯU THAY ĐỔI</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -503,15 +481,14 @@ $profile = $profileResponse['data'][0];
 
                     <div class="col-md-4">
                         <!-- Upload Section -->
-                        <div class="card p-3 mb-4">
-                            <div class="card-header border-0 bg-white p-0 mb-3">
-                                <h6 class="fw-bold text-dark mb-0">Tải lên tài liệu</h6>
-                                <p class="text-muted small mb-0">Chọn loại hồ sơ và tệp tin điện tử (PDF, JPG, PNG)</p>
-                            </div>
-                            <div class="card-body p-0">
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius:12px; background:linear-gradient(to bottom, #ffffff, #f8fafc);">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-cloud-arrow-up me-2 text-brand"></i>Tải lên tài liệu</h6>
+                                <p class="text-muted small mb-4">Các định dạng hỗ trợ: PDF, JPG, PNG.</p>
+                                
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">1. Loại tài liệu</label>
-                                    <select id="docTypeSelect" class="form-select form-select-sm">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">1. Loại tài liệu</label>
+                                    <select id="docTypeSelect" class="form-select border-0 shadow-sm" style="border-radius:8px;">
                                         <option value="">-- Chọn danh mục --</option>
                                         <?php
                                         $docTypes = Cache::remember('document_types', 3600, function() use ($supabaseAdmin) {
@@ -524,56 +501,57 @@ $profile = $profileResponse['data'][0];
                                         ?>
                                     </select>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">2. Chọn tập tin</label>
-                                    <input type="file" id="fileInput" class="form-control form-control-sm"
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">2. Chọn tập tin</label>
+                                    <input type="file" id="fileInput" class="form-control border-0 shadow-sm"
+                                        accept=".pdf,.jpg,.jpeg,.png" style="border-radius:8px;">
                                 </div>
-                                <button id="uploadBtn" class="btn btn-brand btn-sm w-100 fw-bold py-2">BẮT ĐẦU TẢI
-                                    LÊN</button>
+                                <button id="uploadBtn" class="btn btn-brand w-100 fw-bold py-2 shadow-sm rounded-3">BẮT ĐẦU TẢI LÊN</button>
 
                                 <!-- Progress Bar -->
-                                <div id="uploadProgress" class="progress mt-3 d-none" style="height: 5px;">
+                                <div id="uploadProgress" class="progress mt-3 d-none rounded-pill" style="height: 6px;">
                                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
                                         style="width: 100%"></div>
                                 </div>
-                                <div id="uploadStatus" class="small mt-2 text-center"></div>
+                                <div id="uploadStatus" class="small mt-2 text-center text-muted fw-medium"></div>
                             </div>
                         </div>
 
                         <!-- List Section -->
-                        <div class="card p-0">
-                            <div class="card-header py-3 px-3">
-                                <h6 class="mb-0 fw-bold">Tài liệu đã nộp</h6>
+                        <div class="card border-0 shadow-sm" style="border-radius:12px;">
+                            <div class="card-header border-bottom-0 bg-white p-4 pb-0">
+                                <h6 class="mb-0 fw-bold"><i class="bi bi-folder2-open me-2 text-brand"></i>Tài liệu đã nộp</h6>
                             </div>
-                            <div class="list-group list-group-flush" id="documentList">
-                                <?php
-                                $userDocsRes = $supabaseAdmin->select('user_documents', "user_id=eq.{$user_id}", $token);
-                                if ($userDocsRes['code'] == 200 && !empty($userDocsRes['data'])) {
-                                    foreach ($userDocsRes['data'] as $doc) {
-                                        // Tìm tên loại tài liệu
-                                        $typeName = "Tài liệu #{$doc['document_type_id']}";
-                                        foreach ($docTypes as $dt) {
-                                            if ($dt['id'] == $doc['document_type_id']) {
-                                                $typeName = $dt['type_name'];
-                                                break;
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" id="documentList">
+                                    <?php
+                                    $userDocsRes = $supabaseAdmin->select('user_documents', "user_id=eq.{$user_id}", $token);
+                                    if ($userDocsRes['code'] == 200 && !empty($userDocsRes['data'])) {
+                                        foreach ($userDocsRes['data'] as $doc) {
+                                            // Tìm tên loại tài liệu
+                                            $typeName = "Tài liệu #{$doc['document_type_id']}";
+                                            foreach ($docTypes as $dt) {
+                                                if ($dt['id'] == $doc['document_type_id']) {
+                                                    $typeName = $dt['type_name'];
+                                                    break;
+                                                }
                                             }
+                                            echo "
+                                        <div class='list-group-item d-flex justify-content-between align-items-center py-3 border-bottom px-4'>
+                                            <div>
+                                                <div class='fw-semibold text-dark small mb-1'>" . htmlspecialchars($typeName, ENT_QUOTES) . "</div>
+                                                <a href='" . htmlspecialchars($doc['drive_file_url'] ?? '', ENT_QUOTES) . "' target='_blank' class='badge bg-light text-brand text-decoration-none border'><i class='bi bi-eye-fill me-1'></i>Xem file</a>
+                                            </div>
+                                            <div>
+                                                <button class='btn btn-sm btn-outline-danger border-0' onclick='deleteDocument(\"{$doc['id']}\")' title='Xóa tài liệu'><i class='bi bi-trash-fill'></i></button>
+                                            </div>
+                                        </div>";
                                         }
-                                        echo "
-                                    <div class='list-group-item d-flex justify-content-between align-items-center py-3'>
-                                        <div>
-                                            <div class='fw-bold small'>{$typeName}</div>
-                                            <a href='{$doc['drive_file_url']}' target='_blank' class='text-brand small text-decoration-none'>Xem file</a>
-                                        </div>
-                                        <div>
-                                            <button class='btn btn-sm btn-outline-danger' onclick='deleteDocument(\"{$doc['id']}\")'>Xóa</button>
-                                        </div>
-                                    </div>";
+                                    } else {
+                                        echo "<div class='p-4 text-center text-muted small fst-italic'>Chưa có tài liệu nào.</div>";
                                     }
-                                } else {
-                                    echo "<div class='p-4 text-center text-muted small'>Chưa có tài liệu nào.</div>";
-                                }
-                                ?>
+                                    ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -606,149 +584,37 @@ $profile = $profileResponse['data'][0];
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo BASE_URL; ?>/assets/js/address_combo.js"></script>
+    <script src="<?php echo BASE_URL; ?>/assets/js/gas_uploader.js"></script>
     <script>
-        // ============================================================
-        // Địa danh 2 cấp: Tỉnh/TP → Phường/Xã
-        // ============================================================
-        // ============================================================
-        // Reusable Combobox Factory + Address Section Builder
-        // ============================================================
+        // Address combos — sử dụng module AddressCombo dùng chung
         (function () {
             const API_BASE = '<?php echo BASE_URL; ?>/api/dia_danh.php';
 
-            // ---- Combobox factory ----
-            function makeCombo({ triggerEl, dropdown, searchEl, listEl, clearEl, onClear }) {
-                triggerEl.addEventListener('click', () => {
-                    if (triggerEl.disabled) return;
-                    const isOpen = dropdown.classList.contains('open');
-                    closeAll();
-                    if (!isOpen) {
-                        dropdown.classList.add('open');
-                        searchEl.value = '';
-                        searchEl.dispatchEvent(new Event('input'));
-                        setTimeout(() => searchEl.focus(), 50);
-                    }
-                });
-                searchEl.addEventListener('input', () => {
-                    const q = searchEl.value.toLowerCase().trim();
-                    listEl.querySelectorAll('.combo-option').forEach(opt => {
-                        opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
-                    });
-                    const visible = [...listEl.querySelectorAll('.combo-option')].filter(o => o.style.display !== 'none');
-                    let noRes = listEl.querySelector('.no-result');
-                    if (!visible.length) {
-                        if (!noRes) { noRes = document.createElement('div'); noRes.className = 'combo-option no-result'; noRes.textContent = 'Không tìm thấy kết quả'; listEl.appendChild(noRes); }
-                    } else { if (noRes) noRes.remove(); }
-                });
-                if (clearEl && onClear) clearEl.addEventListener('click', onClear);
-            }
-
-            function closeAll() {
-                document.querySelectorAll('.combo-dropdown.open').forEach(d => d.classList.remove('open'));
-            }
-            document.addEventListener('click', e => {
-                if (!e.target.closest('.combo-wrapper')) closeAll();
-            });
-
-            function renderOptions(listEl, items, onSelect) {
-                listEl.innerHTML = '';
-                items.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'combo-option';
-                    div.textContent = item.name;
-                    div.dataset.code = item.code;
-                    div.addEventListener('click', () => { onSelect(item); closeAll(); });
-                    listEl.appendChild(div);
-                });
-            }
-
-            // ============================================================
-            // Section builder for province/ward combos
-            // ============================================================
-            function initAddressSection(cfg) {
-                const pInput = document.getElementById(cfg.provinceInputId);
-                const pDropdown = document.getElementById(cfg.provinceDropdownId);
-                const pSearch = document.getElementById(cfg.provinceSearchId);
-                const pList = document.getElementById(cfg.provinceListId);
-                const pName = document.getElementById(cfg.provinceNameId);
-                const pClear = document.getElementById(cfg.provinceClearId);
-
-                const wInput = document.getElementById(cfg.wardInputId);
-                const wDropdown = document.getElementById(cfg.wardDropdownId);
-                const wSearch = document.getElementById(cfg.wardSearchId);
-                const wList = document.getElementById(cfg.wardListId);
-                const wName = document.getElementById(cfg.wardNameId);
-                const wClear = document.getElementById(cfg.wardClearId);
-
-                const addrDetail = cfg.addressDetailId ? document.getElementById(cfg.addressDetailId) : null;
-
-                function clearWard() { wInput.value = ''; wName.value = ''; wClear.style.display = 'none'; }
-                function clearProvince() { pInput.value = ''; pName.value = ''; pClear.style.display = 'none'; clearWard(); wInput.disabled = true; }
-
-                function selectProvince(p, skipWardReset) {
-                    pInput.value = p.name; pName.value = p.name; pClear.style.display = 'block';
-                    if (!skipWardReset) { clearWard(); wInput.disabled = false; }
-                    fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(p.code)}`)
-                        .then(r => r.json())
-                        .then(wards => renderOptions(wList, wards, selectWard));
-                }
-                function selectWard(w) { wInput.value = w.name; wName.value = w.name; wClear.style.display = 'block'; }
-
-                makeCombo({ triggerEl: pInput, dropdown: pDropdown, searchEl: pSearch, listEl: pList, clearEl: pClear, onClear: clearProvince });
-                makeCombo({ triggerEl: wInput, dropdown: wDropdown, searchEl: wSearch, listEl: wList, clearEl: wClear, onClear: clearWard });
-
-                // Load provinces + restore
-                fetch(API_BASE + '?action=provinces')
-                    .then(r => r.json())
-                    .then(provinces => {
-                        renderOptions(pList, provinces, p => selectProvince(p));
-                        if (addrDetail && cfg.savedAddressDetail) addrDetail.value = cfg.savedAddressDetail;
-                        if (cfg.savedProvince) {
-                            const match = provinces.find(p => p.name === cfg.savedProvince);
-                            if (match) {
-                                selectProvince(match, true);
-                                fetch(`${API_BASE}?action=wards&province_code=${encodeURIComponent(match.code)}`)
-                                    .then(r => r.json())
-                                    .then(wards => {
-                                        renderOptions(wList, wards, selectWard);
-                                        wInput.disabled = false;
-                                        if (cfg.savedWard) {
-                                            const mw = wards.find(w => w.name === cfg.savedWard);
-                                            if (mw) selectWard(mw);
-                                        }
-                                    });
-                            }
-                        }
-                    })
-                    .catch(() => console.warn('Không thể tải dữ liệu địa danh.'));
-            }
-
-            // ============================================================
             // 1. Địa chỉ cá nhân
-            // ============================================================
-            initAddressSection({
+            AddressCombo.init(API_BASE, {
+                comboKey: 'provinceInput',
                 provinceInputId: 'provinceInput', provinceDropdownId: 'provinceDropdown',
                 provinceSearchId: 'provinceSearch', provinceListId: 'provinceList',
-                provinceNameId: 'provinceName', provinceClearId: 'provinceClear',
+                provinceHiddenId: 'provinceName', provinceClearId: 'provinceClear',
                 wardInputId: 'wardInput', wardDropdownId: 'wardDropdown',
                 wardSearchId: 'wardSearch', wardListId: 'wardList',
-                wardNameId: 'wardName', wardClearId: 'wardClear',
+                wardHiddenId: 'wardName', wardClearId: 'wardClear',
                 addressDetailId: 'addressDetail',
                 savedProvince: <?php echo json_encode($profile['province'] ?? ''); ?>,
                 savedWard: <?php echo json_encode($profile['ward'] ?? ''); ?>,
                 savedAddressDetail: <?php echo json_encode($profile['address_detail'] ?? ''); ?>
             });
 
-            // ============================================================
             // 2. Địa chỉ trường THPT
-            // ============================================================
-            initAddressSection({
+            AddressCombo.init(API_BASE, {
+                comboKey: 'schoolProvinceInput',
                 provinceInputId: 'schoolProvinceInput', provinceDropdownId: 'schoolProvinceDropdown',
                 provinceSearchId: 'schoolProvinceSearch', provinceListId: 'schoolProvinceList',
-                provinceNameId: 'schoolProvinceName', provinceClearId: 'schoolProvinceClear',
+                provinceHiddenId: 'schoolProvinceName', provinceClearId: 'schoolProvinceClear',
                 wardInputId: 'schoolWardInput', wardDropdownId: 'schoolWardDropdown',
                 wardSearchId: 'schoolWardSearch', wardListId: 'schoolWardList',
-                wardNameId: 'schoolWardName', wardClearId: 'schoolWardClear',
+                wardHiddenId: 'schoolWardName', wardClearId: 'schoolWardClear',
                 addressDetailId: 'schoolAddressDetail',
                 savedProvince: <?php echo json_encode($profile['school_province'] ?? ''); ?>,
                 savedWard: <?php echo json_encode($profile['school_ward'] ?? ''); ?>,
@@ -760,78 +626,37 @@ $profile = $profileResponse['data'][0];
         const GAS_URL = '<?php echo GAS_WEBAPP_URL; ?>';
         const USER_ID = '<?php echo $user_id; ?>';
 
-        document.getElementById('uploadBtn').addEventListener('click', async function () {
-            const fileInput = document.getElementById('fileInput');
+        document.getElementById('uploadBtn').addEventListener('click', function () {
             const docTypeId = document.getElementById('docTypeSelect').value;
-            const statusDiv = document.getElementById('uploadStatus');
-            const progress = document.getElementById('uploadProgress');
-
             if (!docTypeId) { showNotifyModal('Vui lòng chọn loại tài liệu!', 'warning'); return; }
-            if (fileInput.files.length === 0) { showNotifyModal('Vui lòng chọn file!', 'warning'); return; }
-            if (!GAS_URL) { showNotifyModal('Chưa cấu hình Google Apps Script URL trong .env!', 'danger'); return; }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            statusDiv.className = 'small mt-2 text-center text-brand';
-            statusDiv.innerText = 'Đang mã hóa file...';
-            progress.classList.remove('d-none');
-            this.disabled = true;
-
-            reader.onload = async function () {
-                const base64 = reader.result.split(',')[1];
-                statusDiv.innerText = 'Đang tải hồ sơ lên Google Drive...';
-
-                try {
-                    // Tên file: DOC_D{docTypeId}_{cccdLast6}_{timestamp}.{ext}
-                    // Ví dụ: DOC_D3_789012_1710567890123.pdf
-                    const ext = file.type === 'application/pdf' ? 'pdf' : (file.type === 'image/png' ? 'png' : 'jpg');
-                    const cccdRaw = "<?php echo addslashes($profile['identity_card'] ?? '000000'); ?>";
-                    const cccd6 = cccdRaw.replace(/\D/g, '').slice(-6);
-                    const safeFileName = `DOC_D${docTypeId}_${cccd6}_${Date.now()}.${ext}`;
-
-                    // 1. Upload lên Google Drive qua GAS
-                    const response = await fetch(GAS_URL, {
+            GasUploader.upload({
+                gasUrl: GAS_URL,
+                fileInput: document.getElementById('fileInput'),
+                filePrefix: 'DOC_D' + docTypeId,
+                identitySuffix: "<?php echo addslashes($profile['identity_card'] ?? '000000'); ?>",
+                statusEl: document.getElementById('uploadStatus'),
+                progressEl: document.getElementById('uploadProgress'),
+                triggerBtn: this,
+                onSuccess: function(webViewLink) {
+                    document.getElementById('uploadStatus').innerText = 'Lưu thông tin vào hệ thống...';
+                    fetch('api/save_document.php', {
                         method: 'POST',
-                        body: JSON.stringify({
-                            base64: base64,
-                            fileName: safeFileName,
-                            mimeType: file.type
-                        })
-                    });
-
-
-                    const gasData = await response.json();
-
-                    if (gasData.status === 'success') {
-                        statusDiv.innerText = 'Lưu thông tin vào hệ thống...';
-
-                        // 2. Lưu URL vào Supabase qua PHP proxy
-                        const saveResponse = await fetch('save_document.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `doc_type_id=${docTypeId}&file_url=${encodeURIComponent(gasData.webViewLink)}`
-                        });
-
-                        const saveResult = await saveResponse.json();
-                        if (saveResult.success) {
-                            statusDiv.className = 'small mt-2 text-center text-success';
-                            statusDiv.innerText = 'Tải lên thành công!';
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'doc_type_id=' + docTypeId + '&file_url=' + encodeURIComponent(webViewLink)
+                    })
+                    .then(r => r.json())
+                    .then(result => {
+                        if (result.success) {
+                            document.getElementById('uploadStatus').className = 'small mt-2 text-center text-success';
+                            document.getElementById('uploadStatus').innerText = 'Tải lên thành công!';
                             setTimeout(() => location.reload(), 1500);
-                        } else {
-                            throw new Error(saveResult.message || 'Lỗi lưu database');
-                        }
-                    } else {
-                        throw new Error(gasData.message || 'Lỗi GAS');
-                    }
-                } catch (err) {
-                    statusDiv.className = 'small mt-2 text-center text-danger';
-                    statusDiv.innerText = 'Lỗi: ' + err.message;
-                    document.getElementById('uploadBtn').disabled = false;
-                    progress.classList.add('d-none');
-                }
-            };
-            reader.readAsDataURL(file);
+                        } else { showNotifyModal('Lỗi: ' + (result.message || 'Lỗi database'), 'danger'); }
+                    })
+                    .catch(err => showNotifyModal('Lỗi lưu: ' + err.message, 'danger'));
+                },
+                onError: function(msg) { showNotifyModal(msg, 'warning'); }
+            });
         });
 
         let docIdToDelete = null;
@@ -849,7 +674,7 @@ $profile = $profileResponse['data'][0];
             this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xóa...';
 
             try {
-                const res = await fetch('delete_document.php', {
+                const res = await fetch('api/delete_document.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: docIdToDelete })

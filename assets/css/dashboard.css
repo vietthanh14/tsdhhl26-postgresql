@@ -61,17 +61,21 @@ body {
 
 /* ── Cards ── */
 .card {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e1e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     margin-bottom: 24px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    overflow: hidden;
+}
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 .card-header {
-    border-bottom: 1px solid #e2e8f0;
-    background: white;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-bottom: 1px solid #e1e8f0;
+    background: #fff;
+    padding: 16px 20px;
 }
 
 /* ── Buttons ── */
@@ -79,24 +83,31 @@ body {
     background-color: var(--brand-color);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 .btn-brand:hover {
     background-color: var(--brand-hover);
     color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 58, 110, 0.2);
+}
+.btn-brand:active {
+    transform: translateY(0);
 }
 .btn-secondary {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500;
-    border-radius: 6px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 /* ── Brand Utilities ── */
@@ -110,21 +121,30 @@ body {
 /* ── Forms ── */
 .form-control,
 .form-select {
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #cbd5e1;
     min-height: 44px;
+    background-color: #f8fafc;
+    transition: all 0.2s ease;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.form-select option {
+    white-space: normal;
+    word-break: break-word;
 }
 .form-control:focus,
 .form-select:focus {
+    background-color: #fff;
     border-color: var(--brand-color);
-    box-shadow: 0 0 0 2px rgba(26, 58, 110, 0.15);
+    box-shadow: 0 0 0 3px rgba(26, 58, 110, 0.15);
 }
 .form-label {
     font-size: clamp(0.78rem, 0.72rem + 0.2vw, 0.85rem);
-    color: #64748b;
-    margin-bottom: 0.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #475569;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
 }
 
 /* ── Table (Dashboard) ── */
@@ -140,7 +160,109 @@ body {
     vertical-align: middle;
 }
 .badge {
-    border-radius: 4px;
-    padding: 0.4em 0.6em;
-    font-weight: 500;
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+    font-weight: 600;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.wizard-step {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Stepper (candidate/apply.php) ── */
+.stepper-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+}
+.stepper-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+.stepper-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+.stepper-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+.stepper-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    text-align: center;
+}
+.stepper-item.active .stepper-circle {
+    border-color: var(--brand-color);
+    background: var(--brand-color);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(26, 58, 110, 0.15);
+}
+.stepper-item.active .stepper-title {
+    color: var(--brand-color);
+}
+.stepper-item.completed .stepper-circle {
+    border-color: #10b981;
+    background: #10b981;
+    color: #fff;
+}
+.stepper-item.completed .stepper-title {
+    color: #10b981;
+}
+@media (max-width: 767.98px) {
+    /* Ẩn chữ stepper trên mobile để gọn */
+    .stepper-title { display: none; }
+    
+    /* Compact Mode: Giảm thiểu độ dài trang trên thiết bị di động */
+    .card-body { padding: 1.25rem 1rem !important; }
+    .content-area { padding-top: 1rem !important; padding-inline: 0.75rem !important; }
+    
+    /* Ép gọn khoảng cách margins */
+    .mb-4, .mb-5 { margin-bottom: 1.25rem !important; }
+    .mb-3 { margin-bottom: 0.85rem !important; }
+    .mt-3.mt-md-0, .my-3 { margin-top: 0.85rem !important; margin-bottom: 0.85rem !important; }
+    
+    /* Thu gọn font and control sizes */
+    .form-control, .form-select { min-height: 42px; font-size: 0.95rem; }
+    .form-label { margin-bottom: 0.25rem; font-size: 0.8rem; }
+    
+    h3, .fs-3 { font-size: 1.3rem !important; margin-bottom: 0.5rem !important; }
+    h5, .fs-5 { font-size: 1.1rem !important; }
+    h6, .fs-6 { font-size: 0.95rem !important; }
+    
+    /* Stepper gọn hơn */
+    .stepper-wrapper { margin-bottom: 1.5rem !important; }
+    .stepper-circle { width: 28px; height: 28px; font-size: 0.85rem; }
+    .stepper-wrapper::before { top: 13px; }
+    
+    /* Bảng thông tin thanh toán gọn hơn */
+    .account-info-block { padding: 0.75rem 0 !important; }
 }

@@ -1,14 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php'); exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-require_once __DIR__ . '/../lib/Cache.php';
-$supabaseAdmin = new SupabaseClient('service');
-$message = $_SESSION['msg'] ?? ''; $error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -54,33 +45,45 @@ include __DIR__ . '/includes/admin_header.php';
 </div>
 
 
-<div class="bg-white p-4 rounded-3 shadow-sm border-0">
-<table class="table table-hover align-middle mb-0">
-    <thead class="table-light"><tr>
-        <th>Mã Ngành</th><th>Tên Ngành</th><th>Hệ Đào Tạo</th><th>Nhóm Zalo</th><th>Hành động</th>
-    </tr></thead>
-    <tbody id="majorsBody">
-        <?php foreach($majors as $m): ?>
-        <tr>
-            <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($m['major_code']); ?></span></td>
-            <td class="fw-bold text-dark"><?php echo htmlspecialchars($m['major_name']); ?></td>
-            <td><span class="badge bg-info text-white"><?php echo htmlspecialchars($m['education_levels']['name'] ?? 'N/A'); ?></span></td>
-            <td>
-                <?php if (!empty($m['zalo_link'])): ?>
-                    <a href="<?php echo htmlspecialchars($m['zalo_link']); ?>" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3"><i class="bi bi-chat-dots-fill"></i> Tham gia</a>
-                <?php else: ?><span class="text-muted small">Chưa có</span><?php endif; ?>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-outline-warning" onclick="openEditMajorModal('<?php echo $m['id']; ?>', '<?php echo htmlspecialchars($m['major_code'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($m['major_name'], ENT_QUOTES); ?>', '<?php echo $m['education_level_id']; ?>', '<?php echo htmlspecialchars($m['zalo_link'] ?? '', ENT_QUOTES); ?>')">Sửa</button>
-                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmDelete(this, 'Xóa ngành học này?');">
-                    <input type="hidden" name="action" value="delete_major"><input type="hidden" name="id" value="<?php echo $m['id']; ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
-                </form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Ngành</th>
+                        <th>Tên Ngành</th>
+                        <th>Hệ Đào Tạo</th>
+                        <th>Nhóm Zalo</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="majorsBody">
+                    <?php foreach($majors as $m): ?>
+                    <tr>
+                        <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($m['major_code']); ?></span></td>
+                        <td class="fw-bold text-dark"><?php echo htmlspecialchars($m['major_name']); ?></td>
+                        <td><span class="badge bg-info text-white"><?php echo htmlspecialchars($m['education_levels']['name'] ?? 'N/A'); ?></span></td>
+                        <td>
+                            <?php if (!empty($m['zalo_link'])): ?>
+                                <a href="<?php echo htmlspecialchars($m['zalo_link']); ?>" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1"><i class="bi bi-chat-dots-fill"></i> Nhóm</a>
+                            <?php else: ?>
+                                <span class="text-muted small">Chưa có</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditMajorModal('<?php echo $m['id']; ?>', '<?php echo htmlspecialchars($m['major_code'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($m['major_name'], ENT_QUOTES); ?>', '<?php echo $m['education_level_id']; ?>', '<?php echo htmlspecialchars($m['zalo_link'] ?? '', ENT_QUOTES); ?>')" title="Sửa"><i class="bi bi-pencil"></i></button>
+                            <form method="POST" class="d-inline" onsubmit="event.preventDefault(); window.confirmDelete ? confirmDelete(this, 'Xóa ngành học này?') : (confirm('Xóa ngành học này?') && this.submit());">
+                                <input type="hidden" name="action" value="delete_major"><input type="hidden" name="id" value="<?php echo $m['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Thêm Ngành -->

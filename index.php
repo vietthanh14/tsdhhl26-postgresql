@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <?php if ($error): ?>
-                <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo $error; ?>
+                <div class="alert alert-danger py-2 rounded-1 border-0 bg-danger text-white small"><?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
 

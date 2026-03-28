@@ -1,18 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-
-// admin/applications.php
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php');
-    exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-$supabaseAdmin = new SupabaseClient('service');
-
-$message = $_SESSION['msg'] ?? '';
-$error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 // Xu ly POST (Cap nhat trang thai)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -122,8 +109,7 @@ unset($app);
                 </button>
             </div>
 
-            <?php if($message): ?><div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"><?php echo $message; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
-            <?php if($error): ?><div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"><?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+            <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
 
             <form method="POST" action="" id="bulkForm">
                 <input type="hidden" name="action" value="bulk_update">
@@ -312,7 +298,7 @@ unset($app);
             var cacheBuster = new Date().getTime();
             
             $.ajax({
-                url: 'api_export_csv.php?t=' + cacheBuster,
+                url: 'api/export_csv.php?t=' + cacheBuster,
                 method: 'GET',
                 dataType: 'json',
                 success: function(res) {

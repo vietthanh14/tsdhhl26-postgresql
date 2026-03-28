@@ -50,7 +50,7 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/public.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dashboard.css?v=1.2">
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -68,16 +68,31 @@ foreach ($methodsData as $mt) { $methodsMap[$mt['id']] = $mt['method_name']; }
 
             <div class="row">
                 <!-- Cảnh báo nếu chưa cập nhật hồ sơ -->
-                <?php if(empty($profile['phone_number']) || empty($profile['address'])): ?>
+                <?php if(empty($profile['phone_number']) || empty($profile['province'])): ?>
                 <div class="col-12 mb-4">
-                    <div class="alert alert-warning border-start border-warning border-4">
-                        <h5 class="alert-heading">⚠️ Thông báo! Vui lòng kiểm tra, đọc trước các nội dung sau:</h5>
-                        <p class="mb-0">- <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="alert-link">Cập nhật thông tin</a> , đăng tải minh chứng đầy đủ trước khi đăng ký xét tuyển.</p>
-                        <p class="mb-0">- <a href="https://uhl.edu.vn/TuyensinhHeDaihoc_8699.htm" class="alert-link">Thông tin tuyển sinh</a> trình độ đại học chính quy năm 2026.</p>
-                        <p class="mb-0">- <a href="https://uhl.edu.vn/QuydoidiemChungchiNgoainguHSG_5722.htm" class="alert-link">Quy đổi điểm chứng chỉ ngoại ngữ quốc tế </a> đối với phương thức
-
-xét tuyển kết hợp (Mã phương thức: 409).</p>
-                        <p class="mb-0">- <a href="https://uhl.edu.vn/CACTINHDIEMXETTUYENTUYENSINHNAM_11210.htm" class="alert-link">Cách tính điểm</a> xét tuyển sinh năm 2026.</p>
+                    <div class="card border-0 shadow-sm" style="background: linear-gradient(to right, #fffbeb, #fef3c7); border-radius: 12px; border-left: 5px solid #f59e0b !important;">
+                        <div class="card-body p-4 d-flex align-items-start gap-3">
+                            <div class="flex-shrink-0 text-warning" style="font-size: 2rem; line-height: 1;">
+                                <i class="bi bi-bell-fill mb-2"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-2">Vui lòng hoàn thiện hồ sơ của bạn!</h5>
+                                <p class="text-muted mb-3">Hệ thống yêu cầu cập nhật đẩy đủ thông tin và minh chứng trước khi đăng ký xét tuyển.</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="btn btn-warning fw-bold shadow-sm" style="border-radius: 8px;">Cập nhật thông tin ngay &raquo;</a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-light fw-bold shadow-sm dropdown-toggle" style="border-radius: 8px;" type="button" data-bs-toggle="dropdown">
+                                            Xem hướng dẫn TS
+                                        </button>
+                                        <ul class="dropdown-menu shadow-sm border-0" style="border-radius: 10px;">
+                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/TuyensinhHeDaihoc_8699.htm" target="_blank">Thông tin tuyển sinh đại học 2026</a></li>
+                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/QuydoidiemChungchiNgoainguHSG_5722.htm" target="_blank">Quy đổi điểm ngoại ngữ</a></li>
+                                            <li><a class="dropdown-item py-2" href="https://uhl.edu.vn/CACTINHDIEMXETTUYENTUYENSINHNAM_11210.htm" target="_blank">Cách tính điểm xét tuyển</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -166,8 +181,8 @@ xét tuyển kết hợp (Mã phương thức: 409).</p>
                                     </table>
                                 </div>
 
-                                <!-- Mobile: Card layout (synced with search page style) -->
-                                <div class="d-md-none">
+                                <!-- Mobile: Card layout (Soft Bento Ticket) -->
+                                <div class="d-md-none px-2 pb-3">
                                     <?php foreach ($applications as $i => $app): ?>
                                     <?php
                                         $isApproved = ($app['status'] === 'APPROVED');
@@ -178,50 +193,58 @@ xét tuyển kết hợp (Mã phương thức: 409).</p>
                                         $zalo = $app['majors']['zalo_link'] ?? '';
                                         $majorName = htmlspecialchars($app['majors']['major_name'] ?? 'N/A');
                                         $levelName = htmlspecialchars($app['majors']['education_levels']['name'] ?? '');
-                                        $titleText = $levelName ? "$majorName — $levelName" : $majorName;
                                     ?>
-                                    <div class="result-card mb-3" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;background:#fff;">
-                                        <!-- Card header -->
-                                        <div style="background:#1A3A6E;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="color:#fff;font-weight:700;font-size:.9rem;"><i class="bi bi-mortarboard me-1"></i><?php echo $titleText; ?></span>
-                                            <span class="badge <?php echo $statusClass; ?>" style="font-size:.75rem;padding:5px 12px;border-radius:20px;"><?php echo $statusText; ?></span>
-                                        </div>
-                                        <!-- Card body -->
-                                        <div class="p-3">
-                                            <div class="row g-2 small">
-                                                <div class="col-5 text-muted fw-medium">Phương thức XT</div>
-                                                <div class="col-7"><?php echo htmlspecialchars($methodsMap[$app['admission_method_id']] ?? 'N/A'); ?></div>
-                                                <div class="col-5 text-muted fw-medium">Đợt xét tuyển</div>
-                                                <div class="col-7"><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></div>
-                                                <div class="col-5 text-muted fw-medium">Lệ phí</div>
-                                                <div class="col-7 fw-semibold"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>
-                                                <?php if (!empty($app['admin_notes'])): ?>
-                                                    <div class="col-12 mt-2">
-                                                        <div class="rounded p-2" style="background:#f1f5f9;font-size:.78rem;">
-                                                            <i class="bi bi-chat-left-text text-brand me-1"></i>
-                                                            <span class="text-muted fst-italic"><?php echo htmlspecialchars($app['admin_notes']); ?></span>
-                                                        </div>
-                                                    </div>
-                                                <?php endif; ?>
+                                    <div class="card mb-4 border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                                        <!-- Header -->
+                                        <div class="p-3 d-flex justify-content-between align-items-center" style="background:var(--brand-color);">
+                                            <div class="pe-2">
+                                                <div class="text-white fw-bold mb-1" style="font-size:1rem; line-height:1.2;">
+                                                    <i class="bi bi-journal-bookmark-fill me-1 opacity-75"></i><?php echo $majorName; ?>
+                                                </div>
+                                                <div class="text-white-50" style="font-size:0.75rem;"><?php echo $levelName; ?></div>
                                             </div>
-                                            <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top" style="<?php echo $isApproved ? 'opacity:.4;pointer-events:none;' : ''; ?>">
-                                                <small class="text-muted fw-medium">Nguyện vọng:</small>
-                                                <input type="number" class="form-control form-control-sm text-center priority-input" 
-                                                       value="<?php echo intval($app['priority'] ?? 1); ?>" min="1" max="10"
-                                                       data-app-id="<?php echo $app['id']; ?>"
-                                                       style="width:55px;font-weight:600;"
-                                                       <?php echo $isApproved ? 'disabled' : ''; ?>>
-                                                <button class="btn btn-sm btn-outline-success save-priority-btn" title="Lưu thứ tự"
-                                                        data-app-id="<?php echo $app['id']; ?>"
-                                                        <?php echo $isApproved ? 'disabled' : ''; ?>><i class="bi bi-check-lg"></i></button>
+                                            <div class="badge <?php echo $statusClass; ?> shadow-sm" style="font-size:.75rem;padding:6px 12px;border-radius:20px; white-space:nowrap;"><?php echo $statusText; ?></div>
+                                        </div>
+                                        <!-- Body -->
+                                        <div class="p-3 bg-white">
+                                            <div class="row g-2 mb-3 small">
+                                                <div class="col-5 text-muted fw-semibold">Phương thức XT</div>
+                                                <div class="col-7 fw-medium text-dark"><?php echo htmlspecialchars($methodsMap[$app['admission_method_id']] ?? 'N/A'); ?></div>
+                                                
+                                                <div class="col-5 text-muted fw-semibold">Đợt xét tuyển</div>
+                                                <div class="col-7 fw-medium text-dark"><?php echo htmlspecialchars($app['admission_periods']['name'] ?? 'N/A'); ?></div>
+                                                
+                                                <div class="col-5 text-muted fw-semibold">Lệ phí</div>
+                                                <div class="col-7 fw-bold text-danger"><?php echo number_format($app['fee_amount'], 0, ',', '.'); ?> đ</div>
+                                            </div>
+                                            
+                                            <?php if (!empty($app['admin_notes'])): ?>
+                                                <div class="rounded p-2 mb-3 border-start border-4 border-info bg-light small">
+                                                    <i class="bi bi-info-circle-fill text-info me-1"></i>
+                                                    <span class="text-muted fst-italic"><?php echo htmlspecialchars($app['admin_notes']); ?></span>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background:#f8fafc; border:1px solid #e2e8f0; <?php echo $isApproved ? 'opacity:.6;pointer-events:none;' : ''; ?>">
+                                                <span class="text-muted fw-medium small">Nguyện vọng Ưu tiên:</span>
+                                                <div class="d-flex gap-1">
+                                                    <input type="number" class="form-control form-control-sm text-center priority-input" 
+                                                           value="<?php echo intval($app['priority'] ?? 1); ?>" min="1" max="10"
+                                                           data-app-id="<?php echo $app['id']; ?>"
+                                                           style="width:50px; font-weight:700; border-radius:6px;"
+                                                           <?php echo $isApproved ? 'disabled' : ''; ?>>
+                                                    <button class="btn btn-sm btn-outline-success save-priority-btn d-flex align-items-center justify-content-center" 
+                                                            style="width:32px; border-radius:6px;" title="Lưu"
+                                                            data-app-id="<?php echo $app['id']; ?>"
+                                                            <?php echo $isApproved ? 'disabled' : ''; ?>><i class="bi bi-save"></i></button>
+                                                </div>
                                             </div>
                                         </div>
-                                        <!-- Zalo bar (like download bar on search page) -->
+                                        <!-- Zalo Footer -->
                                         <?php if (!empty($zalo)): ?>
-                                        <div style="padding:12px 16px;background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-top:2px solid #0ea5e9;text-align:center;">
-                                            <a href="<?php echo htmlspecialchars($zalo); ?>" target="_blank" 
-                                               style="display:inline-block;padding:8px 24px;font-size:.88rem;font-weight:700;text-decoration:none;color:#fff;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:8px;transition:transform .2s,box-shadow .2s;">
-                                                <i class="bi bi-chat-dots-fill me-1"></i>Vào Nhóm Zalo Ngành
+                                        <div class="p-3 text-center border-top" style="background:linear-gradient(to right,#eff6ff,#dbeafe);">
+                                            <a href="<?php echo htmlspecialchars($zalo); ?>" target="_blank" class="btn btn-primary fw-bold w-100 shadow-sm" style="border-radius:10px; background:linear-gradient(135deg,#0ea5e9,#0284c7); border:none;">
+                                                <i class="bi bi-chat-dots-fill me-2"></i>Tham gia Nhóm Zalo
                                             </a>
                                         </div>
                                         <?php endif; ?>
@@ -252,7 +275,7 @@ document.querySelectorAll('.save-priority-btn').forEach(btn => {
         this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
         try {
-            const res = await fetch('update_priority.php', {
+            const res = await fetch('api/update_priority.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ app_id: appId, priority: priority })

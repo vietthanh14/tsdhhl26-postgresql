@@ -1,15 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ' . BASE_URL . '/admin/login.php'); exit;
-}
-require_once __DIR__ . '/../lib/SupabaseClient.php';
-require_once __DIR__ . '/../lib/Cache.php';
-$supabaseAdmin = new SupabaseClient('service');
-$message = $_SESSION['msg'] ?? '';
-$error = $_SESSION['err'] ?? '';
-unset($_SESSION['msg'], $_SESSION['err']);
+require_once __DIR__ . '/includes/admin_init.php';
 
 // --- POST Handlers ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -140,34 +130,62 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 </div>
 
-<div class="bg-white p-4 rounded-3 shadow-sm border-0">
-<table class="table table-hover align-middle mb-0">
-    <thead class="table-light"><tr><th>Hệ</th><th>Tên đợt</th><th>Bắt đầu</th><th>Kết thúc</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
-    <tbody id="periodsBody">
-        <?php foreach($periods as $p): ?>
-        <tr>
-            <td><span class="badge bg-secondary"><?php echo htmlspecialchars($p['education_levels']['name'] ?? 'Chưa rõ'); ?></span></td>
-            <td class="fw-semibold">
-                <?php echo htmlspecialchars($p['name']); ?><br>
-                <small class="text-muted"><?php $count = 0; foreach($periodMajors as $pm) { if($pm['period_id'] == $p['id']) $count++; } echo "Gồm {$count} ngành"; ?></small>
-            </td>
-            <td><?php echo date('d/m/Y', strtotime($p['start_date'])); ?></td>
-            <td><?php echo date('d/m/Y', strtotime($p['end_date'])); ?></td>
-            <td><?php echo $p['is_active'] ? '<span class="badge bg-success">Đang Mở</span>' : '<span class="badge bg-secondary">Đã Đóng</span>'; ?></td>
-            <td>
-                <?php
-                    $mIds = []; foreach($periodMajors as $pm) { if($pm['period_id'] == $p['id']) $mIds[] = strval($pm['major_id']); }
-                    $mIdsJson = htmlspecialchars(json_encode($mIds), ENT_QUOTES, 'UTF-8');
-                ?>
-                <button class="btn btn-sm btn-outline-warning" onclick="openEditPeriodModal('<?php echo $p['id']; ?>', '<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>', '<?php echo $p['education_level_id']; ?>', '<?php echo $p['start_date']; ?>', '<?php echo $p['end_date']; ?>', <?php echo $p['is_active'] ? 'true' : 'false'; ?>, <?php echo $mIdsJson; ?>)">Sửa</button>
-                <form method="POST" class="d-inline"><input type="hidden" name="action" value="toggle_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>"><input type="hidden" name="is_active" value="<?php echo $p['is_active'] ? 'false' : 'true'; ?>"><button class="btn btn-sm btn-outline-brand"><?php echo $p['is_active'] ? 'Đóng' : 'Mở'; ?></button></form>
-                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmCopy(this);"><input type="hidden" name="action" value="copy_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>"><button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-copy"></i> Copy</button></form>
-                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmDelete(this, 'Chắc chắn xóa đợt tuyển sinh này?');"><input type="hidden" name="action" value="delete_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>"><button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button></form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hệ</th>
+                        <th>Tên đợt</th>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="periodsBody">
+                    <?php foreach($periods as $p): ?>
+                    <tr>
+                        <td><span class="badge bg-secondary"><?php echo htmlspecialchars($p['education_levels']['name'] ?? 'Chưa rõ'); ?></span></td>
+                        <td class="fw-semibold text-brand">
+                            <?php echo htmlspecialchars($p['name']); ?><br>
+                            <small class="text-muted fw-normal"><?php $count = 0; foreach($periodMajors as $pm) { if($pm['period_id'] == $p['id']) $count++; } echo "Gồm {$count} ngành"; ?></small>
+                        </td>
+                        <td class="small"><?php echo date('d/m/Y', strtotime($p['start_date'])); ?></td>
+                        <td class="small"><?php echo date('d/m/Y', strtotime($p['end_date'])); ?></td>
+                        <td><?php echo $p['is_active'] ? '<span class="badge bg-success">Đang Mở</span>' : '<span class="badge bg-secondary">Đã Đóng</span>'; ?></td>
+                        <td class="text-end">
+                            <?php
+                                $mIds = []; foreach($periodMajors as $pm) { if($pm['period_id'] == $p['id']) $mIds[] = strval($pm['major_id']); }
+                                $mIdsJson = htmlspecialchars(json_encode($mIds), ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <div class="btn-group shadow-sm">
+                                <button class="btn btn-sm btn-outline-warning" onclick="openEditPeriodModal('<?php echo $p['id']; ?>', '<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>', '<?php echo $p['education_level_id']; ?>', '<?php echo $p['start_date']; ?>', '<?php echo $p['end_date']; ?>', <?php echo $p['is_active'] ? 'true' : 'false'; ?>, <?php echo $mIdsJson; ?>)" title="Sửa"><i class="bi bi-pencil"></i></button>
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="action" value="toggle_period">
+                                    <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                    <input type="hidden" name="is_active" value="<?php echo $p['is_active'] ? 'false' : 'true'; ?>">
+                                    <button class="btn btn-sm btn-outline-brand" title="<?php echo $p['is_active'] ? 'Đóng đợt' : 'Mở đợt'; ?>">
+                                        <i class="bi <?php echo $p['is_active'] ? 'bi-lock' : 'bi-unlock'; ?>"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmCopy(this);">
+                                    <input type="hidden" name="action" value="copy_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Copy"><i class="bi bi-copy"></i></button>
+                                </form>
+                                <form method="POST" class="d-inline" onsubmit="event.preventDefault(); confirmDelete(this, 'Chắc chắn xóa đợt tuyển sinh này?');">
+                                    <input type="hidden" name="action" value="delete_period"><input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Thêm Đợt -->
