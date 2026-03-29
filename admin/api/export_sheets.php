@@ -20,13 +20,10 @@ try {
     }
     $applications = $appsRes['data'];
 
-    $usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number,contact_email,date_of_birth,gender,ethnicity,province,ward,address_detail,school_name,school_province,priority_area,priority_object,graduation_year,academic_performance,conduct');
-    $userProfilesMap = [];
-    if ($usersRes['code'] == 200 && is_array($usersRes['data'])) {
-        foreach ($usersRes['data'] as $u) {
-            $userProfilesMap[$u['id']] = $u;
-        }
-    }
+    $userProfilesMap = $supabaseAdmin->fetchUserProfilesMap(
+        array_column($applications, 'user_id'),
+        'id,full_name,identity_card,phone_number,contact_email,date_of_birth,gender,ethnicity,province,ward,address_detail,school_name,school_province,priority_area,priority_object,graduation_year,academic_performance,conduct'
+    );
 
     // Headers
     $values = [];

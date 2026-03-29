@@ -1,19 +1,38 @@
 <?php
 require_once __DIR__ . '/includes/admin_init.php';
 
-// Lay danh sach tai lieu
-$query = 'select=*,document_types(type_name)&order=uploaded_at.desc';
+// Phân trang
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 50;
+$offset = ($page - 1) * $limit;
+
+$searchStr = trim($_GET['search'] ?? '');
+$filterArray = [];
+if ($searchStr !== '') {
+    $encodedSearch = urlencode('%' . $searchStr . '%');
+    $userFilter = "or=(full_name.ilike.{$encodedSearch},identity_card.ilike.{$encodedSearch},phone_number.ilike.{$encodedSearch})&select=id";
+    $searchUsersRes = $supabaseAdmin->select('user_profiles', $userFilter);
+    $searchUserIds = ($searchUsersRes['code'] == 200 && is_array($searchUsersRes['data'])) ? array_column($searchUsersRes['data'], 'id') : [];
+    
+    if (empty($searchUserIds)) {
+        $filterArray[] = "user_id=eq.00000000-0000-0000-0000-000000000000";
+    } else {
+        $inList = SupabaseClient::buildInList($searchUserIds);
+        $filterArray[] = "user_id=in.({$inList})";
+    }
+}
+$filterQuery = !empty($filterArray) ? implode('&', $filterArray) . '&' : '';
+
+$totalDocs = $supabaseAdmin->count('user_documents', rtrim($filterQuery, '&'));
+$totalPages = $totalDocs > 0 ? ceil($totalDocs / $limit) : 1;
+
+// Lay danh sach tai lieu (Paginated)
+$query = $filterQuery . "select=*,document_types(type_name)&order=uploaded_at.desc&limit={$limit}&offset={$offset}";
 $docsRes = $supabaseAdmin->select('user_documents', $query);
 $documents = ($docsRes['code'] == 200) ? $docsRes['data'] : [];
 
-// Lay danh sach user profiles de map thu cong 
-$usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number');
-$userProfilesMap = [];
-if ($usersRes['code'] == 200 && is_array($usersRes['data'])) {
-    foreach ($usersRes['data'] as $u) {
-        $userProfilesMap[$u['id']] = $u;
-    }
-}
+// Lay danh sach user profiles de map thu cong (Chỉ mảng userID hiện tại)
+$userProfilesMap = $supabaseAdmin->fetchUserProfilesMap(array_column($documents, 'user_id'));
 
 // Map user profiles vao tung document
 foreach ($documents as &$doc) {
@@ -49,11 +68,20 @@ unset($doc);
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <h3 class="fw-bold mb-0 text-brand">Quản lý Tài liệu Ứng viên</h3>
-                <button type="button" class="btn btn-success shadow-sm" id="btnExportDocs">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Tải xuống Excel (CSV)
-                </button>
+                <div class="d-flex gap-2 ms-auto align-items-center flex-wrap">
+                    <form method="GET" class="d-flex m-0 gap-2">
+                        <input type="text" name="search" class="form-control form-control-sm shadow-sm border-brand" placeholder="Tên, CMND, SĐT..." value="<?php echo htmlspecialchars($searchStr ?? ''); ?>" style="min-width: 180px;">
+                        <button type="submit" class="btn btn-sm btn-brand shadow-sm"><i class="bi bi-search me-1"></i>Tìm</button>
+                        <?php if(!empty($searchStr)): ?>
+                        <a href="documents.php" class="btn btn-sm btn-outline-secondary" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
+                        <?php endif; ?>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-success shadow-sm" id="btnExportDocs">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Xuất Excel (CSV)
+                    </button>
+                </div>
             </div>
 
             <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
@@ -106,6 +134,10 @@ unset($doc);
                             </tbody>
                         </table>
                     </div>
+                    
+                    <?php $queryParams = ['search' => $searchStr ?? '']; ?>
+                    <?php include __DIR__ . '/includes/paginator.php'; ?>
+                    <div class="text-center text-muted small mt-2">Tổng số: <?php echo number_format($totalDocs); ?> tài liệu</div>
                 </div>
             </div>
         </div>
@@ -122,11 +154,10 @@ unset($doc);
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
             },
-            "order": [[3, "desc"]], 
-            "pageLength": 25,
-            "drawCallback": function() {
-                $('.dataTables_paginate > .pagination').addClass('pagination-sm mt-3');
-            }
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "order": [[3, "desc"]]
         });
 
         // Xử lý Tải xuống bằng File vật lý từ Server

@@ -14,13 +14,10 @@ try {
     $documents = $docsRes['data'];
 
     // 2. Lấy Profile để map thông tin user
-    $usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number,contact_email');
-    $userProfilesMap = [];
-    if ($usersRes['code'] == 200 && is_array($usersRes['data'])) {
-        foreach ($usersRes['data'] as $u) {
-            $userProfilesMap[$u['id']] = $u;
-        }
-    }
+    $userProfilesMap = $supabaseAdmin->fetchUserProfilesMap(
+        array_column($documents, 'user_id'),
+        'id,full_name,identity_card,phone_number,contact_email'
+    );
     
     $filename = 'Danh_sach_TaiLieu_' . date('Y_m_d_His') . '.csv';
     $exportDir = __DIR__ . '/../../uploads/exports';

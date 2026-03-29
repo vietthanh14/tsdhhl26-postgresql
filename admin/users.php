@@ -62,8 +62,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
+// Phân trang & Tìm kiếm
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 50;
+$offset = ($page - 1) * $limit;
+
+$searchStr = trim($_GET['search'] ?? '');
+$filterQuery = '';
+if ($searchStr !== '') {
+    $encodedSearch = urlencode('%' . $searchStr . '%');
+    $filterQuery = "or=(full_name.ilike.{$encodedSearch},identity_card.ilike.{$encodedSearch},phone_number.ilike.{$encodedSearch})&";
+}
+
+$totalUsers = $supabaseAdmin->count('user_profiles', rtrim($filterQuery, '&'));
+$totalPages = $totalUsers > 0 ? ceil($totalUsers / $limit) : 1;
+
 // Lay danh sach tai khoan thi sinh
-$usersRes = $supabaseAdmin->select('user_profiles', 'order=created_at.desc');
+$query = $filterQuery . "order=created_at.desc&limit={$limit}&offset={$offset}";
+$usersRes = $supabaseAdmin->select('user_profiles', $query);
 $users = ($usersRes['code'] == 200) ? $usersRes['data'] : [];
 
 // Encode all users as JSON for JS detail modal
@@ -104,8 +120,15 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <h3 class="fw-bold mb-0 text-brand">Quản lý Thông tin Thí sinh</h3>
+                <form method="GET" class="d-flex ms-auto" style="min-width: 280px;">
+                    <input type="text" name="search" class="form-control form-control-sm me-2 shadow-sm border-brand" placeholder="Tìm tên, CMND, SĐT..." value="<?php echo htmlspecialchars($searchStr ?? ''); ?>">
+                    <button type="submit" class="btn btn-sm btn-brand shadow-sm"><i class="bi bi-search me-1"></i>Tìm</button>
+                    <?php if(!empty($searchStr)): ?>
+                    <a href="users.php" class="btn btn-sm btn-outline-secondary ms-1" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
@@ -178,6 +201,10 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                             </tbody>
                         </table>
                     </div>
+                    
+                    <?php $queryParams = ['search' => $searchStr ?? '']; ?>
+                    <?php include __DIR__ . '/includes/paginator.php'; ?>
+                    <div class="text-center text-muted small mt-2">Tổng số: <?php echo number_format($totalUsers); ?> thí sinh</div>
                 </div>
             </div>
         </div>
@@ -396,11 +423,10 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
             },
-            "order": [[6, "desc"]],
-            "pageLength": 25,
-            "drawCallback": function() {
-                $('.dataTables_paginate > .pagination').addClass('pagination-sm mt-3');
-            }
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "order": [[6, "desc"]]
         });
     });
 </script>

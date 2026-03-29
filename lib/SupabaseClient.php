@@ -130,8 +130,9 @@ class SupabaseClient {
      * Lấy đếm số lượng bản ghi (Count) bằng giao thức HEAD (Zero Egress Payload).
      * Rất tiết kiệm băng thông khi chỉ cần đếm tổng số mà không tải mảng Data về.
      */
-    public function count($table) {
-        $ch = curl_init($this->url . "/rest/v1/" . $table . "?select=id&limit=1");
+    public function count($table, $query = '') {
+        $endpoint = "/rest/v1/" . $table . "?select=id&limit=1" . ($query ? '&' . ltrim($query, '?&') : '');
+        $ch = curl_init($this->url . $endpoint);
         $headers = [
             'apikey: ' . $this->key,
             'Prefer: count=exact',
@@ -156,5 +157,38 @@ class SupabaseClient {
             }
         }
         return 0; // Fallback
+    }
+
+    /**
+     * Helper: Build PostgREST IN filter string from array of IDs (UUID or int).
+     * Returns: "id1","id2","id3"  (ready for use in `id=in.(...)`)
+     */
+    public static function buildInList(array $ids): string {
+        return implode(',', array_map(function($id) { return '"' . $id . '"'; }, $ids));
+    }
+
+    /**
+     * Helper: Fetch user profiles by IDs and return as associative map [id => profile].
+     * Reduces repeated boilerplate across admin pages (applications, documents, exports).
+     * 
+     * @param array  $userIds  Array of user UUIDs
+     * @param string $select   Columns to select (default: basic info)
+     * @return array  Associative map [user_id => profile_data]
+     */
+    public function fetchUserProfilesMap(array $userIds, string $select = 'id,full_name,identity_card,phone_number'): array {
+        $map = [];
+        $userIds = array_values(array_unique(array_filter($userIds)));
+        if (empty($userIds)) return $map;
+
+        $inList = self::buildInList($userIds);
+        $query = "select={$select}&id=in.({$inList})";
+        $res = $this->select('user_profiles', $query);
+
+        if ($res['code'] == 200 && is_array($res['data'])) {
+            foreach ($res['data'] as $u) {
+                $map[$u['id']] = $u;
+            }
+        }
+        return $map;
     }
 }

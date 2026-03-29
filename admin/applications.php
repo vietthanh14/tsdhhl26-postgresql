@@ -36,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             elseif ($bulk_type === 'mark_approved') $data['status'] = 'APPROVED';
             elseif ($bulk_type === 'mark_rejected') $data['status'] = 'REJECTED';
 
+            if (isset($_POST['bulk_admin_notes']) && trim($_POST['bulk_admin_notes']) !== '') {
+                $data['admin_notes'] = trim($_POST['bulk_admin_notes']);
+            }
+
             // Gọi 1 lần duy nhất: PATCH /applications?id=in.(id1,id2,...)
             $res = $supabaseAdmin->updateBulk('applications', 'id', array_values($app_ids), $data);
 
@@ -54,19 +58,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $periodsRes = $supabaseAdmin->select('admission_periods', 'order=id.desc');
 $periods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
 
-// Lay danh sach ho so
-$query = 'select=*,admission_periods(name),majors(major_name),admission_methods(method_name,application_fee)&order=submitted_at.desc';
+// Phân trang & Lọc
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 50;
+$offset = ($page - 1) * $limit;
+
+$statusFilter = $_GET['status'] ?? '';
+$searchStr = trim($_GET['search'] ?? '');
+
+$filterArray = [];
+if ($statusFilter !== '') {
+    $filterArray[] = "status=eq.{$statusFilter}";
+}
+
+if ($searchStr !== '') {
+    $encodedSearch = urlencode('%' . $searchStr . '%');
+    $userFilter = "or=(full_name.ilike.{$encodedSearch},identity_card.ilike.{$encodedSearch},phone_number.ilike.{$encodedSearch})&select=id";
+    $searchUsersRes = $supabaseAdmin->select('user_profiles', $userFilter);
+    $searchUserIds = ($searchUsersRes['code'] == 200 && is_array($searchUsersRes['data'])) ? array_column($searchUsersRes['data'], 'id') : [];
+    
+    if (empty($searchUserIds)) {
+        // Tìm không ra user nào thì set điều kiện không khớp
+        $filterArray[] = "user_id=eq.00000000-0000-0000-0000-000000000000";
+    } else {
+        $inList = SupabaseClient::buildInList($searchUserIds);
+        $filterArray[] = "user_id=in.({$inList})";
+    }
+}
+
+$filterQuery = !empty($filterArray) ? implode('&', $filterArray) . '&' : '';
+
+$totalApps = $supabaseAdmin->count('applications', rtrim($filterQuery, '&'));
+$totalPages = $totalApps > 0 ? ceil($totalApps / $limit) : 1;
+
+// Lay danh sach ho so (Paginated)
+$query = $filterQuery . "select=*,admission_periods(name),majors(major_name),admission_methods(method_name,application_fee)&order=submitted_at.desc&limit={$limit}&offset={$offset}";
 $appsRes = $supabaseAdmin->select('applications', $query);
 $applications = ($appsRes['code'] == 200) ? $appsRes['data'] : [];
 
-// Lay danh sach user profiles de map thu cong 
-$usersRes = $supabaseAdmin->select('user_profiles', 'select=id,full_name,identity_card,phone_number');
-$userProfilesMap = [];
-if ($usersRes['code'] == 200 && is_array($usersRes['data'])) {
-    foreach ($usersRes['data'] as $u) {
-        $userProfilesMap[$u['id']] = $u;
-    }
-}
+// Lay danh sach user profiles de map thu cong (Chỉ mảng userID hiện tại)
+$userProfilesMap = $supabaseAdmin->fetchUserProfilesMap(array_column($applications, 'user_id'));
 
 // Map user profiles vao tung application
 foreach ($applications as &$app) {
@@ -102,11 +133,26 @@ unset($app);
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <h3 class="fw-bold m-0 text-brand">Quản lý Hồ sơ Đăng ký Xét tuyển</h3>
-                <button type="button" class="btn btn-sm btn-outline-success" id="btnExportDocs">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Tải xuống Excel (CSV)
-                </button>
+                <div class="d-flex gap-2 ms-auto align-items-center flex-wrap">
+                    <form method="GET" class="d-flex m-0 gap-2">
+                        <select name="status" class="form-select form-select-sm shadow-sm" style="min-width: 140px;" onchange="this.form.submit()">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="PENDING" <?php echo ($statusFilter == 'PENDING') ? 'selected' : ''; ?>>Chờ duyệt</option>
+                            <option value="APPROVED" <?php echo ($statusFilter == 'APPROVED') ? 'selected' : ''; ?>>Hợp lệ</option>
+                            <option value="REJECTED" <?php echo ($statusFilter == 'REJECTED') ? 'selected' : ''; ?>>Từ chối</option>
+                        </select>
+                        <input type="text" name="search" class="form-control form-control-sm shadow-sm border-brand" placeholder="Tên, CMND, SĐT..." value="<?php echo htmlspecialchars($searchStr ?? ''); ?>" style="min-width: 180px;">
+                        <button type="submit" class="btn btn-sm btn-brand shadow-sm"><i class="bi bi-search me-1"></i>Tìm</button>
+                        <?php if(!empty($searchStr) || !empty($statusFilter)): ?>
+                        <a href="applications.php" class="btn btn-sm btn-outline-secondary" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
+                        <?php endif; ?>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-success shadow-sm" id="btnExportDocs">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Xuất Excel (CSV)
+                    </button>
+                </div>
             </div>
 
             <?php include __DIR__ . '/../includes/flash_messages.php'; ?>
@@ -114,6 +160,7 @@ unset($app);
             <form method="POST" action="" id="bulkForm">
                 <input type="hidden" name="action" value="bulk_update">
                 <input type="hidden" name="bulk_type" id="bulkTypeInput" value="">
+                <input type="hidden" name="bulk_admin_notes" id="bulkAdminNotesInput" value="">
 
                 <div class="bulk-actions mb-4 p-3 rounded-3 border-brand border-start border-5 shadow-sm bg-white d-none" id="bulkActionsPanel">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -208,6 +255,10 @@ unset($app);
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <?php $queryParams = ['status' => $statusFilter ?? '', 'search' => $searchStr ?? '']; ?>
+                        <?php include __DIR__ . '/includes/paginator.php'; ?>
+                        <div class="text-center text-muted small mt-2">Tổng số: <?php echo number_format($totalApps); ?> hồ sơ</div>
                     </div>
                 </div>
             </form>
@@ -260,7 +311,11 @@ unset($app);
             <div class="modal-body p-4 text-center">
                 <i class="bi bi-exclamation-triangle text-danger mb-3 d-block" style="font-size: 3rem;"></i>
                 <p class="mb-0 fs-5">Bạn muốn áp dụng thao tác này cho <strong id="confirmCount" class="badge bg-danger">0</strong> hồ sơ đã chọn không?</p>
-                <p class="text-muted small mt-2">Hành động này không thể hoàn tác.</p>
+                <p class="text-muted small mt-2 mb-3">Hành động này không thể hoàn tác.</p>
+                <div class="text-start bg-light p-3 rounded text-muted">
+                    <label class="form-label fw-bold small text-uppercase mb-2"><i class="bi bi-pencil-square"></i> Ghi chú hàng loạt (Tùy chọn)</label>
+                    <textarea class="form-control border-0 bg-white shadow-sm" id="modal_bulk_notes" rows="2" placeholder="Nhập ghi chú chung áp dụng cho tất cả hồ sơ này..."></textarea>
+                </div>
             </div>
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy bỏ</button>
@@ -280,8 +335,10 @@ unset($app);
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
             },
+            "paging": false,
+            "searching": false,
+            "info": false,
             "order": [[3, "desc"]], // Sắp xếp theo ngày nộp
-            "pageLength": 50,
             "columnDefs": [
                 { "orderable": false, "targets": 0 } // Không sắp xếp cột Checkbox
             ]
@@ -365,6 +422,7 @@ unset($app);
 
     document.getElementById('btnConfirmBulk').addEventListener('click', function() {
         document.getElementById('bulkTypeInput').value = currentBulkType;
+        document.getElementById('bulkAdminNotesInput').value = document.getElementById('modal_bulk_notes').value;
         document.getElementById('bulkForm').submit();
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
