@@ -59,6 +59,9 @@ $is_config_page = in_array($current_page, $config_pages);
         <a href="<?php echo BASE_URL; ?>/admin/users.php" class="rounded-3 <?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
             <i class="bi bi-people me-2"></i> Quản lý Thí sinh
         </a>
+        <a href="<?php echo BASE_URL; ?>/assets/docs/huong_dan_admin.pdf" target="_blank" class="rounded-3">
+            <i class="bi bi-file-earmark-medical me-2"></i> Hướng dẫn sử dụng
+        </a>
     </div>
 
 </div>
@@ -109,6 +112,9 @@ $is_config_page = in_array($current_page, $config_pages);
         </a>
         <a href="<?php echo BASE_URL; ?>/admin/users.php" class="rounded-3 <?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
             <i class="bi bi-people me-2"></i> Quản lý Thí sinh
+        </a>
+        <a href="<?php echo BASE_URL; ?>/assets/docs/huong_dan_admin.pdf" target="_blank" class="rounded-3">
+            <i class="bi bi-file-earmark-medical me-2"></i> Hướng dẫn sử dụng
         </a>
     </div>
 </div>

@@ -40,6 +40,9 @@ $levelFileMap = [
         <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="rounded-3 <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">
             <i class="bi bi-person me-2"></i> Thông tin cá nhân
         </a>
+        <a href="<?php echo BASE_URL; ?>/assets/docs/huong_dan_thi_sinh.pdf" target="_blank" class="rounded-3">
+            <i class="bi bi-book me-2"></i> Hướng dẫn sử dụng
+        </a>
         
         <!-- Cấu hình - Collapsible -->
         <a href="#applySubmenu" class="rounded-3 d-flex justify-content-between align-items-center <?php echo (strpos($currentPage, 'apply') !== false) ? 'active' : ''; ?>" 
@@ -78,6 +81,9 @@ $levelFileMap = [
         </a>
         <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="rounded-3 <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">
             <i class="bi bi-person me-2"></i> Thông tin cá nhân
+        </a>
+        <a href="<?php echo BASE_URL; ?>/assets/docs/huong_dan_thi_sinh.pdf" target="_blank" class="rounded-3">
+            <i class="bi bi-book me-2"></i> Hướng dẫn sử dụng
         </a>
 
         <!-- Cấu hình - Collapsible (Mobile) -->

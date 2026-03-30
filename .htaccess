@@ -1,4 +1,29 @@
 # ----------------------------------------------------------------------
+# CHẶN TRUY CẬP DANH MỤC (BẢO MẬT DIRECTORY LISTING)
+# ----------------------------------------------------------------------
+Options -Indexes
+# ----------------------------------------------------------------------
+# CHẾ ĐỘ BẢO TRÌ NÂNG CẤP HỆ THỐNG
+# Bỏ dấu # ở 3 dòng dưới (RewriteCond/RewriteRule) để kích hoạt Bảo Trì
+# ----------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Cho phép Admin (nhập đúng IP của bạn vào đây) vẫn truy cập được web khi bảo trì:
+    # RewriteCond %{REMOTE_ADDR} !^123\.45\.67\.89$
+    
+    # Bật 3 dòng dưới để BẬT CHẾ ĐỘ BẢO TRÌ (Loại trừ file maintenance, assets, và trang tra cứu)
+    #RewriteCond %{REQUEST_URI} !/maintenance.html$ [NC]
+    #RewriteCond %{REQUEST_URI} !/assets/ [NC]
+    #RewriteCond %{REQUEST_URI} !/search.php$ [NC]
+    #RewriteCond %{REQUEST_URI} !/api_search_sheets.php$ [NC]
+    # ------- NẾU ĐANG CHẠY XAMPP Ở MÁY TÍNH THÌ BẬT DÒNG NÀY:
+    #RewriteRule ^(.*)$ /tsdhhl26/maintenance.html [R=302,L]
+    # ------- NẾU ĐÃ UP LÊN HOSTING (WEB THẬT) THÌ DÙNG DÒNG NÀY VÀ XÓA DÒNG TRÊN:
+    # RewriteRule ^(.*)$ /maintenance.html [R=302,L]
+</IfModule>
+
+# ----------------------------------------------------------------------
 # BẬT GZIP COMPRESSION (TĂNG TỐC ĐỘ WEBSITE)
 # ----------------------------------------------------------------------
 <IfModule mod_deflate.c>

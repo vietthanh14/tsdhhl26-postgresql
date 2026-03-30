@@ -38,8 +38,8 @@ try {
     // Google Sheets API cho phép tối đa 60 requests/phút/user.
     // Nếu có 1000 người vào tra cứu cùng 1 lúc thì sẽ bị block.
     // Giải pháp: Cache toàn bộ nội dung Sheet vào ổ cứng (File JSON).
-    // Tuổi thọ của cache (VD: 15 phút = 900 giây, 5 phút = 300 giây). Ở đây để 5 phút.
-    $cacheTime = 300; 
+    // Tuổi thọ của cache (VD: 15 phút = 900 giây, 5 phút = 300 giây).
+    $cacheTime = 1800; 
     $cacheDir = __DIR__ . '/storage/cache';
     if (!is_dir($cacheDir)) {
         mkdir($cacheDir, 0777, true);

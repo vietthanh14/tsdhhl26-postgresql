@@ -233,23 +233,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="card-body p-4">
                             <?php if ($message): ?>
                                 <div class="text-center py-4">
-                                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                                        style="width: 70px; height: 70px; background: linear-gradient(135deg, #16a34a, #22c55e);">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow-sm"
+                                        style="width: 70px; height: 70px; background: var(--brand, #1A3A6E);">
                                         <i class="bi bi-check-lg text-white" style="font-size: 2.2rem;"></i>
                                     </div>
                                     <h4 class="fw-bold text-dark">Đăng ký thành công!</h4>
                                     <p class="text-muted mb-4"><?php echo $message; ?></p>
 
                                     <?php if ($success_info): ?>
-                                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 420px;">
+                                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 420px; border-radius: .5rem;">
                                             <div class="card-body p-0">
                                                 <div class="px-4 py-3"
-                                                    style="background: linear-gradient(135deg, #1A3A6E, #2563eb); border-radius: .5rem .5rem 0 0;">
+                                                    style="background: var(--brand, #1A3A6E); border-radius: .5rem .5rem 0 0;">
                                                     <span class="text-white fw-bold small"><i
-                                                            class="bi bi-file-earmark-check me-1"></i> Thông tin hồ sơ đã
-                                                        nộp</span>
+                                                            class="bi bi-file-earmark-check me-1"></i> Thông tin hồ sơ đã nộp</span>
                                                 </div>
-                                                <div class="text-start px-4 py-3">
+                                                <div class="text-start px-4 py-3 border border-top-0" style="border-radius: 0 0 .5rem .5rem;">
                                                     <?php if (!empty($success_info['edu_level'])): ?>
                                                         <div class="d-flex justify-content-between py-2 border-bottom"
                                                             style="font-size: .88rem;">
@@ -275,18 +274,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     <div class="d-flex justify-content-between py-2" style="font-size: .88rem;">
                                                         <span class="text-muted">Lệ phí</span>
                                                         <span
-                                                            class="fw-bold text-danger"><?php echo number_format($success_info['fee'], 0, ',', '.'); ?>
-                                                            đ</span>
+                                                            class="fw-bold text-danger"><?php echo number_format($success_info['fee'], 0, ',', '.'); ?> đ</span>
                                                     </div>
                                                 </div>
                                                 <?php if (!empty($success_info['zalo_link'])): ?>
-                                                    <div class="px-4 py-3 text-center"
-                                                        style="background: #f0fdf4; border-top: 1px solid #dcfce7;">
+                                                    <div class="px-4 py-3 text-center border border-top-0"
+                                                        style="background: #f8fafc; border-radius: 0 0 .5rem .5rem;">
                                                         <p class="mb-2 small text-muted">Tham gia nhóm Zalo để nhận thông báo mới
                                                             nhất</p>
                                                         <a href="<?php echo htmlspecialchars($success_info['zalo_link']); ?>"
                                                             target="_blank" class="btn px-4 py-2 fw-bold text-white shadow-sm"
-                                                            style="background: linear-gradient(135deg, #0068ff, #0098ff); border: none; border-radius: 50px;">
+                                                            style="background: #0068ff; border: none; border-radius: 50px;">
                                                             <i class="bi bi-chat-dots-fill me-2"></i>Vào nhóm Zalo ngành
                                                         </a>
                                                     </div>
@@ -297,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                     <div class="mt-4">
                                         <a href="<?php echo BASE_URL; ?>/candidate/index.php"
-                                            class="btn btn-success px-4 py-2 shadow-sm fw-semibold"><i
+                                            class="btn btn-brand px-4 py-2 shadow-sm fw-semibold"><i
                                                 class="bi bi-columns-gap me-1"></i> Về Bảng điều khiển</a>
                                     </div>
                                 </div>
