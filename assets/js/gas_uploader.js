@@ -47,8 +47,11 @@ window.GasUploader = (function () {
         // Kiểm tra dung lượng file (giới hạn 30MB)
         const maxSize = 30 * 1024 * 1024; // 30MB
         if (file.size > maxSize) {
-            alert('Dung lượng file vượt quá giới hạn 30MB. Vui lòng chọn file nhỏ hơn hoặc nén lại trước khi tải lên.');
-            if (onError) onError('File quá lớn (>30MB).');
+            if (onError) {
+                onError('Dung lượng file vượt quá giới hạn 30MB. Vui lòng chọn file nhỏ hơn hoặc nén lại trước khi tải lên.');
+            } else if (typeof showNotifyModal === 'function') {
+                showNotifyModal('Dung lượng file vượt quá giới hạn 30MB. Vui lòng chọn file nhỏ hơn hoặc nén lại.', 'warning');
+            }
             return;
         }
 

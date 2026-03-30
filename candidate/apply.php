@@ -2,6 +2,7 @@
 // candidate/apply.php
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/CSRF.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . '/auth/login.php');
@@ -65,6 +66,17 @@ $today = date('Y-m-d');
 $periodsRes = $supabaseAdmin->select('admission_periods', "is_active=eq.true&end_date=gte.{$today}");
 $activePeriods = ($periodsRes['code'] == 200) ? $periodsRes['data'] : [];
 
+// Lọc trước danh sách ứng tuyển (priorities) bằng Zero-Egress pattern
+$userAppsRes = $supabaseAdmin->select('applications', "select=admission_period_id,priority&user_id=eq.{$user_id}");
+$userPrioritiesMap = [];
+if ($userAppsRes['code'] == 200) {
+    foreach ($userAppsRes['data'] as $app) {
+        $pid = $app['admission_period_id'];
+        if (!isset($userPrioritiesMap[$pid])) $userPrioritiesMap[$pid] = 0;
+        if ($app['priority'] > $userPrioritiesMap[$pid]) $userPrioritiesMap[$pid] = $app['priority'];
+    }
+}
+
 // Danh sách ngành/phương thức sẽ được load động qua AJAX (candidate/api/)
 // Không cần fetch toàn bộ ở đây nữa
 // Khi POST: fetch ngành và mapping từ DB để validate phía server
@@ -100,7 +112,16 @@ $error = $_SESSION['apply_err'] ?? '';
 $success_info = $_SESSION['apply_success_info'] ?? null;
 unset($_SESSION['apply_msg'], $_SESSION['apply_err'], $_SESSION['apply_success_info']);
 
+$csrf_token = CSRF::generateToken();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $redirect_url = $_SERVER['REQUEST_URI'];
+    if (!isset($_POST['csrf_token']) || !CSRF::validateToken($_POST['csrf_token'])) {
+        $_SESSION['apply_err'] = "Yêu cầu không hợp lệ. Vui lòng tải lại trang (Lỗi bảo mật CSRF).";
+        header("Location: $redirect_url");
+        exit;
+    }
+
     $admission_period_id = $_POST['admission_period_id'] ?? '';
     $major_id = $_POST['major_id'] ?? '';
     $admission_method_id = $_POST['admission_method_id'] ?? '';
@@ -143,6 +164,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!$validMajorInPeriod) {
             $_SESSION['apply_err'] = "Ngành học này không thuộc đợt tuyển sinh đã chọn. Vui lòng thực hiện lại từ Bước 1.";
         } else {
+            // Tự động shift NV (tịnh tiến NV cũ xuống) nếu thêm NV mới (kể cả NV đang trùng)
+            $rpcShfitRes = $supabaseAdmin->rpc('shift_application_priority', [
+                'p_user_id' => $user_id,
+                'p_period_id' => (string)$admission_period_id,
+                'p_start_priority' => (int)$priority
+            ]);
+
+            if (!in_array($rpcShfitRes['code'], [200, 204])) {
+                $errDetail = isset($rpcShfitRes['data']) ? json_encode($rpcShfitRes['data']) : 'Unknown';
+                $_SESSION['apply_err'] = "Lỗi Database (RPC shift_priority): Mã " . $rpcShfitRes['code'] . " - " . $errDetail;
+                header("Location: apply.php");
+                exit;
+            }
+
             $appData = [
                 'user_id' => $user_id,
                 'admission_period_id' => $admission_period_id,
@@ -335,6 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="card border-0 shadow-sm" style="border-radius:12px;">
                                     <div class="card-body p-4 p-md-5">
                                         <form method="POST" action="">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                                             <!-- Bước 1 -->
                                             <div class="wizard-step" id="step-1">
                                                 <h5 class="text-brand fw-bold mb-4 text-center">Bước 1: Chọn Đợt Tuyển Sinh</h5>
@@ -591,6 +627,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="<?php echo BASE_URL; ?>/assets/js/gas_uploader.js"></script>
     <script>
+        // Mảng cấu hình cho Zero-Egress Auto Suggest
+        const USER_PRIORITIES = <?php echo json_encode($userPrioritiesMap); ?>;
+
         const GAS_URL = '<?php echo GAS_WEBAPP_URL; ?>';
         const USER_ID = '<?php echo $user_id; ?>';
 
@@ -669,6 +708,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 comboList.innerHTML = '';
                 majorItems = [];
                 return;
+            }
+
+            // Zero-Egress Auto Suggest Priority
+            const priorityInput = document.getElementById('priorityInput');
+            if (USER_PRIORITIES[periodId] !== undefined) {
+                priorityInput.value = USER_PRIORITIES[periodId] + 1;
+            } else {
+                priorityInput.value = 1;
             }
 
             comboInput.value = '';
@@ -826,7 +873,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // === Kiểm tra 1: Trùng Ngành + Phương thức trong Đợt ===
                 const r1 = await fetch('api/check_duplicate.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<?php echo htmlspecialchars($csrf_token); ?>'
+                    },
                     body: JSON.stringify({ period_id: periodId, major_id: majorId, method_id: methodId })
                 });
                 const d1 = await r1.json();
@@ -839,14 +889,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // === Kiểm tra 2: Trùng Thứ tự Nguyện vọng trong Đợt ===
                 const r2 = await fetch('api/check_priority_dup.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<?php echo htmlspecialchars($csrf_token); ?>'
+                    },
                     body: JSON.stringify({ period_id: periodId, priority: parseInt(priority) })
                 });
                 const d2 = await r2.json();
                 if (d2.duplicate) {
-                    dupMsg.classList.remove('d-none');
-                    dupMsg.innerHTML = `<strong>⚠️ Trùng thứ tự Nguyện vọng!</strong> Nguyện vọng <b>${priority}</b> đã được dùng cho ngành <em>${d2.taken_by}</em>. Bạn có thể đổi sang nguyện vọng khác hoặc thay đổi thứ tự sau trong Bảng điều khiển.`;
-                    return;
+                    const confirmShift = await showConfirmModal(`Thứ tự NV ${priority} đã được dùng cho lô hồ sơ "${d2.taken_by}".\n\nNếu bạn làm Bước này hệ thống sẽ tự động chèn hồ sơ mới vào NV${priority} và đẩy lùi hồ sơ cũ xuống NV${parseInt(priority)+1}.\n\nBạn có chắc chắn muốn chèn hồ sơ này không?`);
+                    if (!confirmShift) {
+                        btn.disabled = false;
+                        btn.innerText = 'Tiếp tục \xBB';
+                        return;
+                    }
                 }
 
                 // Tất cả đều hợp lệ → sang bước thanh toán

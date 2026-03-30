@@ -3,6 +3,7 @@
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 require_once __DIR__ . '/../lib/Cache.php';
+require_once __DIR__ . '/../lib/CSRF.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . '/auth/login.php');
@@ -16,8 +17,16 @@ $supabaseAdmin = new SupabaseClient('service');
 $message = '';
 $error = '';
 
+$csrf_token = CSRF::generateToken();
+
 // Xử lý CẬP NHẬT thông tin
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !CSRF::validateToken($_POST['csrf_token'])) {
+        $_SESSION['profile_error'] = "Yêu cầu không hợp lệ. Vui lòng tải lại trang (Lỗi bảo mật CSRF).";
+        header('Location: ' . BASE_URL . '/candidate/profile.php');
+        exit;
+    }
+
     $full_name = trim($_POST['full_name'] ?? '');
     $identity_card = trim($_POST['identity_card'] ?? '');
     $contact_email = trim($_POST['contact_email'] ?? '');
@@ -169,6 +178,7 @@ $profile = $profileResponse['data'][0];
                                 <?php endif; ?>
 
                                 <form method="POST" action="">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
 
                                     <!-- ====== Section 1: Thông tin định danh ====== -->
                                     <h6 class="fw-bold mb-4 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-person-vcard me-2"></i>1. Thông tin định danh</h6>
@@ -235,40 +245,13 @@ $profile = $profileResponse['data'][0];
                                     <h6 class="fw-bold mb-4 mt-5 pb-2 border-bottom text-brand text-uppercase" style="font-size: .85rem; letter-spacing: .5px;"><i class="bi bi-house-door me-2"></i>2. Địa chỉ thường trú</h6>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label text-muted fw-bold">Tỉnh / Thành phố</label>
-                                            <div class="combo-wrapper" id="provinceWrapper">
-                                                <span class="combo-clear" id="provinceClear" title="Xóa">&times;</span>
-                                                <input type="text" class="combo-input" id="provinceInput"
-                                                    placeholder="-- Chọn Tỉnh/Thành phố --" readonly>
-                                                <div class="combo-dropdown" id="provinceDropdown">
-                                                    <div class="combo-search">
-                                                        <input type="text" id="provinceSearch"
-                                                            placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off">
-                                                    </div>
-                                                    <div id="provinceList"></div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="province_name" id="provinceName">
-                                            <input type="hidden" name="province_code" id="provinceCode">
-                                        </div>
-                                        <div class="col-md-6 mt-3 mt-md-0">
-                                            <label class="form-label text-muted fw-bold">Phường / Xã</label>
-                                            <div class="combo-wrapper" id="wardWrapper">
-                                                <span class="combo-clear" id="wardClear" title="Xóa">&times;</span>
-                                                <input type="text" class="combo-input" id="wardInput"
-                                                    placeholder="-- Chọn Phường/Xã --" readonly disabled>
-                                                <div class="combo-dropdown" id="wardDropdown">
-                                                    <div class="combo-search">
-                                                        <input type="text" id="wardSearch"
-                                                            placeholder="🔍 Tìm phường/xã..." autocomplete="off">
-                                                    </div>
-                                                    <div id="wardList"></div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="ward_name" id="wardName">
-                                            <input type="hidden" name="ward_code" id="wardCode">
-                                        </div>
+                                        <?php
+                                        $ac_id_prefix = '';
+                                        $ac_name_prefix = '';
+                                        $ac_label_province = 'Tỉnh / Thành phố';
+                                        $ac_label_ward = 'Phường / Xã';
+                                        include __DIR__ . '/../includes/components/address_combo.php';
+                                        ?>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -299,40 +282,13 @@ $profile = $profileResponse['data'][0];
                                     </div>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label text-muted fw-bold">Tỉnh / Thành phố (Trường THPT)</label>
-                                            <div class="combo-wrapper" id="schoolProvinceWrapper">
-                                                <span class="combo-clear" id="schoolProvinceClear" title="Xóa">&times;</span>
-                                                <input type="text" class="combo-input" id="schoolProvinceInput"
-                                                    placeholder="-- Chọn Tỉnh/Thành phố --" readonly>
-                                                <div class="combo-dropdown" id="schoolProvinceDropdown">
-                                                    <div class="combo-search">
-                                                        <input type="text" id="schoolProvinceSearch"
-                                                            placeholder="🔍 Tìm tỉnh/thành..." autocomplete="off">
-                                                    </div>
-                                                    <div id="schoolProvinceList"></div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="school_province_name" id="schoolProvinceName">
-                                            <input type="hidden" name="school_province_code" id="schoolProvinceCode">
-                                        </div>
-                                        <div class="col-md-6 mt-3 mt-md-0">
-                                            <label class="form-label text-muted fw-bold">Phường / Xã (Trường THPT)</label>
-                                            <div class="combo-wrapper" id="schoolWardWrapper">
-                                                <span class="combo-clear" id="schoolWardClear" title="Xóa">&times;</span>
-                                                <input type="text" class="combo-input" id="schoolWardInput"
-                                                    placeholder="-- Chọn Phường/Xã --" readonly disabled>
-                                                <div class="combo-dropdown" id="schoolWardDropdown">
-                                                    <div class="combo-search">
-                                                        <input type="text" id="schoolWardSearch"
-                                                            placeholder="🔍 Tìm phường/xã..." autocomplete="off">
-                                                    </div>
-                                                    <div id="schoolWardList"></div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="school_ward_name" id="schoolWardName">
-                                            <input type="hidden" name="school_ward_code" id="schoolWardCode">
-                                        </div>
+                                        <?php
+                                        $ac_id_prefix = 'school';
+                                        $ac_name_prefix = 'school_';
+                                        $ac_label_province = 'Tỉnh / Thành phố (Trường THPT)';
+                                        $ac_label_ward = 'Phường / Xã (Trường THPT)';
+                                        include __DIR__ . '/../includes/components/address_combo.php';
+                                        ?>
                                     </div>
 
                                     <div class="row mb-3">
@@ -641,7 +597,10 @@ $profile = $profileResponse['data'][0];
                 onSuccess: function(webViewLink) {
                     fetch('api/save_document.php', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: { 
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-Token': '<?php echo htmlspecialchars($csrf_token); ?>'
+                        },
                         body: 'doc_type_id=' + docTypeId + '&file_url=' + encodeURIComponent(webViewLink)
                     })
                     .then(r => r.json())
@@ -675,7 +634,10 @@ $profile = $profileResponse['data'][0];
             try {
                 const res = await fetch('api/delete_document.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<?php echo htmlspecialchars($csrf_token); ?>'
+                    },
                     body: JSON.stringify({ id: docIdToDelete })
                 });
                 const data = await res.json();

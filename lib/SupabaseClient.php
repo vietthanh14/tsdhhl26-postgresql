@@ -95,6 +95,10 @@ class SupabaseClient {
          return $this->request('POST', "/rest/v1/" . $table, $data, $token);
     }
 
+    public function rpc($function_name, $data = null, $token = null) {
+        return $this->request('POST', "/rest/v1/rpc/" . $function_name, $data, $token);
+    }
+
     public function update($table, $matchField, $matchValue, $data, $token = null) {
         $endpoint = "/rest/v1/" . $table . "?$matchField=eq." . $matchValue;
         return $this->request('PATCH', $endpoint, $data, $token);

@@ -38,23 +38,30 @@ $maxPriority = count($allApps);
 $newPriority = max(1, min($newPriority, $maxPriority));
 array_splice($others, $newPriority - 1, 0, [['id' => $app_id, 'priority' => (int)($targetApp['priority'])]]);
 
-// 4. Bulk update
+// 4. Bulk update (Zero-Latency Pattern via RPC)
 $priorityMap = [];
-$errors = [];
+$updatesList = [];
+
 foreach ($others as $idx => $app) {
     $assignedPriority = $idx + 1;
     $priorityMap[(string)$app['id']] = $assignedPriority;
 
     if ((int)($app['priority'] ?? 0) !== $assignedPriority) {
-        $upd = $supabase->update('applications', 'id', $app['id'], ['priority' => $assignedPriority]);
-        if (!in_array($upd['code'], [200, 204])) {
-            $errors[] = $app['id'];
-        }
+        $updatesList[] = [
+            'id' => $app['id'],
+            'priority' => $assignedPriority
+        ];
     }
 }
 
-if (!empty($errors)) {
-    echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật hồ sơ: ' . implode(', ', $errors)]);
-} else {
-    echo json_encode(['success' => true, 'priority_map' => $priorityMap]);
+if (!empty($updatesList)) {
+    // 1 API Request to rule them all thay vì N Request
+    $rpcRes = $supabase->rpc('bulk_update_priorities', ['p_updates' => $updatesList]);
+    if (!in_array($rpcRes['code'], [200, 204])) {
+        $errDetail = isset($rpcRes['data']) ? json_encode($rpcRes['data']) : 'Unknown';
+        echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật CSDL: Mạng (' . $rpcRes['code'] . ') Chi tiết: ' . $errDetail]);
+        exit;
+    }
 }
+
+echo json_encode(['success' => true, 'priority_map' => $priorityMap]);

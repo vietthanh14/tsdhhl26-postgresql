@@ -76,6 +76,26 @@ require_once __DIR__ . '/../config/supabase.php';
     </div>
 </div>
 
+<!-- Modal Xác nhận Dùng Chung (gọi bằng showConfirmModal) -->
+<div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-warning text-dark">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle me-2"></i> Yêu cầu xác nhận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-question-circle text-warning mb-3 d-block" style="font-size: 3rem;"></i>
+                <p class="mb-0 fs-6" id="globalConfirmMsg" style="white-space: pre-wrap;"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-secondary px-4 me-2" id="globalConfirmCancelBtn" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold" id="globalConfirmBtn">Xác nhận Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function showNotifyModal(message, type) {
     type = type || 'danger';
@@ -92,5 +112,44 @@ function showNotifyModal(message, type) {
     document.getElementById('globalNotifyMsg').textContent = message;
     document.getElementById('globalNotifyBtn').className = 'btn px-4 ' + c.btn;
     new bootstrap.Modal(document.getElementById('globalNotifyModal')).show();
+}
+
+function showConfirmModal(message) {
+    return new Promise((resolve) => {
+        document.getElementById('globalConfirmMsg').textContent = message;
+        
+        const modalEl = document.getElementById('globalConfirmModal');
+        const modal = new bootstrap.Modal(modalEl);
+        
+        const btnConfirm = document.getElementById('globalConfirmBtn');
+        const btnCancel = document.getElementById('globalConfirmCancelBtn');
+        
+        // Reset listeners
+        const newConfirm = btnConfirm.cloneNode(true);
+        btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+        
+        const newCancel = btnCancel.cloneNode(true);
+        btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+        
+        let isResolved = false;
+
+        newConfirm.addEventListener('click', () => {
+            isResolved = true;
+            modal.hide();
+            resolve(true);
+        });
+        
+        newCancel.addEventListener('click', () => {
+            isResolved = true;
+            resolve(false);
+        });
+        
+        modalEl.addEventListener('hidden.bs.modal', function onHidden() {
+            modalEl.removeEventListener('hidden.bs.modal', onHidden);
+            if (!isResolved) resolve(false); // Xử lý nhấn ra ngoài hoặc ESC
+        });
+
+        modal.show();
+    });
 }
 </script>

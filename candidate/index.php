@@ -2,6 +2,7 @@
 // candidate/index.php
 session_start();
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/CSRF.php';
 
 // Kiểm tra xem đã đăng nhập chưa
 if (!isset($_SESSION['user_id'])) {
@@ -262,7 +263,10 @@ document.querySelectorAll('.save-priority-btn').forEach(btn => {
         try {
             const res = await fetch('api/update_priority.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<?php echo htmlspecialchars(CSRF::generateToken()); ?>'
+                },
                 body: JSON.stringify({ app_id: appId, priority: priority })
             });
             const data = await res.json();
