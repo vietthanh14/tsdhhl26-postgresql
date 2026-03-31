@@ -33,19 +33,24 @@ class Cache {
         $file = self::path($key);
 
         if (file_exists($file)) {
-            $cached = unserialize(file_get_contents($file));
+            $cached = @unserialize(file_get_contents($file));
             if ($cached && $cached['expires_at'] > time()) {
                 return $cached['data'];
             }
         }
 
         $data = $callback();
-        $payload = serialize([
-            'data' => $data,
-            'expires_at' => time() + $ttlSeconds,
-            'key' => $key,
-        ]);
-        file_put_contents($file, $payload, LOCK_EX);
+        
+        // Cải tiến: Nếu callback trả về false (ví dụ API lỗi), ta không cache nó 
+        // để tránh việc hệ thống bị khoá ở trạng thái lỗi trong suốt TTL.
+        if ($data !== false) {
+            $payload = serialize([
+                'data' => $data,
+                'expires_at' => time() + $ttlSeconds,
+                'key' => $key,
+            ]);
+            file_put_contents($file, $payload, LOCK_EX);
+        }
         return $data;
     }
 
@@ -63,14 +68,14 @@ class Cache {
      * Xóa nhiều cache keys theo prefix
      */
     public static function forgetByPrefix(string $prefix): void {
-        // Vì dùng md5 hash nên không thể match prefix trên filename
-        // → Dùng metadata approach: scan tất cả file, check key
         self::ensureDir();
         $files = glob(self::$cacheDir . '/*.cache');
-        foreach ($files as $file) {
-            $cached = @unserialize(file_get_contents($file));
-            if ($cached && isset($cached['key']) && str_starts_with($cached['key'], $prefix)) {
-                unlink($file);
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                $cached = @unserialize(file_get_contents($file));
+                if ($cached && isset($cached['key']) && str_starts_with($cached['key'], $prefix)) {
+                    @unlink($file);
+                }
             }
         }
     }
@@ -81,8 +86,10 @@ class Cache {
     public static function flush(): void {
         self::ensureDir();
         $files = glob(self::$cacheDir . '/*.cache');
-        foreach ($files as $file) {
-            unlink($file);
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
         }
     }
 
@@ -93,15 +100,17 @@ class Cache {
         self::ensureDir();
         $files = glob(self::$cacheDir . '/*.cache');
         $stats = [];
-        foreach ($files as $file) {
-            $cached = @unserialize(file_get_contents($file));
-            if ($cached && isset($cached['key'])) {
-                $stats[] = [
-                    'key' => $cached['key'],
-                    'expires_at' => date('H:i:s d/m/Y', $cached['expires_at']),
-                    'expired' => $cached['expires_at'] < time(),
-                    'size' => filesize($file),
-                ];
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                $cached = @unserialize(file_get_contents($file));
+                if ($cached && isset($cached['key'])) {
+                    $stats[] = [
+                        'key' => $cached['key'],
+                        'expires_at' => date('H:i:s d/m/Y', $cached['expires_at']),
+                        'expired' => $cached['expires_at'] < time(),
+                        'size' => filesize($file),
+                    ];
+                }
             }
         }
         return $stats;

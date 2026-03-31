@@ -13,7 +13,11 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username       = strtolower(trim($_POST['username'] ?? ''));
+    require_once __DIR__ . '/../lib/RateLimiter.php';
+    if (!RateLimiter::checkSessionLimit('register', 5, 1800)) {
+        $error = 'Bạn đã đăng ký quá 5 tài khoản trong 30 phút. Vui lòng thử lại sau để tránh nghẽn hệ thống.';
+    } else {
+        $username       = strtolower(trim($_POST['username'] ?? ''));
     $password       = $_POST['password'] ?? '';
     $password_confirm = $_POST['password_confirm'] ?? '';
     $full_name      = trim($_POST['full_name'] ?? '');
@@ -81,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $error = "Lỗi hệ thống: " . $e->getMessage();
         }
+    }
     }
 }
 

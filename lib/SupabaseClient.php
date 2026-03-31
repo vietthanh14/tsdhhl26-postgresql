@@ -184,13 +184,17 @@ class SupabaseClient {
         $userIds = array_values(array_unique(array_filter($userIds)));
         if (empty($userIds)) return $map;
 
-        $inList = self::buildInList($userIds);
-        $query = "select={$select}&id=in.({$inList})";
-        $res = $this->select('user_profiles', $query);
+        // Tối ưu: Chia nhỏ danh sách ID thành từng batch (100 IDs) để tránh lỗi URL Too Long (HTTP 414) do chuỗi query quá dài
+        $chunks = array_chunk($userIds, 100);
+        foreach ($chunks as $chunk) {
+            $inList = self::buildInList($chunk);
+            $query = "select={$select}&id=in.({$inList})";
+            $res = $this->select('user_profiles', $query);
 
-        if ($res['code'] == 200 && is_array($res['data'])) {
-            foreach ($res['data'] as $u) {
-                $map[$u['id']] = $u;
+            if ($res['code'] == 200 && is_array($res['data'])) {
+                foreach ($res['data'] as $u) {
+                    $map[$u['id']] = $u;
+                }
             }
         }
         return $map;

@@ -1,6 +1,14 @@
 <?php
 // admin/api/export_docs_csv.php — Xuất CSV danh sách tài liệu thí sinh
 require_once __DIR__ . '/_guard.php';
+require_once __DIR__ . '/../../lib/RateLimiter.php';
+
+// Kiểm tra Rate Limit: Cấm xuất file liên tục (Tối đa 5 lần mỗi 30 phút = 1800 giây)
+if (!RateLimiter::checkSessionLimit('export_docs', 5, 1800)) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'message' => 'Bạn đã xuất file quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo vệ máy chủ.']);
+    exit;
+}
 
 try {
     $supabaseAdmin = new SupabaseClient('service');
@@ -33,7 +41,7 @@ try {
     }
 
     $filepath = $exportDir . '/' . $filename;
-    $fileUrl = '../../uploads/exports/' . $filename; 
+    $fileUrl = BASE_URL . '/uploads/exports/' . $filename; 
 
     $output = fopen($filepath, 'w');
     fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
@@ -47,13 +55,14 @@ try {
     foreach ($documents as $doc) {
         $user = $userProfilesMap[$doc['user_id']] ?? [];
         $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
+        $phone = '="' . ($user['phone_number'] ?? '') . '"';
         $dateUploaded = !empty($doc['uploaded_at']) ? date('d/m/Y H:i', strtotime($doc['uploaded_at'])) : '';
 
         fputcsv($output, [
             $stt++,
             $user['full_name'] ?? 'Không xác định',
             $cmnd,
-            $user['phone_number'] ?? '',
+            $phone,
             $user['contact_email'] ?? '',
             $doc['document_types']['type_name'] ?? 'Khác',
             $dateUploaded,

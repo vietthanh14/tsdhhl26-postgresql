@@ -1,7 +1,15 @@
 <?php
 // admin/api/export_sheets.php — Xuất dữ liệu lên Google Sheets
 require_once __DIR__ . '/_guard.php';
+require_once __DIR__ . '/../../lib/RateLimiter.php';
+
 header('Content-Type: application/json; charset=utf-8');
+
+// Kiểm tra Rate Limit: Cấm xuất Google Sheets liên tục (Tối đa 5 lần mỗi 30 phút = 1800 giây)
+if (!RateLimiter::checkSessionLimit('export_sheets', 5, 1800)) {
+    echo json_encode(['status' => 'error', 'message' => 'Bạn đã xuất file quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo vệ máy chủ.']);
+    exit;
+}
 
 $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
 if (!file_exists($autoloadPath)) {
@@ -43,12 +51,14 @@ try {
         $genderText = ($user['gender'] ?? '') === 'male' ? 'Nam' : (($user['gender'] ?? '') === 'female' ? 'Nữ' : '');
         $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
         $paymentText = $app['payment_status'] == 'PAID' ? 'Đã thanh toán' : ($app['payment_status'] == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán');
+        $cmndStr = isset($user['identity_card']) && $user['identity_card'] !== '' ? "'" . $user['identity_card'] : '';
+        $phoneStr = isset($user['phone_number']) && $user['phone_number'] !== '' ? "'" . $user['phone_number'] : '';
 
         $values[] = [
             $stt++,
             $user['full_name'] ?? '', $dob, $genderText,
-            $user['identity_card'] ?? '', $user['ethnicity'] ?? '',
-            $user['phone_number'] ?? '', $user['contact_email'] ?? '',
+            $cmndStr, $user['ethnicity'] ?? '',
+            $phoneStr, $user['contact_email'] ?? '',
             trim($user['address_detail'] ?? ''),
             $user['province'] ?? '', $user['ward'] ?? '',
             $user['school_name'] ?? '', $user['graduation_year'] ?? '',

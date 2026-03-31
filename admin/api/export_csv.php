@@ -1,6 +1,14 @@
 <?php
 // admin/api/export_csv.php — Xuất CSV danh sách hồ sơ xét tuyển
 require_once __DIR__ . '/_guard.php';
+require_once __DIR__ . '/../../lib/RateLimiter.php';
+
+// Kiểm tra Rate Limit: Cấm xuất file liên tục (Tối đa 5 lần mỗi 30 phút = 1800 giây)
+if (!RateLimiter::checkSessionLimit('export_csv', 5, 1800)) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'message' => 'Bạn đã xuất file quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo vệ máy chủ.']);
+    exit;
+}
 
 try {
     $supabaseAdmin = new SupabaseClient('service');
@@ -33,7 +41,7 @@ try {
     }
 
     $filepath = $exportDir . '/' . $filename;
-    $fileUrl = '../../uploads/exports/' . $filename; 
+    $fileUrl = BASE_URL . '/uploads/exports/' . $filename; 
 
     $output = fopen($filepath, 'w');
     fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
@@ -60,13 +68,14 @@ try {
         $dob = !empty($user['date_of_birth']) ? date('d/m/Y', strtotime($user['date_of_birth'])) : '';
         $genderText = ($user['gender'] ?? '') === 'male' ? 'Nam' : (($user['gender'] ?? '') === 'female' ? 'Nữ' : '');
         $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
+        $phone = '="' . ($user['phone_number'] ?? '') . '"';
         $appIdStr = '="' . ($app['id'] ?? '') . '"';
         $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
         $paymentText = ($app['payment_status'] ?? '') == 'PAID' ? 'Đã TT' : 'Chưa TT';
 
         fputcsv($output, [
             $stt++, $statusText, $user['full_name'] ?? '', $dob, $genderText,
-            $cmnd, $user['ethnicity'] ?? '', $user['phone_number'] ?? '',
+            $cmnd, $user['ethnicity'] ?? '', $phone,
             $user['contact_email'] ?? '', $user['address_detail'] ?? '',
             $user['province'] ?? '', $user['ward'] ?? '',
             $user['school_name'] ?? '', $user['school_province'] ?? '',

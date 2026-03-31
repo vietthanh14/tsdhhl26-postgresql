@@ -8,7 +8,11 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = strtolower(trim($_POST['username'] ?? ''));
+    require_once __DIR__ . '/../lib/RateLimiter.php';
+    if (!RateLimiter::checkSessionLimit('forgot_pwd', 5, 1800)) {
+        $error = 'Bạn đã yêu cầu thao tác quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo mật tài khoản.';
+    } else {
+        $username = strtolower(trim($_POST['username'] ?? ''));
     $identity_card = trim($_POST['identity_card'] ?? '');
     $new_password = $_POST['new_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $error = 'Lỗi hệ thống: ' . $e->getMessage();
         }
+    }
     }
 }
 
