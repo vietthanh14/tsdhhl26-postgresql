@@ -50,19 +50,7 @@ $is_config_page = in_array($current_page, $config_pages);
             </div>
         </div>
 
-        <!-- Cấu hình hệ thống - Collapsible (Desktop) -->
-        <a href="#systemSubmenu" class="rounded-3 d-flex justify-content-between align-items-center <?php echo $current_page == 'cleanup.php' ? 'active' : ''; ?>" 
-           data-bs-toggle="collapse" aria-expanded="<?php echo $current_page == 'cleanup.php' ? 'true' : 'false'; ?>">
-            <span><i class="bi bi-sliders me-2"></i> Hệ thống</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-        <div class="collapse <?php echo $current_page == 'cleanup.php' ? 'show' : ''; ?>" id="systemSubmenu">
-            <div class="d-flex flex-column gap-1 ps-3">
-                <a href="<?php echo BASE_URL; ?>/admin/maintenance/cleanup.php" class="rounded-3 small <?php echo ($current_page == 'cleanup.php') ? 'active text-brand fw-bold' : 'text-danger'; ?>">
-                    <i class="bi bi-trash3 me-2"></i> Dọn dẹp dữ liệu
-                </a>
-            </div>
-        </div>
+
 
         <a href="<?php echo BASE_URL; ?>/admin/applications.php" class="rounded-3 <?php echo ($current_page == 'applications.php') ? 'active' : ''; ?>">
             <i class="bi bi-file-earmark-text me-2"></i> Quản lý Hồ sơ
@@ -118,19 +106,7 @@ $is_config_page = in_array($current_page, $config_pages);
             </div>
         </div>
 
-        <!-- Cấu hình hệ thống - Collapsible (Mobile) -->
-        <a href="#systemSubmenuMobile" class="rounded-3 d-flex justify-content-between align-items-center <?php echo $current_page == 'cleanup.php' ? 'active' : ''; ?>"
-           data-bs-toggle="collapse" aria-expanded="<?php echo $current_page == 'cleanup.php' ? 'true' : 'false'; ?>">
-            <span><i class="bi bi-sliders me-2"></i> Hệ thống</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-        <div class="collapse <?php echo $current_page == 'cleanup.php' ? 'show' : ''; ?>" id="systemSubmenuMobile">
-            <div class="d-flex flex-column gap-1 ps-3">
-                <a href="<?php echo BASE_URL; ?>/admin/maintenance/cleanup.php" class="rounded-3 small <?php echo ($current_page == 'cleanup.php') ? 'active text-brand fw-bold' : 'text-danger'; ?>">
-                    <i class="bi bi-trash3 me-2"></i> Dọn dẹp dữ liệu
-                </a>
-            </div>
-        </div>
+
 
         <a href="<?php echo BASE_URL; ?>/admin/applications.php" class="rounded-3 <?php echo ($current_page == 'applications.php') ? 'active' : ''; ?>">
             <i class="bi bi-file-earmark-text me-2"></i> Quản lý Hồ sơ
