@@ -405,33 +405,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <!-- Bước 2 -->
                                             <div class="wizard-step d-none" id="step-2">
                                                 <h5 class="text-brand fw-bold mb-4 text-center">Bước 2: Rà soát Hồ Sơ</h5>
+
+                                        <?php
+                                        // Kiểm tra xem có trường bắt buộc nào đang bị trống không
+                                        $missing_req_fields = [];
+                                        foreach ($step2_fields as $f) {
+                                            if (isset($f['required']) && $f['required'] === true) {
+                                                $val = trim($profileData[$f['key']] ?? '');
+                                                if ($val === '') {
+                                                    $missing_req_fields[] = $f['label'];
+                                                }
+                                            }
+                                        }
+
+                                        // ==== KIỂM TRA TÀI LIỆU BẮT BUỘC THEO TỪNG HỆ ====
+                                        // Dùng Zero-Egress pattern: chỉ kéo ID tài liệu đã tải lên
+                                        $docsRes = $supabaseAdmin->select('user_documents', "select=document_type_id&user_id=eq.{$user_id}");
+                                        $uploaded_doc_types = [];
+                                        if ($docsRes['code'] == 200) {
+                                            foreach ($docsRes['data'] as $doc) {
+                                                $uploaded_doc_types[] = (int)$doc['document_type_id'];
+                                            }
+                                        }
+
+                                        // Sử dụng cấu hình từ file wrapper, nếu không có thì mặc định chỉ bắt bản sao CCCD
+                                        $required_docs = $required_doc_config ?? [2 => 'Ảnh chụp CMND/CCCD'];
+                                        $missing_docs_list = [];
+                                        
+                                        foreach ($required_docs as $req_id => $req_name) {
+                                            $is_uploaded = in_array((int)$req_id, $uploaded_doc_types);
+                                            $missing_docs_list[$req_id] = [
+                                                'name' => $req_name,
+                                                'uploaded' => $is_uploaded
+                                            ];
+                                            if (!$is_uploaded) {
+                                                $missing_req_fields[] = $req_name;
+                                            }
+                                        }
+
+                                        $is_step2_valid = empty($missing_req_fields);
+                                        ?>
+
                                         <div class="row mb-3 bg-light p-3 rounded mx-0 border">
+                                            <!-- Hiển thị các trường Text -->
                                             <?php foreach ($step2_fields as $f): ?>
                                                 <div class="col-md-6 mb-3">
-                                                    <span
-                                                        class="text-muted small d-block mb-1"><?php echo htmlspecialchars($f['label']); ?></span>
+                                                    <span class="text-muted small d-block mb-1">
+                                                        <?php echo htmlspecialchars($f['label']); ?>
+                                                        <?php if (isset($f['required']) && $f['required']): ?>
+                                                            <span class="text-danger" title="Bắt buộc">*</span>
+                                                        <?php endif; ?>
+                                                    </span>
                                                     <?php
                                                     $val = $profileData[$f['key']] ?? '';
                                                     if ($f['key'] === 'date_of_birth' && !empty($val)) {
                                                         $val = date('d/m/Y', strtotime($val));
                                                     }
                                                     ?>
-                                                    <strong
-                                                        class="text-dark fs-6"><?php echo htmlspecialchars($val ?: 'Chưa cập nhật'); ?></strong>
+                                                    <?php if (empty($val) && isset($f['required']) && $f['required']): ?>
+                                                        <strong class="text-danger fs-6"><i class="bi bi-x-circle me-1"></i>Bắt buộc cập nhật</strong>
+                                                    <?php else: ?>
+                                                        <strong class="text-dark fs-6"><?php echo htmlspecialchars($val ?: 'Chưa cập nhật'); ?></strong>
+                                                    <?php endif; ?>
                                                 </div>
                                             <?php endforeach; ?>
+
+                                            <!-- Phân cách hiển thị Tình trạng Tài liệu Bắt buộc -->
+                                            <div class="col-12 mt-2 pt-3 border-top border-light border-opacity-75">
+                                                <h6 class="text-brand fw-bold mb-3"><i class="bi bi-folder-check me-2"></i>Tài liệu đính kèm bắt buộc</h6>
+                                                
+                                                <div class="row">
+                                                    <?php foreach ($missing_docs_list as $doc_id => $doc_info): ?>
+                                                        <div class="col-md-6 mb-3">
+                                                            <span class="text-muted small d-block mb-1">
+                                                                <?php echo htmlspecialchars($doc_info['name']); ?> <span class="text-danger" title="Bắt buộc">*</span>
+                                                            </span>
+                                                            <?php if (!$doc_info['uploaded']): ?>
+                                                                <strong class="text-danger fs-6"><i class="bi bi-x-circle me-1"></i>Chưa nộp (Bắt buộc tải lên)</strong>
+                                                            <?php else: ?>
+                                                                <strong class="text-success fs-6"><i class="bi bi-file-earmark-check-fill me-1"></i>Đã nộp</strong>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="alert alert-warning small py-2 mb-4">
-                                            <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                                            Nếu thông tin chưa chính xác, vui lòng <a
-                                                href="<?php echo BASE_URL; ?>/candidate/profile.php"
-                                                class="fw-bold text-decoration-none" target="_blank">cập nhật tại đây</a>
-                                            trước khi nộp.
-                                        </div>
+                                        
+                                        <?php if (!$is_step2_valid): ?>
+                                            <div class="alert alert-danger small py-2 mb-4">
+                                                <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>
+                                                Hồ sơ của bạn còn thiếu các thông tin bắt buộc: <strong><?php echo implode(', ', $missing_req_fields); ?></strong>.<br>
+                                                Vui lòng <a href="<?php echo BASE_URL; ?>/candidate/profile.php" class="fw-bold text-decoration-none" target="_blank">cập nhật hồ sơ</a>, sau đó <strong>tải lại trang này</strong> để tiếp tục nộp.
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="alert alert-warning small py-2 mb-4">
+                                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                                                Nếu thông tin chưa chính xác, vui lòng <a
+                                                    href="<?php echo BASE_URL; ?>/candidate/profile.php"
+                                                    class="fw-bold text-decoration-none" target="_blank">cập nhật tại đây</a>
+                                                trước khi nộp.
+                                            </div>
+                                        <?php endif; ?>
+
                                         <div class="d-flex justify-content-between">
                                             <button type="button" class="btn btn-secondary px-4 py-2 text-white fw-semibold"
                                                 onclick="goToStep(1)">&laquo; Quay lại</button>
                                             <button type="button" class="btn btn-brand px-4 py-2 fw-semibold"
+                                                <?php echo !$is_step2_valid ? 'disabled' : ''; ?>
                                                 onclick="goToStep(3)">Tiếp tục &raquo;</button>
                                         </div>
                                     </div>

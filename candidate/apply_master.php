@@ -4,12 +4,17 @@
 $forced_level_id = 3;
 
 // Bước 2 — Thạc sĩ hiển thị: Họ tên, CCCD, Ngày sinh, Email, SĐT, Bằng ĐH
+// Cấu hình tài liệu bắt buộc dùng để quét ở Bước 2
+$required_doc_config = [
+    2 => 'Ảnh chụp CMND/CCCD',
+    5 => 'Bằng tốt nghiệp ĐH'
+];
 $step2_fields = [
-    ['label' => 'Họ và tên',      'key' => 'full_name'],
-    ['label' => 'Số CMND/CCCD',   'key' => 'identity_card'],
-    ['label' => 'Ngày sinh',       'key' => 'date_of_birth'],
-    ['label' => 'Email liên lạc', 'key' => 'contact_email'],
-    ['label' => 'Số điện thoại',  'key' => 'phone_number'],
+    ['label' => 'Họ và tên',      'key' => 'full_name', 'required' => true],
+    ['label' => 'Số CMND/CCCD',   'key' => 'identity_card', 'required' => true],
+    ['label' => 'Ngày sinh',       'key' => 'date_of_birth', 'required' => true],
+    ['label' => 'Email liên lạc', 'key' => 'contact_email', 'required' => true],
+    ['label' => 'Số điện thoại',  'key' => 'phone_number', 'required' => true],
 ];
 $step1_info = '
 <div class="d-flex align-items-start gap-2">

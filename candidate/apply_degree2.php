@@ -4,12 +4,17 @@
 $forced_level_id = 5;
 
 // Bước 2 — VB2 hiển thị: Họ tên, CCCD, Ngày sinh, SĐT, Email
+// Cấu hình tài liệu bắt buộc dùng để quét ở Bước 2
+$required_doc_config = [
+    2 => 'Ảnh chụp CMND/CCCD',
+    5 => 'Bằng tốt nghiệp (hoặc Giấy chứng nhận tạm thời)'
+];
 $step2_fields = [
-    ['label' => 'Họ và tên',      'key' => 'full_name'],
-    ['label' => 'Số CMND/CCCD',   'key' => 'identity_card'],
-    ['label' => 'Ngày sinh',       'key' => 'date_of_birth'],
-    ['label' => 'Số điện thoại',  'key' => 'phone_number'],
-    ['label' => 'Email liên lạc', 'key' => 'contact_email'],
+    ['label' => 'Họ và tên',      'key' => 'full_name', 'required' => true],
+    ['label' => 'Số CMND/CCCD',   'key' => 'identity_card', 'required' => true],
+    ['label' => 'Ngày sinh',       'key' => 'date_of_birth', 'required' => true],
+    ['label' => 'Số điện thoại',  'key' => 'phone_number', 'required' => true],
+    ['label' => 'Email liên lạc', 'key' => 'contact_email', 'required' => true],
 ];
 $step1_info = '
 <div class="d-flex align-items-start gap-2">
