@@ -183,10 +183,10 @@
                             <option value="">-- Không có --</option>
                             <option value="01">01 - Dân tộc thiểu số (KV1)</option>
                             <option value="02">02 - CN sản xuất ưu tú</option>
-                            <option value="03">03 - Thương binh, Quân/CA</option>
+                            <option value="03">03 - Thương binh, Quân/CA tại ngũ</option>
                             <option value="04">04 - Con liệt sĩ, Con TB/BB (≥81%)</option>
                             <option value="05">05 - TNXP, Quân/CA xuất ngũ</option>
-                            <option value="06">06 - DTTS ngoài KV1</option>
+                            <option value="06">06 - DTTS ngoài KV1, Con TB/BB (<81%)</option>
                             <option value="07">07 - Người KT nặng, LĐ/Nhà giáo/YT XS</option>
                         </select>
                     </div>

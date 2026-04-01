@@ -71,7 +71,7 @@ $searchStr = trim($_GET['search'] ?? '');
 $filterQuery = '';
 if ($searchStr !== '') {
     $encodedSearch = urlencode('%' . $searchStr . '%');
-    $filterQuery = "or=(full_name.ilike.{$encodedSearch},identity_card.ilike.{$encodedSearch},phone_number.ilike.{$encodedSearch})&";
+    $filterQuery = "or=(full_name.ilike.{$encodedSearch},username.ilike.{$encodedSearch},identity_card.ilike.{$encodedSearch},phone_number.ilike.{$encodedSearch})&";
 }
 
 $totalUsers = $supabaseAdmin->count('user_profiles', rtrim($filterQuery, '&'));
@@ -123,7 +123,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <h3 class="fw-bold mb-0 text-brand">Quản lý Thông tin Thí sinh</h3>
                 <form method="GET" class="d-flex ms-auto" style="min-width: 280px;">
-                    <input type="text" name="search" class="form-control form-control-sm me-2 shadow-sm border-brand" placeholder="Tìm tên, CMND, SĐT..." value="<?php echo htmlspecialchars($searchStr ?? ''); ?>">
+                    <input type="text" name="search" class="form-control form-control-sm me-2 shadow-sm border-brand" placeholder="Tìm tên, username, CMND, SĐT..." value="<?php echo htmlspecialchars($searchStr ?? ''); ?>">
                     <button type="submit" class="btn btn-sm btn-brand shadow-sm"><i class="bi bi-search me-1"></i>Tìm</button>
                     <?php if(!empty($searchStr)): ?>
                     <a href="users.php" class="btn btn-sm btn-outline-secondary ms-1" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
@@ -140,6 +140,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                             <thead class="table-light text-muted">
                                 <tr>
                                     <th>Họ và Tên</th>
+                                    <th>Tên đăng nhập</th>
                                     <th>Thông tin liên hệ</th>
                                     <th>CMND / CCCD</th>
                                     <th>Ngày sinh</th>
@@ -155,6 +156,9 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
                                     <td>
                                         <strong class="d-block text-brand"><?php echo htmlspecialchars($u['full_name'] ?? 'Không rõ'); ?></strong>
                                         <span class="text-muted small">ID: <?php echo htmlspecialchars(substr($u['id'], 0, 8) . '...'); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block text-dark fw-medium"><?php echo htmlspecialchars($u['username'] ?? 'N/A'); ?></span>
                                     </td>
                                     <td>
                                         <span class="d-block small"><i class="bi bi-envelope text-muted"></i> <?php echo htmlspecialchars($u['contact_email'] ?? 'N/A'); ?></span>
@@ -426,7 +430,7 @@ $usersJson = json_encode($users, JSON_UNESCAPED_UNICODE);
             "paging": false,
             "searching": false,
             "info": false,
-            "order": [[6, "desc"]]
+            "order": [[7, "desc"]]
         });
     });
 </script>
