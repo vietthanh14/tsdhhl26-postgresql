@@ -115,13 +115,14 @@ $export_stats = get_dir_stats($directories_to_clean['CSVExports']);
 </head>
 <body class="bg-light">
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
+<?php include __DIR__ . '/../../includes/header.php'; ?>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <!-- Sidebar -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
-        <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+        <div class="main-content">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                 <h1 class="h3 fw-bold text-brand">
                     <i class="bi bi-trash text-danger me-2"></i> Dọn dẹp hệ thống
@@ -224,10 +225,11 @@ $export_stats = get_dir_stats($directories_to_clean['CSVExports']);
                 </div>
             </div>
 
-        </main>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>
 </html>
