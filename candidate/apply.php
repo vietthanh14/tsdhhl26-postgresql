@@ -537,12 +537,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <input type="hidden" name="major_id" id="majorIdHidden" required>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label text-muted fw-bold">Phương thức xét tuyển <span
-                                                    class="text-danger">*</span></label>
-                                            <select class="form-select" name="admission_method_id" required
-                                                id="methodSelect" onchange="updateFeePreview()">
-                                                <option value="">-- Vui lòng chọn Ngành học trước --</option>
-                                            </select>
+                                            <label class="form-label text-muted fw-bold">Phương thức xét tuyển <span class="text-danger">*</span></label>
+                                            <div class="combo-wrapper" id="methodComboWrapper">
+                                                <span class="combo-clear" id="methodComboClear" title="Xóa">&times;</span>
+                                                <input type="text" class="form-control combo-input" id="methodComboInput"
+                                                    placeholder="-- Vui lòng chọn Ngành học trước --" readonly>
+                                                <div class="combo-dropdown" id="methodComboDropdown">
+                                                    <div class="combo-search">
+                                                        <input type="text" id="methodComboSearch"
+                                                            placeholder="🔍 Tìm phương thức..." autocomplete="off">
+                                                    </div>
+                                                    <div class="combo-list" id="methodComboList"></div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="admission_method_id" required id="methodIdHidden" onchange="updateFeePreview()">
                                         </div>
                                         <div class="mb-4">
                                             <label class="form-label text-muted fw-bold">Thứ tự Nguyện vọng <span
@@ -736,7 +744,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const periodSelect = document.getElementById('periodSelect');
             try {
                 const levelId = document.getElementById('levelSelect').value;
-                const methodSelect = document.getElementById('methodSelect');
 
                 // Reset combobox ngành
                 selectedMajor = null;
@@ -746,7 +753,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('majorComboList').innerHTML = '';
                 document.getElementById('majorIdHidden').value = '';
                 document.getElementById('majorComboClear').style.display = 'none';
-                resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --');
+
+                // Reset combobox phương thức
+                selectedMethod = null;
+                methodItems = [];
+                document.getElementById('methodComboInput').value = '';
+                document.getElementById('methodComboInput').placeholder = '-- Vui lòng chọn Ngành học trước --';
+                document.getElementById('methodComboList').innerHTML = '';
+                document.getElementById('methodIdHidden').value = '';
+                document.getElementById('methodComboClear').style.display = 'none';
                 updateFeePreview();
 
                 if (!levelId) { resetSelect(periodSelect, '-- Vui lòng chọn Hệ Đào tạo trước --'); return; }
@@ -767,16 +782,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         let majorItems = [];   // [{id, name, fee}, ...]
         let selectedMajor = null;
 
+        // ── Method Combobox state ──────────────────────────────────────
+        let methodItems = [];   // [{id, name, fee}, ...]
+        let selectedMethod = null;
+
         // ── Bước 3a: Chọn Đợt → fetch Ngành qua AJAX ─────────────────
         async function filterMajors() {
             const periodId = document.querySelector('select[name="admission_period_id"]').value;
-            const methodSelect = document.getElementById('methodSelect');
             const comboInput = document.getElementById('majorComboInput');
             const comboList = document.getElementById('majorComboList');
             const idHidden = document.getElementById('majorIdHidden');
             const clearBtn = document.getElementById('majorComboClear');
 
-            resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --');
+            // Reset combobox phương thức
+            selectedMethod = null;
+            methodItems = [];
+            document.getElementById('methodComboInput').value = '';
+            document.getElementById('methodComboInput').title = '';
+            document.getElementById('methodComboInput').placeholder = '-- Vui lòng chọn Ngành học trước --';
+            document.getElementById('methodComboList').innerHTML = '';
+            document.getElementById('methodIdHidden').value = '';
+            document.getElementById('methodComboClear').style.display = 'none';
             selectedMajor = null;
             idHidden.value = '';
             clearBtn.style.display = 'none';
@@ -876,14 +902,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('majorFeeHidden').value = '0';
                 comboClear.style.display = 'none';
                 comboDropdown.classList.remove('show');
-                resetSelect(document.getElementById('methodSelect'), '-- Vui lòng chọn Ngành học trước --');
+                
+                // Reset combobox phương thức
+                selectedMethod = null;
+                methodItems = [];
+                document.getElementById('methodComboInput').value = '';
+                document.getElementById('methodComboInput').title = '';
+                document.getElementById('methodComboInput').placeholder = '-- Vui lòng chọn Ngành học trước --';
+                document.getElementById('methodComboList').innerHTML = '';
+                document.getElementById('methodIdHidden').value = '';
+                document.getElementById('methodComboClear').style.display = 'none';
                 updateFeePreview();
             });
 
-            // Close dropdown when clicking outside
+            // Method Combobox setup
+            const methodInput = document.getElementById('methodComboInput');
+            const methodDropdown = document.getElementById('methodComboDropdown');
+            const methodSearch = document.getElementById('methodComboSearch');
+            const methodClear = document.getElementById('methodComboClear');
+
+            if (methodInput) {
+                methodInput.addEventListener('click', () => {
+                    if (!methodItems.length) return;
+                    methodDropdown.classList.toggle('show');
+                    if (methodDropdown.classList.contains('show')) {
+                        methodSearch.value = '';
+                        renderMethodList('');
+                        setTimeout(() => methodSearch.focus(), 50);
+                    }
+                });
+
+                methodSearch.addEventListener('input', () => {
+                    renderMethodList(methodSearch.value);
+                });
+
+                methodClear.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedMethod = null;
+                    methodInput.value = '';
+                    methodInput.title = '';
+                    document.getElementById('methodIdHidden').value = '';
+                    methodClear.style.display = 'none';
+                    methodDropdown.classList.remove('show');
+                    updateFeePreview();
+                });
+            }
+
+            // Close dropdowns when clicking outside
             document.addEventListener('click', (e) => {
-                if (!document.getElementById('majorComboWrapper').contains(e.target)) {
-                    comboDropdown.classList.remove('show');
+                const majorWrapper = document.getElementById('majorComboWrapper');
+                const methodWrapper = document.getElementById('methodComboWrapper');
+                if (majorWrapper && !majorWrapper.contains(e.target)) {
+                    document.getElementById('majorComboDropdown')?.classList.remove('show');
+                }
+                if (methodWrapper && !methodWrapper.contains(e.target)) {
+                    document.getElementById('methodComboDropdown')?.classList.remove('show');
                 }
             });
         });
@@ -892,37 +965,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         async function filterMethods() {
             const periodId = document.querySelector('select[name="admission_period_id"]').value;
             const majorId = document.getElementById('majorIdHidden').value;
-            const methodSelect = document.getElementById('methodSelect');
+            const comboInput = document.getElementById('methodComboInput');
+            const comboList = document.getElementById('methodComboList');
+            const idHidden = document.getElementById('methodIdHidden');
+            const clearBtn = document.getElementById('methodComboClear');
 
-            if (!periodId || !majorId) { resetSelect(methodSelect, '-- Vui lòng chọn Ngành học trước --'); updateFeePreview(); return; }
+            selectedMethod = null;
+            idHidden.value = '';
+            clearBtn.style.display = 'none';
+            comboInput.title = '';
+            updateFeePreview();
 
-            setLoading(methodSelect, 'Đang tải phương thức...');
+            if (!periodId || !majorId) {
+                comboInput.value = '';
+                comboInput.placeholder = '-- Vui lòng chọn Ngành học trước --';
+                comboList.innerHTML = '';
+                methodItems = [];
+                return;
+            }
+
+            comboInput.value = '';
+            comboInput.placeholder = 'Đang tải danh sách phương thức...';
+            comboList.innerHTML = '';
+            methodItems = [];
+
             try {
                 const data = await fetch(`<?php echo BASE_URL; ?>/candidate/api/methods.php?period_id=${periodId}&major_id=${majorId}`).then(r => r.json());
-                methodSelect.disabled = false;
-                if (!data.length) { resetSelect(methodSelect, '-- Ngành này chưa thiết lập phương thức --'); updateFeePreview(); return; }
-                methodSelect.innerHTML = '<option value="" data-fee="0">-- Chọn phương thức xét tuyển --</option>';
-                const formatter = new Intl.NumberFormat('vi-VN');
-                data.forEach(m => {
-                    // Truncate name if too long to prevent Desktop dropdowns from overflowing
-                    let shortName = m.method_name;
-                    if (shortName.length > 55) {
-                        shortName = shortName.substring(0, 52) + '...';
-                    }
-                    const opt = new Option(`${shortName} (${formatter.format(m.application_fee || 0)}đ)`, m.id);
-                    opt.title = m.method_name; // Full name on hover
-                    opt.dataset.fee = m.application_fee || 0;
-                    opt.dataset.fullname = m.method_name;
-                    methodSelect.appendChild(opt);
-                });
-                updateFeePreview();
-            } catch (e) { resetSelect(methodSelect, '-- Lỗi tải dữ liệu --'); }
+                
+                if (!data.length) {
+                    comboInput.placeholder = '-- Ngành này chưa thiết lập phương thức --';
+                    return;
+                }
+                
+                methodItems = data.map(m => ({
+                    id: m.id,
+                    name: m.method_name,
+                    fee: m.application_fee || 0
+                }));
+                comboInput.placeholder = '-- Nhấn để chọn phương thức --';
+                renderMethodList('');
+            } catch (e) {
+                comboInput.placeholder = '-- Lỗi tải dữ liệu --';
+            }
+        }
+
+        function renderMethodList(filter) {
+            const comboList = document.getElementById('methodComboList');
+            const lower = filter.toLowerCase();
+            const filtered = methodItems.filter(m => m.name.toLowerCase().includes(lower));
+            comboList.innerHTML = '';
+            
+            if (!filtered.length) {
+                comboList.innerHTML = '<div class="combo-item text-muted">Không tìm thấy phương thức phù hợp</div>';
+                return;
+            }
+            
+            const formatter = new Intl.NumberFormat('vi-VN');
+            filtered.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'combo-item' + (selectedMethod && selectedMethod.id === m.id ? ' selected' : '');
+                div.textContent = `${m.name} (${formatter.format(m.fee)}đ)`;
+                div.addEventListener('click', () => selectMethod(m));
+                comboList.appendChild(div);
+            });
+        }
+
+        function selectMethod(m) {
+            selectedMethod = m;
+            document.getElementById('methodComboInput').value = m.name;
+            document.getElementById('methodComboInput').title = m.name;
+            document.getElementById('methodIdHidden').value = m.id;
+            document.getElementById('methodComboClear').style.display = 'block';
+            document.getElementById('methodComboDropdown').classList.remove('show');
+            updateFeePreview();
         }
 
         function updateFeePreview() {
-            const methodSelect = document.getElementById('methodSelect');
-            const selectedOption = methodSelect.options[methodSelect.selectedIndex];
-            const fee = selectedOption ? (selectedOption.dataset.fee || 0) : 0;
+            const fee = selectedMethod ? selectedMethod.fee : 0;
             const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
             const feeEl = document.getElementById('feePreview');
             if (feeEl) feeEl.innerText = formatter.format(fee);
@@ -931,7 +1050,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         async function checkDupThenPay() {
             const periodId = document.getElementById('periodSelect').value;
             const majorId = document.getElementById('majorIdHidden').value;
-            const methodId = document.getElementById('methodSelect').value;
+            const methodId = document.getElementById('methodIdHidden').value;
             const priority = document.getElementById('priorityInput').value;
             const dupMsg = document.getElementById('dupCheckMsg');
             const btn = document.getElementById('goToPaymentBtn');
@@ -1005,7 +1124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             if (step === 4) {
-                if (!document.getElementById('majorIdHidden').value || !document.getElementById('methodSelect').value) {
+                if (!document.getElementById('majorIdHidden').value || !document.getElementById('methodIdHidden').value) {
                     showNotifyModal('Vui lòng chọn Ngành học và Phương thức xét tuyển trước!', 'warning');
                     return;
                 }
@@ -1019,8 +1138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const cccdLast6 = cccd.replace(/\D/g, '').slice(-6); // 6 số cuối CCCD
                 const content = `TS${periodId}M${majorId} ${cccdLast6}`;
 
-                const methodSel = document.getElementById('methodSelect');
-                const fee = methodSel.options[methodSel.selectedIndex].dataset.fee || 0;
+                const fee = selectedMethod ? selectedMethod.fee : 0;
 
                 const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
                 document.getElementById('paymentAmountText').innerText = formatter.format(fee);
@@ -1028,8 +1146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Populate tóm tắt hồ sơ
                 const majorText = selectedMajor ? selectedMajor.name : '';
-                const methodOption = methodSel.options[methodSel.selectedIndex];
-                const methodText = methodOption.dataset.fullname ? methodOption.dataset.fullname : methodOption.text;
+                const methodText = selectedMethod ? selectedMethod.name : '';
                 const priority = document.getElementById('priorityInput').value;
                 document.getElementById('summaryMajor').innerText = majorText;
                 document.getElementById('summaryMethod').innerText = methodText;
