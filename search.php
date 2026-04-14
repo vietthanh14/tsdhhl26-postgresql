@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/supabase.php';
+require_once __DIR__ . '/config/database.php';
 
 // search.php - Trang tra cứu kết quả tuyển sinh từ Google Sheets
 session_start();
