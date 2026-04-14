@@ -344,42 +344,53 @@ unset($app);
             ]
         });
 
-        // Xử lý Tải xuống bằng File vật lý từ Server (Vượt bypass mọi Extension IDM)
+        // Xử lý Tải xuống bằng Stream PHP (An toàn dữ liệu)
         $('#btnExportDocs').on('click', function(e) {
             e.preventDefault();
             var btn = $(this);
             var originalHtml = btn.html();
             btn.html('<span class="spinner-border spinner-border-sm"></span> Đang tải...').prop('disabled', true);
             
-            // Xóa cache trình duyệt bằng tham số thời gian
             var cacheBuster = new Date().getTime();
             
-            $.ajax({
-                url: 'api/export_csv.php?t=' + cacheBuster,
-                method: 'GET',
-                dataType: 'json',
-                success: function(res) {
-                    if(res.status === 'success' && res.file_url) {
-                        // Kích hoạt download bằng cách trỏ tới URL vật lý
-                        // IDM hay bất cứ Extension nào cũng không thể chặn được dạng này
-                        var link = document.createElement('a');
-                        link.href = res.file_url;
-                        link.download = res.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    } else {
-                        alert("Lỗi xuất file: " + (res.message || 'Unknown'));
+            fetch('api/export_csv.php?t=' + cacheBuster)
+                .then(response => {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        // Nhận JSON tức là có lỗi hoặc Rate Limit
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Lỗi xuất tệp');
+                        });
                     }
-                },
-                error: function(err) {
-                    alert("Có lỗi xảy ra khi tạo file xuất. Vui lòng thử lại.");
+                    
+                    // Xử lý File Stream
+                    var filename = 'Danh_sach_Hoso.csv';
+                    var disposition = response.headers.get('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    }
+
+                    return response.blob().then(blob => ({ blob, filename }));
+                })
+                .then(({blob, filename}) => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => {
+                    alert(err.message || "Có lỗi xảy ra khi tạo file xuất. Vui lòng thử lại.");
                     console.error(err);
-                },
-                complete: function() {
+                })
+                .finally(() => {
                     btn.html(originalHtml).prop('disabled', false);
-                }
-            });
+                });
         });
         // Xử lý Checkbox Chọn tất cả
         $('#checkAll').on('click', function(){

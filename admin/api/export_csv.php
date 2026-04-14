@@ -28,23 +28,19 @@ try {
     );
     
     $filename = 'Danh_sach_Hoso_' . date('Y_m_d_His') . '.csv';
-    $exportDir = __DIR__ . '/../../uploads/exports';
-    if (!is_dir($exportDir)) {
-        mkdir($exportDir, 0777, true);
-    }
     
-    // Xoá file csv cũ hơn 1 ngày
-    foreach (glob($exportDir . '/*.csv') as $file) {
-        if (is_file($file) && time() - filemtime($file) >= 86400) {
-            unlink($file);
-        }
-    }
+    // Xoá bộ nhớ đệm (Clean output buffer)
+    if (ob_get_level()) ob_end_clean();
+    
+    // Đặt Headers tải file CSV trực tiếp (Stream)
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    
+    // Ghi thẳng dữ liệu tĩnh ra luồng mạng
+    $output = fopen('php://output', 'w');
+    fputs($output, "\xEF\xBB\xBF"); // BOM cho Excel
 
-    $filepath = $exportDir . '/' . $filename;
-    $fileUrl = BASE_URL . '/uploads/exports/' . $filename; 
-
-    $output = fopen($filepath, 'w');
-    fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
 
     fputcsv($output, [
         'STT', 'Trạng thái hồ sơ', 'Họ và tên', 'Ngày sinh', 'Giới tính',
@@ -90,10 +86,6 @@ try {
     }
 
     fclose($output);
-
-    if (ob_get_level()) ob_end_clean();
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['status' => 'success', 'filename' => $filename, 'file_url' => $fileUrl]);
     exit;
 
 } catch (Exception $e) {

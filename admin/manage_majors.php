@@ -3,24 +3,36 @@ require_once __DIR__ . '/includes/admin_init.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    
+    // Hàm Helper đọc lỗi thân thiện
+    function getDbError($res) {
+        if (!empty($res['error']) && is_string($res['error'])) return $res['error'];
+        $data = $res['data'] ?? [];
+        if (isset($data['code'])) {
+            if ($data['code'] === '23505') return "Lỗi: Mã ngành hoặc tên ngành bị trùng lặp.";
+            if ($data['code'] === '23503') return "Lỗi: Ngành này đang có dữ liệu ràng buộc, không thể xóa.";
+        }
+        return isset($data['message']) ? "Lỗi CSDL: " . $data['message'] : json_encode($data);
+    }
+
     if ($action === 'add_major') {
         $data = ['major_code' => $_POST['major_code'], 'major_name' => $_POST['major_name'], 'education_level_id' => $_POST['education_level_id'], 'zalo_link' => trim($_POST['zalo_link'] ?? '')];
         $res = $supabaseAdmin->insert('majors', $data);
         if (in_array($res['code'], [201, 200, 204])) $_SESSION['msg'] = "Thêm Ngành học thành công!";
-        else $_SESSION['err'] = "Lỗi thêm ngành: " . ($res['error'] ?? json_encode($res['data']));
+        else $_SESSION['err'] = "Lỗi thêm ngành: " . getDbError($res);
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
     elseif ($action === 'edit_major') {
         $data = ['major_code' => $_POST['major_code'], 'major_name' => $_POST['major_name'], 'education_level_id' => $_POST['education_level_id'], 'zalo_link' => trim($_POST['zalo_link'] ?? '')];
         $res = $supabaseAdmin->update('majors', 'id', $_POST['id'], $data);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Cập nhật Ngành học thành công!";
-        else $_SESSION['err'] = "Lỗi sửa ngành: " . ($res['error'] ?? json_encode($res['data']));
+        else $_SESSION['err'] = "Lỗi sửa ngành: " . getDbError($res);
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
     elseif ($action === 'delete_major') {
         $res = $supabaseAdmin->delete('majors', 'id', $_POST['id']);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Xóa Ngành thành công!";
-        else $_SESSION['err'] = "Lỗi xóa ngành: " . ($res['error'] ?? json_encode($res['data']));
+        else $_SESSION['err'] = "Lỗi xóa ngành: " . getDbError($res);
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
 }
