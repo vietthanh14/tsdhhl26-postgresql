@@ -33,7 +33,10 @@ $sql = "SELECT m.*, el.name as education_levels__name
         LEFT JOIN education_levels el ON m.education_level_id = el.id 
         ORDER BY m.id DESC";
 $majorsRes = $supabaseAdmin->rawQuery($sql);
-$majors = $majorsRes['code'] == 200 ? $majorsRes['data'] : [];
+if ($majorsRes['code'] !== 200) {
+    die("LỖI ĐỌC DỮ LIỆU: " . $majorsRes['error']);
+}
+$majors = $majorsRes['data'] ?? [];
 
 $pageTitle = 'Quản lý Ngành Học';
 include __DIR__ . '/includes/admin_header.php';
@@ -64,6 +67,7 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody id="majorsBody">
+                    <tr><td colspan="5"><pre><?php var_dump($majors); ?></pre></td></tr>
                     <?php foreach($majors as $m): ?>
                     <tr>
                         <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($m['major_code']); ?></span></td>
