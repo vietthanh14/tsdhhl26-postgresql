@@ -384,7 +384,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="mb-3" <?php echo $selected_level_id ? 'style="display:none;"' : ''; ?>>
                                             <label class="form-label text-muted fw-bold">Hệ Đào tạo <span
                                                     class="text-danger">*</span></label>
-                                            <select class="form-select" id="levelSelect" <?php echo $selected_level_id ? '' : 'required'; ?> onchange="filterPeriods()">
+                                            <select class="form-select" id="levelSelect" <?php echo $selected_level_id ? '' : 'required'; ?> onchange="redirectToSys()">
                                                 <option value="">-- Chọn Hệ đào tạo --</option>
                                                 <?php foreach ($levels as $l): ?>
                                                     <option value="<?php echo $l['id']; ?>" <?php echo ($selected_level_id == $l['id']) ? 'selected' : ''; ?>>
@@ -1223,6 +1223,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 onError: function(msg) { showNotifyModal(msg, 'warning'); }
             });
         });
+
+        // Hàm chuyển hướng về wrapper tương ứng
+        function redirectToSys() {
+            var levelMap = {
+                1: 'apply_university.php',
+                2: 'apply_college.php',
+                3: 'apply_master.php',
+                4: 'apply_vocational.php',
+                5: 'apply_degree2.php'
+            };
+            var lvlId = document.getElementById('levelSelect').value;
+            if (lvlId && levelMap[lvlId]) {
+                window.location.href = levelMap[lvlId];
+            } else if (lvlId) {
+                window.location.href = 'apply.php?level_id=' + lvlId;
+            } else {
+                filterPeriods();
+            }
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <?php include __DIR__ . '/../includes/footer.php'; ?>

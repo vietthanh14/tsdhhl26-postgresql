@@ -6,7 +6,7 @@ $forced_level_id = 4;
 // Bước 2 — Trung cấp hiển thị trường 1–11 (Định danh + Địa chỉ)
 // Cấu hình tài liệu bắt buộc dùng để quét ở Bước 2
 $required_doc_config = [
-    2 => 'Ảnh chụp CMND/CCCD'
+    1 => 'Ảnh chụp CMND/CCCD'
 ];
 $step2_fields = [
     ['label' => 'Họ và tên',           'key' => 'full_name', 'required' => true],

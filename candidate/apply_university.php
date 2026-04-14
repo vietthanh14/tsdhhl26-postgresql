@@ -7,8 +7,8 @@ $forced_level_id = 1;
 // Bước 2 — Đại học hiển thị trường 1–20 (Định danh + Địa chỉ + THPT + Ưu tiên)
 // Cấu hình tài liệu bắt buộc dùng để quét ở Bước 2
 $required_doc_config = [
-    2 => 'Ảnh chụp CMND/CCCD',
-    4 => 'Học bạ THPT'
+    1 => 'Ảnh chụp CMND/CCCD',
+    2 => 'Học bạ THPT'
 ];
 // Thêm 'required' => true vào các trường muốn bắt buộc cập nhật
 $step2_fields = [

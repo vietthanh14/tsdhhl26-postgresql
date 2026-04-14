@@ -6,8 +6,8 @@ $forced_level_id = 2;
 // Bước 2 — Cao đẳng hiển thị trường 1–20 (Định danh + Địa chỉ + THPT + Ưu tiên)
 // Cấu hình tài liệu bắt buộc dùng để quét ở Bước 2
 $required_doc_config = [
-    2 => 'Ảnh chụp CMND/CCCD',
-    4 => 'Học bạ THPT'
+    1 => 'Ảnh chụp CMND/CCCD',
+    2 => 'Học bạ THPT'
 ];
 $step2_fields = [
     ['label' => 'Họ và tên',           'key' => 'full_name', 'required' => true],
