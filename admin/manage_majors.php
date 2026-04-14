@@ -67,7 +67,7 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody id="majorsBody">
-                    <tr><td colspan="5"><pre><?php var_dump($majors); ?></pre></td></tr>
+
                     <?php foreach($majors as $m): ?>
                     <tr>
                         <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($m['major_code']); ?></span></td>
