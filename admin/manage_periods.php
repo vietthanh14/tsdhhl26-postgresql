@@ -103,11 +103,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --- Fetch Data ---
-$periodsRes = $supabaseAdmin->select('admission_periods', 'select=*,education_levels(name)&order=id.desc');
+$sqlP = "SELECT ap.*, el.name as education_levels__name FROM admission_periods ap LEFT JOIN education_levels el ON ap.education_level_id = el.id ORDER BY ap.id DESC";
+$periodsRes = $supabaseAdmin->rawQuery($sqlP);
 $periods = $periodsRes['code'] == 200 ? $periodsRes['data'] : [];
+
 $levelsRes = $supabaseAdmin->select('education_levels', 'order=id.asc');
 $levels = $levelsRes['code'] == 200 ? $levelsRes['data'] : [];
-$majorsRes = $supabaseAdmin->select('majors', 'select=*,education_levels(name)&order=id.desc');
+
+$sqlM = "SELECT m.*, el.name as education_levels__name FROM majors m LEFT JOIN education_levels el ON m.education_level_id = el.id ORDER BY m.id DESC";
+$majorsRes = $supabaseAdmin->rawQuery($sqlM);
 $majors = $majorsRes['code'] == 200 ? $majorsRes['data'] : [];
 $periodMajorsRes = $supabaseAdmin->select('admission_period_majors', 'select=period_id,major_id');
 $periodMajors = $periodMajorsRes['code'] == 200 ? $periodMajorsRes['data'] : [];

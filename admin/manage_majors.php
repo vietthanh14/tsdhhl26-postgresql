@@ -27,7 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $levelsRes = $supabaseAdmin->select('education_levels', 'order=id.asc');
 $levels = $levelsRes['code'] == 200 ? $levelsRes['data'] : [];
-$majorsRes = $supabaseAdmin->select('majors', 'select=*,education_levels(name)&order=id.desc');
+
+$sql = "SELECT m.*, el.name as education_levels__name 
+        FROM majors m 
+        LEFT JOIN education_levels el ON m.education_level_id = el.id 
+        ORDER BY m.id DESC";
+$majorsRes = $supabaseAdmin->rawQuery($sql);
 $majors = $majorsRes['code'] == 200 ? $majorsRes['data'] : [];
 
 $pageTitle = 'Quản lý Ngành Học';

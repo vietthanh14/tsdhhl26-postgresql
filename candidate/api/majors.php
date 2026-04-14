@@ -21,10 +21,12 @@ $majorIds = array_column($pmRes['data'], 'major_id');
 $idsStr   = implode(',', $majorIds);
 
 // Lấy thông tin ngành kèm tên hệ
-$majorsRes = $supabase->select(
-    'majors',
-    "id=in.({$idsStr})&select=id,major_name,major_code,education_levels(name)&order=major_name.asc"
-);
+$sql = "SELECT m.id, m.major_name, m.major_code, el.name as education_levels__name
+        FROM majors m
+        LEFT JOIN education_levels el ON m.education_level_id = el.id
+        WHERE m.id IN ($idsStr)
+        ORDER BY m.major_name ASC";
+$majorsRes = $supabase->rawQuery($sql);
 
 $majors = [];
 if ($majorsRes['code'] === 200) {

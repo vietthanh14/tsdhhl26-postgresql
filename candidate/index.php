@@ -27,8 +27,18 @@ if ($profileResponse['code'] == 401 || empty($profileResponse['data'])) {
 $profile = $profileResponse['data'][0];
 
 // Lấy danh sách hồ sơ (đã nộp) của thí sinh với các join liên quan
-$appsQuery = "select=*,majors(major_name,zalo_link,education_levels(name)),admission_periods(name)&user_id=eq.{$user_id}&order=priority.asc,submitted_at.desc";
-$appsResponse = $supabase->select('applications', $appsQuery, $token);
+$sql = "SELECT a.*, 
+        m.major_name as majors__major_name, 
+        m.zalo_link as majors__zalo_link, 
+        el.name as majors__education_levels__name,
+        ap.name as admission_periods__name
+        FROM applications a 
+        LEFT JOIN majors m ON a.major_id = m.id
+        LEFT JOIN education_levels el ON m.education_level_id = el.id
+        LEFT JOIN admission_periods ap ON a.admission_period_id = ap.id
+        WHERE a.user_id = :user_id
+        ORDER BY a.priority ASC, a.submitted_at DESC";
+$appsResponse = $supabase->rawQuery($sql, ['user_id' => $user_id]);
 $applications = ($appsResponse['code'] == 200) ? $appsResponse['data'] : [];
 
 // Lấy danh sách phương thức xét tuyển (từ cache, TTL 1 giờ)

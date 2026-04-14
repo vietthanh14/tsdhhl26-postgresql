@@ -14,8 +14,11 @@ if (!$period_id || $priority < 1) {
 }
 
 $supabase = new DatabaseClient('service');
-$query = "user_id=eq.{$user_id}&admission_period_id=eq.{$period_id}&priority=eq.{$priority}&select=id,major_id,majors(major_name)";
-$res = $supabase->select('applications', $query);
+$sql = "SELECT a.id, a.major_id, m.major_name as majors__major_name
+        FROM applications a
+        LEFT JOIN majors m ON a.major_id = m.id
+        WHERE a.user_id = :u AND a.admission_period_id = :p AND a.priority = :pri";
+$res = $supabase->rawQuery($sql, [':u' => $user_id, ':p' => $period_id, ':pri' => $priority]);
 
 if ($res['code'] !== 200 || empty($res['data'])) {
     echo json_encode(['duplicate' => false]);
