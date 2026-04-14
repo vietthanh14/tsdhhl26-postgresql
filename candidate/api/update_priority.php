@@ -55,11 +55,24 @@ foreach ($others as $idx => $app) {
 }
 
 if (!empty($updatesList)) {
-    // 1 API Request to rule them all thay vì N Request
-    $rpcRes = $supabase->rpc('bulk_update_priorities', ['p_updates' => $updatesList]);
-    if (!in_array($rpcRes['code'], [200, 204])) {
-        $errDetail = isset($rpcRes['data']) ? json_encode($rpcRes['data']) : 'Unknown';
-        echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật CSDL: Mạng (' . $rpcRes['code'] . ') Chi tiết: ' . $errDetail]);
+    $supabase->beginTransaction();
+    $allSuccess = true;
+    $errDetail = '';
+
+    foreach ($updatesList as $upd) {
+        $res = $supabase->update('applications', 'id', $upd['id'], ['priority' => $upd['priority']]);
+        if (!in_array($res['code'], [200, 204])) {
+            $allSuccess = false;
+            $errDetail = $res['error'] ?? 'Unknown DB Error';
+            break;
+        }
+    }
+
+    if ($allSuccess) {
+        $supabase->commit();
+    } else {
+        $supabase->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật CSDL: ' . $errDetail]);
         exit;
     }
 }

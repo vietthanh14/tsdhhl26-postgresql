@@ -26,6 +26,21 @@ class DatabaseClient {
         }
     }
 
+    public function beginTransaction() {
+        return $this->pdo->beginTransaction();
+    }
+
+    public function commit() {
+        return $this->pdo->commit();
+    }
+
+    public function rollBack() {
+        return $this->pdo->rollBack();
+    }
+
+    public function inTransaction() {
+        return $this->pdo->inTransaction();
+    }
     // Auth functions fake-out (re-coded for native users table)
     public function signUp($email, $password) {
         try {

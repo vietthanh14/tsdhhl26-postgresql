@@ -164,57 +164,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!$validMajorInPeriod) {
             $_SESSION['apply_err'] = "Ngành học này không thuộc đợt tuyển sinh đã chọn. Vui lòng thực hiện lại từ Bước 1.";
         } else {
-            // Tự động shift NV (tịnh tiến NV cũ xuống) nếu thêm NV mới (kể cả NV đang trùng)
-            $rpcShfitRes = $supabaseAdmin->rpc('shift_application_priority', [
-                'p_user_id' => $user_id,
-                'p_period_id' => (string)$admission_period_id,
-                'p_start_priority' => (int)$priority
-            ]);
+            $supabaseAdmin->beginTransaction();
+            try {
+                // Tự động shift NV (tịnh tiến NV cũ xuống) nếu thêm NV mới (kể cả NV đang trùng)
+                $shiftSql = "UPDATE applications SET priority = priority + 1 
+                            WHERE user_id = :uid 
+                              AND admission_period_id = :pid 
+                              AND priority >= :start_prio";
+                $supabaseAdmin->rawQuery($shiftSql, [
+                    'uid' => $user_id,
+                    'pid' => $admission_period_id,
+                    'start_prio' => $priority
+                ]);
 
-            if (!in_array($rpcShfitRes['code'], [200, 204])) {
-                $errDetail = isset($rpcShfitRes['data']) ? json_encode($rpcShfitRes['data']) : 'Unknown';
-                $_SESSION['apply_err'] = "Lỗi Database (RPC shift_priority): Mã " . $rpcShfitRes['code'] . " - " . $errDetail;
-                header("Location: apply.php");
-                exit;
-            }
+                $appData = [
+                    'user_id' => $user_id,
+                    'admission_period_id' => $admission_period_id,
+                    'major_id' => $major_id,
+                    'admission_method_id' => $admission_method_id,
+                    'fee_amount' => $fee_amount,
+                    'priority' => $priority,
+                    'status' => 'PENDING',
+                    'payment_status' => 'UNPAID',
+                    'receipt_url' => $receipt_url
+                ];
 
-            $appData = [
-                'user_id' => $user_id,
-                'admission_period_id' => $admission_period_id,
-                'major_id' => $major_id,
-                'admission_method_id' => $admission_method_id,
-                'fee_amount' => $fee_amount,
-                'priority' => $priority,
-                'status' => 'PENDING',
-                'payment_status' => 'UNPAID',
-                'receipt_url' => $receipt_url
-            ];
+                $insertRes = $supabaseAdmin->insert('applications', $appData);
 
-            $insertRes = $supabaseAdmin->insert('applications', $appData);
-
-            if (in_array($insertRes['code'], [201, 200])) {
-                $_SESSION['apply_msg'] = "Nộp hồ sơ và Minh chứng lệ phí thành công!";
-                // Lưu thông tin chi tiết để hiển thị trên màn hình thành công
-                $edu_level_name = '';
-                foreach ($levels as $lv) {
-                    if (isset($majorsMap[$major_id]['education_level_id']) && (string) $lv['id'] === (string) $majorsMap[$major_id]['education_level_id']) {
-                        $edu_level_name = $lv['name'];
-                        break;
+                if (in_array($insertRes['code'], [201, 200, 204])) {
+                    $supabaseAdmin->commit();
+                    $_SESSION['apply_msg'] = "Nộp hồ sơ và Minh chứng lệ phí thành công!";
+                    // Lưu thông tin chi tiết để hiển thị trên màn hình thành công
+                    $edu_level_name = '';
+                    foreach ($levels as $lv) {
+                        if (isset($majorsMap[$major_id]['education_level_id']) && (string) $lv['id'] === (string) $majorsMap[$major_id]['education_level_id']) {
+                            $edu_level_name = $lv['name'];
+                            break;
+                        }
+                    }
+                    $_SESSION['apply_success_info'] = [
+                        'edu_level' => $edu_level_name,
+                        'major' => $majorsMap[$major_id]['major_name'] ?? '',
+                        'method' => $methodsMap[$admission_method_id]['method_name'] ?? '',
+                        'zalo_link' => $majorsMap[$major_id]['zalo_link'] ?? '',
+                        'fee' => $fee_amount,
+                    ];
+                } else {
+                    $supabaseAdmin->rollBack();
+                    if (strpos(($insertRes['error'] ?? ''), 'duplicate key value') !== false || strpos(($insertRes['error'] ?? ''), 'unique constraint') !== false) {
+                        $_SESSION['apply_err'] = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
+                    } else {
+                        $_SESSION['apply_err'] = "Lỗi không xác định khi nộp hồ sơ. Vui lòng thử lại sau: " . ($insertRes['error'] ?? 'Unknown');
                     }
                 }
-                $_SESSION['apply_success_info'] = [
-                    'edu_level' => $edu_level_name,
-                    'major' => $majorsMap[$major_id]['major_name'] ?? '',
-                    'method' => $methodsMap[$admission_method_id]['method_name'] ?? '',
-                    'zalo_link' => $majorsMap[$major_id]['zalo_link'] ?? '',
-                    'fee' => $fee_amount,
-                ];
-            } else {
-                if (strpos(json_encode($insertRes['data']), 'duplicate key value') !== false) {
-                    $_SESSION['apply_err'] = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
-                } else {
-                    $_SESSION['apply_err'] = "Lỗi không xác định khi nộp hồ sơ. Vui lòng thử lại sau.";
+            } catch (Exception $e) {
+                if ($supabaseAdmin->inTransaction()) {
+                    $supabaseAdmin->rollBack();
                 }
+                $_SESSION['apply_err'] = "Lỗi hệ thống khi nộp hồ sơ: " . $e->getMessage();
             }
         }
     }
