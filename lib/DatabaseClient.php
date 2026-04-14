@@ -289,14 +289,40 @@ class DatabaseClient {
 
     public function insert($table, $data, $token = null) {
         try {
-            $keys = array_keys($data);
-            $fields = implode(', ', $keys);
-            $placeholders = ':' . implode(', :', $keys);
+            if (empty($data)) return ['code' => 400, 'error' => 'No data'];
             
-            $stmt = $this->pdo->prepare("INSERT INTO $table ($fields) VALUES ($placeholders)");
-            $stmt->execute($data);
-            // Giả lập trả về dòng vừa insert (cần fetch lại hoặc coi như thành công)
-            return ['code' => 201, 'data' => [$data]];
+            // Check if batch insert (mảng chứa nhiều mảng con)
+            if (isset($data[0]) && is_array($data[0])) {
+                $keys = array_keys($data[0]);
+                $fields = implode(', ', $keys);
+                
+                $valuesSql = [];
+                $flatParams = [];
+                
+                foreach ($data as $rowIndex => $row) {
+                    $rowPlaceholders = [];
+                    foreach ($keys as $k) {
+                        $pName = $k . '_' . $rowIndex;
+                        $rowPlaceholders[] = ':' . $pName;
+                        $flatParams[$pName] = $row[$k];
+                    }
+                    $valuesSql[] = '(' . implode(', ', $rowPlaceholders) . ')';
+                }
+                
+                $sql = "INSERT INTO $table ($fields) VALUES " . implode(', ', $valuesSql) . " RETURNING *";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute($flatParams);
+                return ['code' => 201, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+            } else {
+                // Insert 1 dòng
+                $keys = array_keys($data);
+                $fields = implode(', ', $keys);
+                $placeholders = ':' . implode(', :', $keys);
+                
+                $stmt = $this->pdo->prepare("INSERT INTO $table ($fields) VALUES ($placeholders) RETURNING *");
+                $stmt->execute($data);
+                return ['code' => 201, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+            }
         } catch (Exception $e) {
             return ['code' => 500, 'error' => $e->getMessage()];
         }
