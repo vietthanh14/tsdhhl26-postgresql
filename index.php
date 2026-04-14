@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($response['code'] == 200 && isset($response['data']['access_token'])) {
                 // Đăng nhập thành công, lưu Token và ID vào session
+                session_regenerate_id(true);
+                unset($_SESSION['admin_logged_in']);
                 $_SESSION['access_token'] = $response['data']['access_token'];
                 $_SESSION['user_id'] = $response['data']['user']['id'];
                 $_SESSION['email'] = $response['data']['user']['email'] ?? '';
