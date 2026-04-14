@@ -164,6 +164,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!$validMajorInPeriod) {
             $_SESSION['apply_err'] = "Ngành học này không thuộc đợt tuyển sinh đã chọn. Vui lòng thực hiện lại từ Bước 1.";
         } else {
+            // Kiểm tra trùng lặp hồ sơ trước khi nộp
+            $checkDup = $supabaseAdmin->select('applications', "user_id=eq.{$user_id}&admission_period_id=eq.{$admission_period_id}&major_id=eq.{$major_id}&admission_method_id=eq.{$admission_method_id}");
+            if ($checkDup['code'] == 200 && !empty($checkDup['data'])) {
+                $_SESSION['apply_err'] = "Bạn đã đăng ký xét tuyển Ngành này với Phương thức này trong Đợt này rồi. Vui lòng chọn ngành hoặc phương thức khác.";
+                header("Location: $redirect_url");
+                exit;
+            }
+
             $supabaseAdmin->beginTransaction();
             try {
                 // Tự động shift NV (tịnh tiến NV cũ xuống) nếu thêm NV mới (kể cả NV đang trùng)
@@ -1241,6 +1249,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 filterPeriods();
             }
+        }
+
+        // Chặn Double-click tạo Duplicate
+        var formSubmitApp = document.querySelector('form');
+        if(formSubmitApp) {
+            formSubmitApp.addEventListener('submit', function(e) {
+                var btn = document.getElementById('submitAppBtn');
+                if (btn) {
+                    if (btn.hasAttribute('data-submitting')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    btn.setAttribute('data-submitting', 'true');
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+                    btn.disabled = true;
+                }
+            });
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
