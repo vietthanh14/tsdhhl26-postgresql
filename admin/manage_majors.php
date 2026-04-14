@@ -7,20 +7,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = ['major_code' => $_POST['major_code'], 'major_name' => $_POST['major_name'], 'education_level_id' => $_POST['education_level_id'], 'zalo_link' => trim($_POST['zalo_link'] ?? '')];
         $res = $supabaseAdmin->insert('majors', $data);
         if (in_array($res['code'], [201, 200, 204])) $_SESSION['msg'] = "Thêm Ngành học thành công!";
-        else $_SESSION['err'] = "Lỗi thêm ngành (có thể trùng mã): " . json_encode($res['data']);
+        else $_SESSION['err'] = "Lỗi thêm ngành: " . ($res['error'] ?? json_encode($res['data']));
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
     elseif ($action === 'edit_major') {
         $data = ['major_code' => $_POST['major_code'], 'major_name' => $_POST['major_name'], 'education_level_id' => $_POST['education_level_id'], 'zalo_link' => trim($_POST['zalo_link'] ?? '')];
         $res = $supabaseAdmin->update('majors', 'id', $_POST['id'], $data);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Cập nhật Ngành học thành công!";
-        else $_SESSION['err'] = "Lỗi sửa ngành: " . json_encode($res['data']);
+        else $_SESSION['err'] = "Lỗi sửa ngành: " . ($res['error'] ?? json_encode($res['data']));
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
     elseif ($action === 'delete_major') {
         $res = $supabaseAdmin->delete('majors', 'id', $_POST['id']);
         if (in_array($res['code'], [200, 204])) $_SESSION['msg'] = "Xóa Ngành thành công!";
-        else $_SESSION['err'] = "Lỗi: Không thể xóa ngành đã có hồ sơ.";
+        else $_SESSION['err'] = "Lỗi xóa ngành: " . ($res['error'] ?? json_encode($res['data']));
         Cache::flush(); header("Location: manage_majors.php"); exit;
     }
 }
