@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$adminUser || !$adminPass) {
         $error = "Chưa cấu hình tài khoản admin trong file .env";
     } elseif ($username === $adminUser && $password === $adminPass) {
+        session_regenerate_id(true);
         unset($_SESSION['user_id'], $_SESSION['access_token'], $_SESSION['email']);
         $_SESSION['admin_logged_in'] = true;
         header('Location: ' . BASE_URL . '/admin/index.php');
