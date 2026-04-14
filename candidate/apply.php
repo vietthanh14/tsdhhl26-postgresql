@@ -1,7 +1,7 @@
 <?php
 // candidate/apply.php
 session_start();
-require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/DatabaseClient.php';
 require_once __DIR__ . '/../lib/CSRF.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $token = $_SESSION['access_token'] ?? null;
-$supabase = new SupabaseClient('anon');
+$supabase = new DatabaseClient('anon');
 
 $chkUser = $supabase->select('user_profiles', "id=eq.{$user_id}", $token);
 if ($chkUser['code'] == 401 || empty($chkUser['data'])) {
@@ -21,7 +21,7 @@ if ($chkUser['code'] == 401 || empty($chkUser['data'])) {
 }
 $profileData = $chkUser['data'][0];
 
-$supabaseAdmin = new SupabaseClient('service');
+$supabaseAdmin = new DatabaseClient('service');
 $message = '';
 $error = '';
 

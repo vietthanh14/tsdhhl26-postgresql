@@ -1,7 +1,7 @@
 <?php
 // auth/register.php
 session_start();
-require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/DatabaseClient.php';
 require_once __DIR__ . '/includes/auth_layout.php';
 
 if (isset($_SESSION['user_id'])) {
@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Mật khẩu phải chứa ít nhất 6 ký tự.';
     } else {
         try {
-            $supabaseAdmin = new SupabaseClient('service');
+            $supabaseAdmin = new DatabaseClient('service');
             $chkUsername = $supabaseAdmin->select('user_profiles', "username=eq.{$username}&select=id");
             if ($chkUsername['code'] == 200 && !empty($chkUsername['data'])) {
                 $error = 'Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác.';
             } else {
                 $fake_email = $username . '@halou.system';
-                $supabase = new SupabaseClient('anon');
+                $supabase = new DatabaseClient('anon');
                 $response = $supabase->signUp($fake_email, $password);
 
                 if ($response['code'] == 200 && isset($response['data']['user'])) {

@@ -8,7 +8,7 @@ if (!$period_id || !ctype_digit($period_id)) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 
 // Lấy các major_id thuộc đợt này
 $pmRes = $supabase->select('admission_period_majors', "period_id=eq.{$period_id}&select=major_id");

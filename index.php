@@ -1,7 +1,7 @@
 <?php
 // index.php (Trang chủ kiêm Trang Đăng nhập)
 session_start();
-require_once __DIR__ . '/lib/SupabaseClient.php';
+require_once __DIR__ . '/lib/DatabaseClient.php';
 
 // Nếu đã đăng nhập, đẩy thẳng vào Dashboard thí sinh
 if (isset($_SESSION['user_id'])) {
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Nối Username với đuôi email ảo để login qua Supabase Auth
             $fake_email = $username . '@halou.system';
 
-            $supabase = new SupabaseClient('anon');
+            $supabase = new DatabaseClient('anon');
             $response = $supabase->signIn($fake_email, $password);
 
             if ($response['code'] == 200 && isset($response['data']['access_token'])) {

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/supabase.php';
+require_once __DIR__ . '/../../config/database.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 $currentLevelId = $_GET['level_id'] ?? null;
@@ -9,8 +9,8 @@ require_once __DIR__ . '/../../lib/Cache.php';
 $educationLevelsSidebar = Cache::remember('education_levels', 3600, function() {
     global $supabase;
     if (!isset($supabase)) {
-        require_once __DIR__ . '/../../lib/SupabaseClient.php';
-        $supabase = new SupabaseClient('anon');
+        require_once __DIR__ . '/../../lib/DatabaseClient.php';
+        $supabase = new DatabaseClient('anon');
     }
     $res = $supabase->select('education_levels', 'order=id.asc');
     return ($res['code'] == 200) ? $res['data'] : [];

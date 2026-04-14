@@ -13,7 +13,7 @@ if (!$period_id || !$major_id || !$method_id) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 $query = "user_id=eq.{$user_id}&admission_period_id=eq.{$period_id}&major_id=eq.{$major_id}&admission_method_id=eq.{$method_id}";
 $res = $supabase->select('applications', $query);
 

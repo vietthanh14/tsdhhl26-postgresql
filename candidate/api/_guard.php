@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Chưa đăng nhập']);
     exit;
 }
-require_once __DIR__ . '/../../lib/SupabaseClient.php';
+require_once __DIR__ . '/../../lib/DatabaseClient.php';
 require_once __DIR__ . '/../../lib/CSRF.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

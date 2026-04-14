@@ -81,7 +81,7 @@ if ($searchStr !== '') {
         // Tìm không ra user nào thì set điều kiện không khớp
         $filterArray[] = "user_id=eq.00000000-0000-0000-0000-000000000000";
     } else {
-        $inList = SupabaseClient::buildInList($searchUserIds);
+        $inList = DatabaseClient::buildInList($searchUserIds);
         $filterArray[] = "user_id=in.({$inList})";
     }
 }

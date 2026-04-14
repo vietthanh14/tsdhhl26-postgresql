@@ -17,7 +17,7 @@ if (!$doc_id) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 
 // Bước 1: Kiểm tra tài liệu có thuộc user đang đăng nhập không
 $checkRes = $supabase->select('user_documents', "id=eq.{$doc_id}&user_id=eq.{$user_id}&select=id");

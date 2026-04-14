@@ -1,7 +1,7 @@
 <?php
 // auth/forgot_password.php
 session_start();
-require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/DatabaseClient.php';
 require_once __DIR__ . '/includes/auth_layout.php';
 
 $error = '';
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Mật khẩu nhập lại không khớp.';
     } else {
         try {
-            $supabaseAdmin = new SupabaseClient('service');
+            $supabaseAdmin = new DatabaseClient('service');
             $profileResponse = $supabaseAdmin->select('user_profiles', "username=ilike.{$username}&identity_card=eq.{$identity_card}");
 
             if ($profileResponse['code'] == 200 && !empty($profileResponse['data'])) {

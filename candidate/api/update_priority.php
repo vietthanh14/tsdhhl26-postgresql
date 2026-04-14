@@ -12,7 +12,7 @@ if (!$app_id || $newPriority < 1) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 
 // 1. Lấy thông tin đợt tuyển sinh (đảm bảo hồ sơ thuộc user này)
 $targetRes = $supabase->select('applications', "id=eq.{$app_id}&user_id=eq.{$user_id}&select=id,admission_period_id,priority");

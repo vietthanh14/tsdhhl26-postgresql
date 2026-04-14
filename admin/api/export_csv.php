@@ -11,7 +11,7 @@ if (!RateLimiter::checkSessionLimit('export_csv', 5, 1800)) {
 }
 
 try {
-    $supabaseAdmin = new SupabaseClient('service');
+    $supabaseAdmin = new DatabaseClient('service');
     
     // 1. Lấy dữ liệu từ Supabase 
     $query = 'select=*,admission_periods(name),majors(major_name,education_levels(name)),admission_methods(method_name,application_fee)&order=submitted_at.desc';

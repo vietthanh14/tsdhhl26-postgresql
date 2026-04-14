@@ -11,7 +11,7 @@ if (!RateLimiter::checkSessionLimit('export_docs', 5, 1800)) {
 }
 
 try {
-    $supabaseAdmin = new SupabaseClient('service');
+    $supabaseAdmin = new DatabaseClient('service');
     
     // 1. Lấy dữ liệu tài liệu từ Supabase 
     $query = 'select=*,document_types(type_name)&order=uploaded_at.desc';

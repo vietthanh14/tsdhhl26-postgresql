@@ -10,7 +10,7 @@ if (!$period_id || !$major_id || !ctype_digit($period_id) || !ctype_digit($major
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 
 // Lấy method_ids áp dụng cho đợt+ngành này
 $pmmRes = $supabase->select(

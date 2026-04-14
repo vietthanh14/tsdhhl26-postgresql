@@ -13,7 +13,7 @@ if (!$period_id || $priority < 1) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 $query = "user_id=eq.{$user_id}&admission_period_id=eq.{$period_id}&priority=eq.{$priority}&select=id,major_id,majors(major_name)";
 $res = $supabase->select('applications', $query);
 

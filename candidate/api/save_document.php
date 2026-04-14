@@ -11,7 +11,7 @@ if (!$doc_type_id || !$file_url) {
     exit;
 }
 
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 
 $data = [
     'user_id' => $user_id,

@@ -1,6 +1,6 @@
 <?php
 // includes/header.php — Header chung cho các trang public
-require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/../config/database.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -9,8 +9,8 @@ if (isset($_SESSION['user_id'])) {
     if (isset($profile) && isset($profile['full_name'])) {
         $header_user_name = $profile['full_name'];
     } else {
-        require_once __DIR__ . '/../lib/SupabaseClient.php';
-        $sb_header = new SupabaseClient('anon');
+        require_once __DIR__ . '/../lib/DatabaseClient.php';
+        $sb_header = new DatabaseClient('anon');
         $header_token = $_SESSION['access_token'] ?? null;
         $p_header = $sb_header->select('user_profiles', "id=eq.".$_SESSION['user_id'], $header_token);
         if ($p_header['code'] == 200 && !empty($p_header['data'])) {

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/supabase.php';
+require_once __DIR__ . '/../../config/database.php';
 
 $current_page = basename($_SERVER['PHP_SELF']);
 $config_pages = ['manage_periods.php', 'manage_levels.php', 'manage_majors.php', 'manage_methods.php', 'manage_doc_types.php', 'admission_settings.php'];

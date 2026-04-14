@@ -14,4 +14,4 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-require_once __DIR__ . '/../../lib/SupabaseClient.php';
+require_once __DIR__ . '/../../lib/DatabaseClient.php';

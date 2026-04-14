@@ -1,7 +1,7 @@
 <?php
 // candidate/index.php
 session_start();
-require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/DatabaseClient.php';
 require_once __DIR__ . '/../lib/CSRF.php';
 
 // Kiểm tra xem đã đăng nhập chưa
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $token = $_SESSION['access_token'] ?? null;
-$supabase = new SupabaseClient('anon');
+$supabase = new DatabaseClient('anon');
 
 // Lấy thông tin cá nhân của thí sinh
 $profileResponse = $supabase->select('user_profiles', "id=eq.{$user_id}", $token);

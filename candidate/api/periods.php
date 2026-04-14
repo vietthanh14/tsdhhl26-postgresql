@@ -9,7 +9,7 @@ if (!$level_id || !ctype_digit($level_id)) {
 }
 
 $today = date('Y-m-d');
-$supabase = new SupabaseClient('service');
+$supabase = new DatabaseClient('service');
 $res = $supabase->select(
     'admission_periods',
     "is_active=eq.true&end_date=gte.{$today}&education_level_id=eq.{$level_id}&order=created_at.desc"
