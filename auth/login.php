@@ -13,8 +13,8 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../lib/RateLimiter.php';
-    if (!RateLimiter::checkSessionLimit('login_auth', 10, 1800)) {
-        $error = 'Bạn đã thử đăng nhập quá 10 lần trong 30 phút. Vui lòng thử lại sau để bảo mật tài khoản.';
+    if (!RateLimiter::checkSessionLimit('login_auth', 50, 1800)) {
+        $error = 'Bạn đã thử đăng nhập quá 50 lần trong 30 phút. Vui lòng thử lại sau để bảo mật tài khoản.';
     } else {
     $username = strtolower(trim($_POST['username'] ?? ''));
     $password = $_POST['password'] ?? '';

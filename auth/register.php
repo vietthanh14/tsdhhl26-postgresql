@@ -14,8 +14,8 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../lib/RateLimiter.php';
-    if (!RateLimiter::checkSessionLimit('register', 5, 1800)) {
-        $error = 'Bạn đã đăng ký quá 5 tài khoản trong 30 phút. Vui lòng thử lại sau để tránh nghẽn hệ thống.';
+    if (!RateLimiter::checkSessionLimit('register', 50, 1800)) {
+        $error = 'Bạn đã đăng ký quá 50 tài khoản trong 30 phút. Vui lòng thử lại sau để tránh nghẽn hệ thống.';
     } else {
         $username       = strtolower(trim($_POST['username'] ?? ''));
     $password       = $_POST['password'] ?? '';

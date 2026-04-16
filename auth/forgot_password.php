@@ -9,8 +9,8 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../lib/RateLimiter.php';
-    if (!RateLimiter::checkSessionLimit('forgot_pwd', 5, 1800)) {
-        $error = 'Bạn đã yêu cầu thao tác quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo mật tài khoản.';
+    if (!RateLimiter::checkSessionLimit('forgot_pwd', 50, 1800)) {
+        $error = 'Bạn đã yêu cầu thao tác quá 50 lần trong 30 phút. Vui lòng thử lại sau để bảo mật tài khoản.';
     } else {
         $username = strtolower(trim($_POST['username'] ?? ''));
     $identity_card = trim($_POST['identity_card'] ?? '');

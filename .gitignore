@@ -21,3 +21,5 @@ serious-app-415103-baf99d68d251.json
 # Cache thư mục tra cứu Google Sheets
 storage/
 *.zip
+key.json
+database_cpanel.sql

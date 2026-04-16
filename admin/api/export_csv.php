@@ -4,9 +4,9 @@ require_once __DIR__ . '/_guard.php';
 require_once __DIR__ . '/../../lib/RateLimiter.php';
 
 // Kiểm tra Rate Limit: Cấm xuất file liên tục (Tối đa 5 lần mỗi 30 phút = 1800 giây)
-if (!RateLimiter::checkSessionLimit('export_csv', 5, 1800)) {
+if (!RateLimiter::checkSessionLimit('export_csv', 50, 1800)) {
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['status' => 'error', 'message' => 'Bạn đã xuất file quá 5 lần trong 30 phút. Vui lòng thử lại sau để bảo vệ máy chủ.']);
+    echo json_encode(['status' => 'error', 'message' => 'Bạn đã xuất file quá 50 lần trong 30 phút. Vui lòng thử lại sau để bảo vệ máy chủ.']);
     exit;
 }
 
@@ -63,15 +63,12 @@ try {
         
         $dob = !empty($user['date_of_birth']) ? date('d/m/Y', strtotime($user['date_of_birth'])) : '';
         $genderText = ($user['gender'] ?? '') === 'male' ? 'Nam' : (($user['gender'] ?? '') === 'female' ? 'Nữ' : '');
-        $cmnd = '="' . ($user['identity_card'] ?? '') . '"';
-        $phone = '="' . ($user['phone_number'] ?? '') . '"';
-        $appIdStr = '="' . ($app['id'] ?? '') . '"';
         $statusText = $app['status'] == 'APPROVED' ? 'Hợp lệ' : ($app['status'] == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt');
         $paymentText = ($app['payment_status'] ?? '') == 'PAID' ? 'Đã TT' : 'Chưa TT';
 
-        fputcsv($output, [
+        $row = [
             $stt++, $statusText, $user['full_name'] ?? '', $dob, $genderText,
-            $cmnd, $user['ethnicity'] ?? '', $phone,
+            $user['identity_card'] ?? '', $user['ethnicity'] ?? '', $user['phone_number'] ?? '',
             $user['contact_email'] ?? '', $user['address_detail'] ?? '',
             $user['province'] ?? '', $user['ward'] ?? '',
             $user['school_name'] ?? '', $user['school_province'] ?? '',
@@ -80,9 +77,21 @@ try {
             $user['priority_object'] ?? '', $levelName, $majorName,
             $app['major_id'] ?? '', $methodName, $app['admission_method_id'] ?? '',
             $app['priority'] ?? 1, $periodName, $feeAmount, $paymentText,
-            $app['admin_notes'] ?? '', $appIdStr,
+            $app['admin_notes'] ?? '', $app['id'] ?? '',
             date('d/m/Y H:i', strtotime($app['submitted_at']))
-        ], ';');
+        ];
+
+        // Áp dụng định dạng ="" (giống SĐT, CCCD) cho TẤT CẢ các cột để bỏ triệt để cảnh báo Excel
+        foreach ($row as $k => $v) {
+            // Không áp dụng cho STT (cột 0) và Lệ phí (cột 26)
+            if ($k !== 0 && $k !== 26) {
+                // Escape nháy kép nếu có để tránh lỗi công thức Excel
+                $v = str_replace('"', '""', (string)$v);
+                $row[$k] = '="' . $v . '"';
+            }
+        }
+
+        fputcsv($output, $row, ';');
     }
 
     fclose($output);

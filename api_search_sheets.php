@@ -20,7 +20,7 @@ require_once $autoloadPath;
 
 try {
     // 1. Khởi tạo Client
-    $keyFilePath = __DIR__ . '/serious-app-415103-baf99d68d251.json';
+    $keyFilePath = __DIR__ . '/key.json';
     if (!file_exists($keyFilePath)) {
         throw new Exception("Không tìm thấy file credentials Google API.");
     }

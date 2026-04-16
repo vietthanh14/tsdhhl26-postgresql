@@ -8,8 +8,8 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../lib/RateLimiter.php';
-    if (!RateLimiter::checkSessionLimit('admin_login', 5, 1800)) {
-        $error = "Bạn đã thử đăng nhập sai vượt quá 5 lần. Vui lòng dừng lại 30 phút để bảo vệ hệ thống.";
+    if (!RateLimiter::checkSessionLimit('admin_login', 50, 1800)) {
+        $error = "Bạn đã thử đăng nhập sai vượt quá 50 lần. Vui lòng dừng lại 30 phút để bảo vệ hệ thống.";
     } else {
         $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
